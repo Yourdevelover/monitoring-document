@@ -16,13 +16,25 @@
 # next.js
 /.next/
 /out/
+*.tsbuildinfo
 
 # production
 /build
 
+# logs
+*.log
+
 # misc
 .DS_Store
 *.pem
+
+# environment
+.env
+.env.local
+.env.*.local
+
+# user uploads
+/public/uploads/
 
 # debug
 npm-debug.log*
