@@ -1,0 +1,228 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  KARYAWAN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum FileCategory {
+  DATA_A
+  DATA_B
+  DATA_C
+}
+
+enum UploadStatus {
+  WAITING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id            Int          @id @default(autoincrement())
+  name          String
+  email         String       @unique
+  phoneNumber   String?
+  passwordHash  String
+  role          Role
+  teamId        Int?
+  isActive      UserStatus   @default(ACTIVE)
+  profilePicture String?
+  lastLoginAt   DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  team            Team?            @relation("TeamMembers", fields: [teamId], references: [id])
+  managedTeam     Team?            @relation("TeamManager")
+  uploads         Upload[]
+  uploadHistory   UploadHistory[]
+  importantFiles  ImportantFile[]
+  announcements   Announcement[]
+  profileRequests ProfileRequest[] @relation("ProfileRequestsUser")
+  reviewedRequests ProfileRequest[] @relation("ProfileRequestsReviewer")
+  activityLogs    ActivityLog[]
+  sentMessages    Message[]        @relation("UserSentMessages")
+  receivedMessages Message[]      @relation("UserReceivedMessages")
+  notes         PersonalNote[]
+
+  @@map("users")
+}
+
+model Team {
+  id         Int      @id @default(autoincrement())
+  name       String
+  managerId  Int      @unique
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  manager    User     @relation("TeamManager", fields: [managerId], references: [id])
+  members    User[]    @relation("TeamMembers")
+  uploads    Upload[]
+  uploadHistory UploadHistory[]
+  importantFiles ImportantFile[]
+  announcements Announcement[]
+
+  @@map("teams")
+}
+
+model Upload {
+  id            Int          @id @default(autoincrement())
+  userId        Int
+  teamId        Int
+  title         String
+  fileName      String
+  filePath      String
+  fileType      String
+  category      FileCategory
+  status        UploadStatus @default(PROCESSING)
+  submissionDate DateTime    @default(now())
+  isSubmitted   Boolean      @default(false)
+  isImportant   Boolean      @default(false)
+  importantSaved Boolean      @default(false)
+  expiresAt     DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  user          User         @relation(fields: [userId], references: [id])
+  team          Team         @relation(fields: [teamId], references: [id])
+
+  @@map("uploads")
+}
+
+model UploadHistory {
+  id             Int          @id @default(autoincrement())
+  sourceUploadId Int          @unique
+  userId         Int
+  teamId         Int
+  title          String
+  fileName       String
+  filePath       String
+  fileType       String
+  category       FileCategory
+  status         UploadStatus
+  submittedAt    DateTime
+  createdAt      DateTime     @default(now())
+
+  user           User         @relation(fields: [userId], references: [id])
+  team           Team         @relation(fields: [teamId], references: [id])
+
+  @@index([teamId, category, submittedAt])
+  @@map("upload_history")
+}
+
+model ImportantFile {
+  id             Int          @id @default(autoincrement())
+  sourceUploadId Int          @unique
+  userId         Int
+  teamId         Int
+  title          String
+  fileName       String
+  filePath       String
+  fileType       String
+  category       FileCategory
+  status         UploadStatus
+  savedAt        DateTime     @default(now())
+
+  user           User         @relation(fields: [userId], references: [id])
+  team           Team         @relation(fields: [teamId], references: [id])
+
+  @@index([userId, category])
+  @@map("important_files")
+}
+
+model Announcement {
+  id            Int       @id @default(autoincrement())
+  managerId     Int
+  teamId        Int
+  targetUserId  Int?
+  title         String
+  content       String
+  isPinned      Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  manager       User      @relation(fields: [managerId], references: [id])
+  team          Team      @relation(fields: [teamId], references: [id])
+
+  @@map("announcements")
+}
+
+model ProfileRequest {
+  id            Int             @id @default(autoincrement())
+  userId        Int
+  fieldName     String
+  oldValue      String?
+  newValue      String?
+  status        ApprovalStatus  @default(PENDING)
+  reviewerId    Int?
+  reviewNote    String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  user          User            @relation("ProfileRequestsUser", fields: [userId], references: [id])
+  reviewer      User?           @relation("ProfileRequestsReviewer", fields: [reviewerId], references: [id])
+
+  @@map("profile_requests")
+}
+
+model ActivityLog {
+  id            Int       @id @default(autoincrement())
+  actorId       Int?
+  action        String
+  targetType    String?
+  targetId      Int?
+  description   String
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime  @default(now())
+
+  actor         User?     @relation(fields: [actorId], references: [id])
+
+  @@map("activity_logs")
+}
+
+model Message {
+  id            Int       @id @default(autoincrement())
+  senderId      Int
+  recipientId   Int
+  content       String
+  createdAt     DateTime  @default(now())
+
+  sender        User      @relation("UserSentMessages", fields: [senderId], references: [id])
+  recipient     User      @relation("UserReceivedMessages", fields: [recipientId], references: [id])
+
+  @@map("messages")
+}
+
+model PersonalNote {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
+  @@map("personal_notes")
+}
