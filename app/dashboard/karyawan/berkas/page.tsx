@@ -5,6 +5,7 @@ import { UploadForm } from "./upload-form";
 import { FileConfirmationDialog } from "./file-confirmation-dialog";
 import { FileActions } from "./file-actions";
 import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
+import { ManagerFilePopover } from "./manager-file-popover";
 
 const CATEGORY_DETAILS = [
   {
@@ -72,84 +73,54 @@ export default async function EmployeeFilesPage() {
   return (
     <main className="min-h-screen text-slate-900">
       <div className="mx-auto max-w-7xl space-y-4">
-        <header className="border-b border-slate-300 pb-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Dokumen tim</p>
-          <h1 className="mt-1 text-2xl font-bold">Berkas</h1>
-          <p className="mt-1 text-sm text-slate-500">Kelola berkas yang dibagikan manajer dan unggah dokumen Anda.</p>
-        </header>
-
-        <section className="rounded-2xl bg-white p-6 shadow-sm">
-          <div className="mb-4 flex items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-semibold">Berkas dari Manajer</h2>
-              <p className="text-sm text-slate-500">
-                File yang dibagikan oleh manajer untuk diunduh oleh tim.
-              </p>
-            </div>
-          </div>
+        <header className="pb-4">
+          <h1 className="mt-1 text-2xl font-bold">Berkas dari Manajer</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            File yang dibagikan oleh manajer untuk diunduh oleh tim.
+          </p>
 
           {managerSharedFiles.length > 0 ? (
-            <div className="space-y-3">
+            <div className="mt-2 grid max-w-md gap-1.5 sm:grid-cols-2">
               {managerSharedFiles.map((upload) => (
-                <div key={upload.id} className="rounded-xl border border-slate-200 p-4">
-                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                    <div>
-                      <p className="font-medium">{upload.title}</p>
-                      <p className="text-sm text-slate-500">
-                        {upload.fileName} • {upload.category} • oleh {upload.user.name}
-                      </p>
-                    </div>
-
-                    <a
-                      href={upload.filePath}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
-                    >
-                      Unduh file
-                    </a>
+                <div key={upload.id} className="flex items-center justify-between gap-2 bg-slate-50 px-2.5 py-1.5">
+                  <div className="min-w-0 max-w-[130px]">
+                    <p className="truncate text-sm font-medium text-slate-700">{upload.title}</p>
+                    <p className="truncate text-xs text-slate-500">{upload.fileName}</p>
                   </div>
+                  <ManagerFilePopover
+                    file={{
+                      id: upload.id,
+                      title: upload.title,
+                      fileName: upload.fileName,
+                      category: upload.category,
+                      filePath: upload.filePath,
+                      uploaderName: upload.user.name ?? "Manajer",
+                    }}
+                  />
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-slate-600">Belum ada berkas yang dibagikan oleh manajer.</p>
+            <p className="mt-2 text-slate-600">Belum ada berkas yang dibagikan oleh manajer.</p>
           )}
-        </section>
+        </header>
 
-        <section className="rounded-2xl bg-white p-6 shadow-sm">
-          <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h2 className="text-xl font-semibold">Unggah Berkas</h2>
-              <p className="text-sm text-slate-500">
-                Jangan lupa untuk simpan data penting.
-              </p>
-            </div>
-            <Link
-              href="/dashboard/karyawan/histori-berkas"
-              className="text-sm font-semibold text-blue-600 hover:text-blue-800"
-            >
-              Histori Berkas →
-            </Link>
-          </div>
-
+        <section className="rounded-2xl bg-white px-6 pb-6 pt-2 shadow-sm">
           <div className="grid gap-4 lg:grid-cols-3">
             {CATEGORY_DETAILS.map((category) => {
               const uploadedFile = uploadedByCategory.get(category.key);
 
               return (
-                <div key={category.key} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div key={category.key} className="bg-slate-50 p-4">
                   <div className="mb-3">
                     <p className="text-sm font-medium uppercase tracking-[0.14em] text-slate-500">
                       {category.label}
                     </p>
-                    <h3 className="mt-2 text-lg font-semibold">{category.label}</h3>
                     <p className="mt-1 text-sm text-slate-600">{category.description}</p>
                   </div>
 
                   {uploadedFile ? (
-                    <div className="space-y-3 rounded-xl border-2 p-3" style={{
-                      borderColor: uploadedFile.isSubmitted ? '#059669' : '#f59e0b',
+                    <div className="space-y-3 p-3" style={{
                       backgroundColor: uploadedFile.isSubmitted ? '#ecfdf5' : '#fffbeb'
                     }}>
                       <div>
@@ -201,7 +172,7 @@ export default async function EmployeeFilesPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="rounded-xl border border-dashed border-slate-300 bg-white p-3 text-sm text-slate-500">
+                    <div className="bg-white p-3 text-sm text-slate-500">
                       Belum ada file untuk kategori ini.
                     </div>
                   )}
@@ -215,6 +186,21 @@ export default async function EmployeeFilesPage() {
                 </div>
               );
             })}
+          </div>
+
+          <div className="mt-6 border-t border-slate-200 pt-4 flex items-end justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">Unggah Berkas</h2>
+              <p className="text-sm text-slate-500">
+                Jangan lupa untuk simpan data penting.
+              </p>
+            </div>
+            <Link
+              href="/dashboard/karyawan/histori-berkas"
+              className="text-sm font-semibold text-blue-600 hover:text-blue-800"
+            >
+              Histori Berkas →
+            </Link>
           </div>
         </section>
       </div>
