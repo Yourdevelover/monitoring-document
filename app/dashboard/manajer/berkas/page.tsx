@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { requireManager } from "@/lib/auth";
 import Link from "next/link";
 import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
+import { ManagerUploadForm } from "./manager-upload-form";
+import { ManagerFileDeleteButton } from "./manager-file-delete-button";
 
 const CATEGORIES = [
   { key: "DATA_A", label: "Berkas A" },
@@ -29,7 +31,8 @@ export default async function ManagerFilesPage() {
     },
   });
 
-  const uploads = team?.uploads ?? [];
+  const uploads = (team?.uploads ?? []).filter((upload) => upload.user.role !== "MANAGER");
+  const managerUploads = (team?.uploads ?? []).filter((upload) => upload.user.role === "MANAGER");
   const formatDateTime = (date: Date) =>
     new Intl.DateTimeFormat("id-ID", {
       day: "2-digit",
@@ -96,6 +99,53 @@ export default async function ManagerFilesPage() {
             </p>
           )}
         </section>
+
+        <section className="rounded-2xl bg-white p-6 shadow-sm">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold">Unggah Berkas untuk Tim</h2>
+            <p className="text-sm text-slate-500">Bagikan file ke seluruh anggota tim.</p>
+          </div>
+          <div className="max-w-md">
+            <ManagerUploadForm />
+          </div>
+        </section>
+
+        {managerUploads.length > 0 && (
+          <section>
+            <div className="mb-4 flex items-center justify-between border-b border-slate-200 pb-3">
+              <div>
+                <h2 className="text-lg font-semibold">Berkas Saya</h2>
+                <p className="text-sm text-slate-500">Berkas yang sudah Anda bagikan ke tim.</p>
+              </div>
+              <span className="text-xs text-slate-500">{managerUploads.length} file dibagikan</span>
+            </div>
+            <div className="divide-y divide-slate-200">
+              {managerUploads.map((upload) => (
+                <div key={upload.id} className="py-4">
+                  <div className="min-w-0 flex items-center justify-between gap-4">
+                    <div>
+                      <p className="break-all font-semibold text-slate-900">{upload.fileName}</p>
+                      <p className="mt-1 text-sm text-slate-600">
+                        {upload.category.replace("DATA_", "Data ")} • Dibagikan {formatDateTime(upload.submissionDate)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={upload.filePath}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="whitespace-nowrap rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                      >
+                        Lihat
+                      </a>
+                      <ManagerFileDeleteButton uploadId={upload.id} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4">
           <p className="text-xs text-slate-500">Unduh seluruh file melalui halaman kategori masing-masing.</p>
