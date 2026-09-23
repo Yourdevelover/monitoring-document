@@ -5,6 +5,13 @@ import { prisma } from "@/lib/prisma";
 
 const SESSION_COOKIE = "monitoring_admin_session";
 
+function getBaseUrl(request: Request) {
+  const forwarded = request.headers.get("x-forwarded-host");
+  const proto = request.headers.get("x-forwarded-proto") ?? "http";
+  const host = forwarded ?? request.headers.get("host") ?? "localhost:3000";
+  return `${proto}://${host}`;
+}
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
@@ -59,7 +66,8 @@ export async function POST(request: Request) {
       redirectPath = "/dashboard/karyawan";
     }
 
-    const response = NextResponse.redirect(new URL(redirectPath, request.url));
+    const baseUrl = getBaseUrl(request);
+    const response = NextResponse.redirect(new URL(redirectPath, baseUrl));
 
     response.cookies.set(SESSION_COOKIE, token, {
       httpOnly: true,

@@ -7,7 +7,7 @@ import { ManagerFileDeleteButton } from "./manager-file-delete-button";
 
 const CATEGORIES = [
   { key: "DATA_A", label: "Berkas A" },
-  { key: "DATA_B", label: "Berkas B" },
+  { key: "DATA_B", label: "Data B" },
   { key: "DATA_C", label: "Berkas C" },
 ] as const;
 

@@ -59,7 +59,7 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 /* ── Announcement bar ── */
 .manager-announcement-bar {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   min-height: 2.75rem;
   overflow: hidden;
   border-bottom: 1px solid var(--content-line);
@@ -68,6 +68,9 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 }
 .manager-announcement-label {
   flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  align-self: stretch;
   border-right: 1px solid var(--content-line);
   padding: 0.65rem 1rem;
   color: var(--badge-pale-yellow-text);
@@ -76,10 +79,14 @@ h1, h2, h3 { letter-spacing: -0.02em; }
   letter-spacing: 0.08em;
   text-transform: uppercase;
   background: var(--badge-pale-yellow-bg);
+  line-height: 1;
+  white-space: nowrap;
 }
 .manager-announcement-viewport {
   min-width: 0;
   flex: 1;
+  display: flex;
+  align-items: center;
   overflow: hidden;
   white-space: nowrap;
 }
@@ -103,6 +110,9 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 @keyframes manager-announcement-slide {
   from { transform: translateX(100%); }
   to { transform: translateX(-100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .manager-announcement-single { animation: none; }
 }
 
 /* ── Content containers ── */

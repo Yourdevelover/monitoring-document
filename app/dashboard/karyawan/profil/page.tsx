@@ -24,23 +24,23 @@ export default async function EmployeeProfilePage({ searchParams }: EmployeeProf
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-5 text-slate-900 sm:px-6 sm:py-8">
+    <main className="min-h-screen bg-[#f8f9fa] px-4 py-5 text-[#111111] sm:px-6 sm:py-8">
       <div className="mx-auto max-w-3xl space-y-4">
-        <header className="border-b border-slate-300 bg-white px-5 py-5 sm:px-7">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Profil</p>
+        <header className="border-b border-[#e5e7eb] bg-white px-5 py-5 sm:px-7">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6b7280]">Profil</p>
           <div className="mt-4 flex items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-800 text-sm font-medium text-white">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#111111] text-sm font-medium text-white">
               {profile.name.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase()}
             </div>
             <div className="min-w-0">
               <h1 className="truncate text-base font-bold">{profile.name}</h1>
-              <p className="mt-1 text-sm text-slate-500">Informasi karyawan</p>
+              <p className="mt-1 text-sm text-[#6b7280]">Informasi karyawan</p>
             </div>
           </div>
         </header>
 
         <section className="bg-white px-5 py-2 sm:px-7">
-          <div className="divide-y divide-slate-200">
+          <div className="divide-y divide-[#e5e7eb]">
             {[
               ["Email", profile.email],
               ["Nomor Telepon", profile.phoneNumber ?? "Belum diisi"],
@@ -48,22 +48,22 @@ export default async function EmployeeProfilePage({ searchParams }: EmployeeProf
               ["Role", profile.role],
             ].map(([label, value]) => (
               <div key={label} className="flex items-center justify-between gap-4 py-4">
-                <p className="shrink-0 text-sm text-slate-500">{label}</p>
-                <p className="break-words text-right text-sm font-medium text-slate-900">{value}</p>
+                <p className="shrink-0 text-sm text-[#6b7280]">{label}</p>
+                <p className="break-words text-right text-sm font-medium text-[#111111]">{value}</p>
               </div>
             ))}
           </div>
         </section>
 
         {profile.id === employee.id && <section className="bg-white px-5 py-5 sm:px-7">
-          <div className="mb-5 border-b border-slate-200 pb-4">
+          <div className="mb-5 border-b border-[#e5e7eb] pb-4">
             <h2 className="text-sm font-semibold">Edit Profil</h2>
-            <p className="mt-1 text-sm text-slate-500">Perubahan akan dikirim ke persetujuan manajer.</p>
+            <p className="mt-1 text-sm text-[#6b7280]">Perubahan akan dikirim ke persetujuan manajer.</p>
           </div>
 
           <form action="/api/profile" method="POST" className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="name" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="name" className="mb-1 block text-sm font-medium text-[#374151]">
                 Nama
               </label>
               <input
@@ -71,12 +71,12 @@ export default async function EmployeeProfilePage({ searchParams }: EmployeeProf
                 name="name"
                 type="text"
                 defaultValue={profile?.name ?? ""}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-700 outline-none transition focus:border-slate-500"
+                className="w-full rounded-lg border border-[#d1d5db] bg-white px-3 py-2.5 text-[#374151] outline-none transition focus:border-[#2563eb]"
               />
             </div>
 
             <div>
-              <label htmlFor="phoneNumber" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="phoneNumber" className="mb-1 block text-sm font-medium text-[#374151]">
                 Nomor Telepon
               </label>
               <input
@@ -84,12 +84,12 @@ export default async function EmployeeProfilePage({ searchParams }: EmployeeProf
                 name="phoneNumber"
                 type="tel"
                 defaultValue={profile?.phoneNumber ?? ""}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-700 outline-none transition focus:border-slate-500"
+                className="w-full rounded-lg border border-[#d1d5db] bg-white px-3 py-2.5 text-[#374151] outline-none transition focus:border-[#2563eb]"
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="email" className="mb-1 block text-sm font-medium text-[#374151]">
                 Email
               </label>
               <input
@@ -97,12 +97,12 @@ export default async function EmployeeProfilePage({ searchParams }: EmployeeProf
                 name="email"
                 type="email"
                 defaultValue={profile?.email ?? ""}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-700 outline-none transition focus:border-slate-500"
+                className="w-full rounded-lg border border-[#d1d5db] bg-white px-3 py-2.5 text-[#374151] outline-none transition focus:border-[#2563eb]"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="password" className="mb-1 block text-sm font-medium text-[#374151]">
                 Password Baru
               </label>
               <input
@@ -110,13 +110,13 @@ export default async function EmployeeProfilePage({ searchParams }: EmployeeProf
                 name="password"
                 type="password"
                 placeholder="Kosongkan jika tidak ingin mengganti password"
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-700 outline-none transition focus:border-slate-500"
+                className="w-full rounded-lg border border-[#d1d5db] bg-white px-3 py-2.5 text-[#374151] outline-none transition focus:border-[#2563eb]"
               />
             </div>
 
             <button
               type="submit"
-              className="inline-flex items-center justify-center bg-slate-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-700 sm:col-span-2 sm:justify-self-start"
+              className="inline-flex items-center justify-center bg-[#111111] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#222222] sm:col-span-2 sm:justify-self-start"
             >
               Ajukan Edit ke Manajer
             </button>

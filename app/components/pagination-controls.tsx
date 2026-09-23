@@ -6,6 +6,7 @@ type PaginationControlsProps = {
   basePath: string;
   page: number;
   totalItems: number;
+  pageSize?: number;
   query?: Record<string, string | undefined>;
 };
 
@@ -13,9 +14,9 @@ export function PaginationControls({
   basePath,
   page,
   totalItems,
+  pageSize = 6,
   query = {},
 }: PaginationControlsProps) {
-  const pageSize = 6;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   if (totalItems === 0) return null;
 
@@ -32,7 +33,7 @@ export function PaginationControls({
     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#e5e7eb] pt-4 text-sm">
         <div className="flex items-center gap-2 text-[#6b7280]">
           Jumlah data:
-          <span className="text-[#6b7280]">6 data per halaman</span>
+          <span className="text-[#6b7280]">{pageSize} data per halaman</span>
         </div>
       <div className="flex items-center gap-2">
         <span className="text-[#6b7280]">Halaman</span>

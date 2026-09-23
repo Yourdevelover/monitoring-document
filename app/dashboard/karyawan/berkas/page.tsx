@@ -25,6 +25,9 @@ const CATEGORY_DETAILS = [
   },
 ] as const;
 
+// Ensure fresh data on each request; avoids stale UI after upload/submit
+export const dynamic = "force-dynamic";
+
 export default async function EmployeeFilesPage() {
   const employee = await requireEmployee();
   const startOfToday = getStartOfCurrentJakartaDay(new Date());
@@ -61,13 +64,16 @@ export default async function EmployeeFilesPage() {
     }),
   ]);
 
+  // Exclude uploads that have been submitted today; keep only pending or older submissions
+  // pending uploads (not submitted today) – used to block new uploads for same day
   const activeUploads = employeeUploads.filter(
     (upload) =>
       !upload.isImportant &&
-      (!upload.isSubmitted || upload.submissionDate >= startOfToday)
+      (!upload.isSubmitted || (upload.submissionDate && upload.submissionDate < startOfToday))
   );
+  // map all uploads (including submitted) for display
   const uploadedByCategory = new Map(
-    activeUploads.map((upload) => [upload.category, upload])
+    employeeUploads.map((upload) => [upload.category, upload])
   );
   const importantBySourceUpload = new Map(
     importantFiles.map((file) => [file.sourceUploadId, file.id])

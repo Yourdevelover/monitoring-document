@@ -365,10 +365,7 @@ export async function POST(request: Request) {
           userId: employee.id,
           category: category as "DATA_A" | "DATA_B" | "DATA_C",
           isImportant: false,
-          OR: [
-            { isSubmitted: false },
-            { submissionDate: { gte: startOfToday } },
-          ],
+          isSubmitted: false,
         },
       });
 
@@ -435,6 +432,13 @@ export async function POST(request: Request) {
       });
     });
   } catch (error) {
+    if (
+      error instanceof Error &&
+      ((error as unknown as { digest?: string }).digest?.startsWith("NEXT_REDIRECT") ||
+        error.message === "NEXT_REDIRECT")
+    ) {
+      throw error;
+    }
     console.error(error);
     return NextResponse.json(
       {
