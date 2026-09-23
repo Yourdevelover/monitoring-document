@@ -1,22 +1,25 @@
-import { hash } from "bcryptjs";
+﻿import { hash } from "bcryptjs";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { createSessionToken } from "@/lib/auth";
 
 export default function ManagerRegistrationPage() {
   return (
-    <main className="min-h-screen bg-slate-100 px-6 py-12 text-slate-900">
-      <div className="mx-auto max-w-xl rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
-        <div className="mb-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
+    <main className="min-h-screen bg-[#f8f9fa] px-6 py-12 text-[#111111]">
+      <div className="mx-auto max-w-xl">
+        <div className="mb-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#6b7280]">
             Monitoring System
           </p>
-          <h1 className="mt-2 text-4xl font-bold">Daftar Manajer</h1>
+          <h1 className="mt-3 text-base font-bold tracking-tight">Daftar Manajer</h1>
+          <p className="mt-3 text-sm leading-relaxed text-[#6b7280]">
+            Buat akun manajer untuk mengelola berkas dan pengumuman tim.
+          </p>
         </div>
 
         <form action="/api/manager/register" method="POST" className="space-y-4">
           <div>
-            <label htmlFor="name" className="mb-1 block text-sm font-medium">
+            <label htmlFor="name" className="mb-1.5 block text-sm font-medium">
               Nama Lengkap
             </label>
             <input
@@ -24,12 +27,12 @@ export default function ManagerRegistrationPage() {
               name="name"
               type="text"
               required
-              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 outline-none transition focus:border-blue-500 focus:bg-white"
+              className="w-full rounded-md border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium">
+            <label htmlFor="email" className="mb-1.5 block text-sm font-medium">
               Email
             </label>
             <input
@@ -37,12 +40,12 @@ export default function ManagerRegistrationPage() {
               name="email"
               type="email"
               required
-              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 outline-none transition focus:border-blue-500 focus:bg-white"
+              className="w-full rounded-md border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-1 block text-sm font-medium">
+            <label htmlFor="password" className="mb-1.5 block text-sm font-medium">
               Password
             </label>
             <input
@@ -50,13 +53,13 @@ export default function ManagerRegistrationPage() {
               name="password"
               type="password"
               required
-              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 outline-none transition focus:border-blue-500 focus:bg-white"
+              className="w-full rounded-md border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700"
+            className="w-full rounded-md bg-[#111111] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#333333] active:scale-[0.98]"
           >
             Daftar sebagai Manajer
           </button>

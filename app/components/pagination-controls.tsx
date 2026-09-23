@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 
@@ -29,15 +29,15 @@ export function PaginationControls({
   };
 
   return (
-    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4 text-sm">
-        <div className="flex items-center gap-2 text-slate-600">
+    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#e5e7eb] pt-4 text-sm">
+        <div className="flex items-center gap-2 text-[#6b7280]">
           Jumlah data:
-          <span className="text-slate-500">6 data per halaman</span>
+          <span className="text-[#6b7280]">6 data per halaman</span>
         </div>
       <div className="flex items-center gap-2">
-        <span className="text-slate-500">Halaman</span>
+        <span className="text-[#6b7280]">Halaman</span>
         {page > 1 && (
-          <Link href={buildUrl(page - 1)} className="border border-slate-300 px-3 py-1 hover:bg-slate-50">
+          <Link href={buildUrl(page - 1)} className="border border-[#e5e7eb] px-3 py-1 hover:bg-[#f8f9fa]">
             Sebelumnya
           </Link>
         )}
@@ -47,14 +47,14 @@ export function PaginationControls({
             href={buildUrl(pageNumber)}
             aria-current={pageNumber === page ? "page" : undefined}
             className={pageNumber === page
-              ? "border border-slate-900 bg-slate-900 px-3 py-1 text-white"
-              : "border border-slate-300 px-3 py-1 hover:bg-slate-50"}
+              ? "border border-[#111111] bg-[#111111] px-3 py-1 text-white"
+              : "border border-[#e5e7eb] px-3 py-1 hover:bg-[#f8f9fa]"}
           >
             {pageNumber}
           </Link>
         ))}
         {page < totalPages && (
-          <Link href={buildUrl(page + 1)} className="border border-slate-300 px-3 py-1 hover:bg-slate-50">
+          <Link href={buildUrl(page + 1)} className="border border-[#e5e7eb] px-3 py-1 hover:bg-[#f8f9fa]">
             Berikutnya
           </Link>
         )}

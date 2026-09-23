@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
@@ -43,7 +43,7 @@ export function EmployeeSearch({ initialValue }: { initialValue: string }) {
         value={value}
         onChange={(event) => setValue(event.target.value)}
         placeholder="Cari nama atau email"
-        className="w-56 border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-slate-500"
+        className="w-56 border border-[#e5e7eb] bg-white px-3 py-2 text-sm outline-none focus:border-[#2563eb]"
       />
     </div>
   );

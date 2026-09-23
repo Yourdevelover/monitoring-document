@@ -37,21 +37,21 @@ export default async function AdminManagerDetailPage({ params }: ManagerDetailPr
   const latestLogout = activities.find((activity) => activity.action === "LOGOUT");
 
   return (
-    <main className="space-y-5 p-4 text-slate-900">
-      <header className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-300 pb-4">
+    <main className="space-y-4 p-4 text-[#111111]">
+      <header className="flex flex-wrap items-end justify-between gap-3 border-b border-[#e5e7eb] pb-4">
         <div>
-          <h1 className="mt-2 text-xl font-semibold">Informasi Manajer</h1>
+          <h1 className="text-base font-bold">Informasi Manajer</h1>
         </div>
-        <span className="text-xs text-slate-500">{manager.isActive}</span>
+        <span className="text-xs text-[#6b7280]">{manager.isActive}</span>
       </header>
 
-      <div className="flex flex-wrap gap-3 border-b border-slate-200 pb-3">
+      <div className="flex flex-wrap gap-3 border-b border-[#e5e7eb] pb-3">
         <a href={`/dashboard/admin/managers/${manager.id}/history`} className="text-sm font-semibold text-blue-600">Lihat Histori Berkas</a>
         <a href={`/dashboard/admin/managers/${manager.id}/edit`} className="text-sm font-semibold text-blue-600">Edit Manajer</a>
         <form action="/api/admin/managers/action" method="POST">
           <input type="hidden" name="userId" value={manager.id} />
           <input type="hidden" name="action" value={manager.isActive === "ACTIVE" ? "deactivate" : "activate"} />
-          <button type="submit" className="text-sm font-semibold text-amber-700">{manager.isActive === "ACTIVE" ? "Nonaktifkan" : "Aktifkan"}</button>
+          <button type="submit" className="text-sm font-semibold text-[#956400]">{manager.isActive === "ACTIVE" ? "Nonaktifkan" : "Aktifkan"}</button>
         </form>
         <ConfirmActionForm
           action="/api/admin/managers/action"
@@ -59,63 +59,63 @@ export default async function AdminManagerDetailPage({ params }: ManagerDetailPr
         >
           <input type="hidden" name="userId" value={manager.id} />
           <input type="hidden" name="action" value="delete" />
-          <button type="submit" className="text-sm font-semibold text-red-700">Hapus</button>
+          <button type="submit" className="text-sm font-semibold text-[#9f2f2d]">Hapus</button>
         </ConfirmActionForm>
       </div>
 
-      <section className="grid gap-3 border-y border-slate-200 py-3 sm:grid-cols-2">
-        <div><p className="text-xs text-slate-500">Nama</p><p className="font-semibold">{manager.name}</p></div>
-        <div><p className="text-xs text-slate-500">Email</p><p className="font-semibold">{manager.email}</p></div>
-        <div><p className="text-xs text-slate-500">Nomor Telepon</p><p className="font-semibold">{manager.phoneNumber ?? "Belum diisi"}</p></div>
-        <div><p className="text-xs text-slate-500">Akun dibuat</p><p className="font-semibold">{new Date(manager.createdAt).toLocaleString("id-ID")}</p></div>
+      <section className="grid gap-3 border-y border-[#e5e7eb] py-3 sm:grid-cols-2">
+        <div><p className="text-xs text-[#6b7280]">Nama</p><p className="font-semibold">{manager.name}</p></div>
+        <div><p className="text-xs text-[#6b7280]">Email</p><p className="font-semibold">{manager.email}</p></div>
+        <div><p className="text-xs text-[#6b7280]">Nomor Telepon</p><p className="font-semibold">{manager.phoneNumber ?? "Belum diisi"}</p></div>
+        <div><p className="text-xs text-[#6b7280]">Akun dibuat</p><p className="font-semibold">{new Date(manager.createdAt).toLocaleString("id-ID")}</p></div>
       </section>
 
-      <section className="border-y border-slate-200 py-3">
+      <section className="border-y border-[#e5e7eb] py-3">
         <h2 className="mb-3 text-base font-semibold">Aktivitas Terakhir</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <p className="text-xs text-slate-500">Login terakhir</p>
+            <p className="text-xs text-[#6b7280]">Login terakhir</p>
             <p className="font-semibold">{latestLogin ? new Date(latestLogin.createdAt).toLocaleString("id-ID") : "Belum ada data"}</p>
           </div>
           <div>
-            <p className="text-xs text-slate-500">Logout terakhir</p>
+            <p className="text-xs text-[#6b7280]">Logout terakhir</p>
             <p className="font-semibold">{latestLogout ? new Date(latestLogout.createdAt).toLocaleString("id-ID") : "Belum ada data"}</p>
           </div>
         </div>
       </section>
 
       <section>
-        <div className="mb-3 flex items-center justify-between border-b border-slate-200 pb-2">
+        <div className="mb-3 flex items-center justify-between border-b border-[#e5e7eb] pb-2">
           <h2 className="text-base font-semibold">Tim</h2>
-          <span className="text-xs text-slate-500">{manager.managedTeam?.members.length ?? 0} anggota</span>
+          <span className="text-xs text-[#6b7280]">{manager.managedTeam?.members.length ?? 0} anggota</span>
         </div>
         {manager.managedTeam ? (
           <>
-            <p className="mb-3 text-sm text-slate-700">Nama tim: <strong>{manager.managedTeam.name}</strong></p>
-            <div className="divide-y divide-slate-200 border-y border-slate-200">
+            <p className="mb-3 text-sm text-[#111111]">Nama tim: <strong>{manager.managedTeam.name}</strong></p>
+            <div className="divide-y divide-slate-200 border-y border-[#e5e7eb]">
               {manager.managedTeam.members.map((member) => (
                 <div key={member.id} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 py-2 text-sm">
                   <span className="truncate font-medium">{member.name}</span>
-                  <span className="truncate text-slate-500">{member.email}</span>
-                  <span className="text-xs text-slate-500">{member.isActive}</span>
+                  <span className="truncate text-[#6b7280]">{member.email}</span>
+                  <span className="text-xs text-[#6b7280]">{member.isActive}</span>
                 </div>
               ))}
             </div>
           </>
-        ) : <p className="text-sm text-slate-500">Manajer belum memiliki tim.</p>}
+        ) : <p className="text-sm text-[#6b7280]">Manajer belum memiliki tim.</p>}
       </section>
 
       <section>
-        <div className="mb-3 border-b border-slate-200 pb-2">
+        <div className="mb-3 border-b border-[#e5e7eb] pb-2">
           <h2 className="text-base font-semibold">Berkas Terbaru Tim</h2>
         </div>
-        <div className="divide-y divide-slate-200 border-y border-slate-200">
+        <div className="divide-y divide-slate-200 border-y border-[#e5e7eb]">
           {manager.managedTeam?.uploads.map((upload) => (
             <div key={upload.id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 py-2 text-sm">
               <span className="truncate" title={upload.fileName}>{upload.fileName}</span>
-              <span className="text-xs text-slate-500">{upload.category}</span>
+              <span className="text-xs text-[#6b7280]">{upload.category}</span>
             </div>
-          )) ?? <p className="py-4 text-sm text-slate-500">Belum ada berkas tim.</p>}
+          )) ?? <p className="py-4 text-sm text-[#6b7280]">Belum ada berkas tim.</p>}
         </div>
       </section>
 

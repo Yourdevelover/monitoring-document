@@ -11,6 +11,14 @@ type Note = {
   updatedAt: Date;
 };
 
+function parseTargetNote(content: string): { name: string; pct: number } | null {
+  const m = content.trim().match(/^Target (.+): .+ \(([\d.,]+)%\)$/);
+  if (!m) return null;
+  const pct = Number(m[2].replace(",", "."));
+  if (Number.isNaN(pct)) return null;
+  return { name: m[1], pct: Math.max(0, Math.min(100, pct)) };
+}
+
 export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
   const [notes, setNotes] = useState(initialNotes);
   const [isOpen, setIsOpen] = useState(false);
@@ -30,7 +38,7 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
 
     header.classList.add("flex", "flex-wrap", "items-start", "justify-between", "gap-4");
     const slot = document.createElement("div");
-    slot.className = "dashboard-notes-slot w-full shrink-0 sm:ml-auto sm:w-64";
+    slot.className = "dashboard-notes-slot w-full shrink-0 sm:ml-auto sm:max-w-md lg:max-w-lg";
     header.appendChild(slot);
     const resizeObserver = new ResizeObserver(() => {
       header.style.minHeight = `${Math.max(128, slot.offsetHeight + 40)}px`;
@@ -48,6 +56,15 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
       header.classList.remove("flex", "flex-wrap", "items-start", "justify-between", "gap-4");
     };
   }, [isHiddenPath, pathname]);
+
+  useEffect(() => {
+    function onNoteSaved(event: Event) {
+      const detail = (event as CustomEvent).detail;
+      if (detail) setNotes((current) => [detail, ...current]);
+    }
+    window.addEventListener("note-saved", onNoteSaved);
+    return () => window.removeEventListener("note-saved", onNoteSaved);
+  }, []);
 
   async function saveNote() {
     setError("");
@@ -105,7 +122,9 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
           +
         </button>
         <div className="flex min-w-0 flex-1 items-start gap-2">
-          {notes.length > 0 ? notes.slice(0, 3).map((note) => (
+          {notes.length > 0 ? notes.slice(0, 4).map((note) => {
+            const t = parseTargetNote(note.content);
+            return (
             <button
               key={note.id}
               type="button"
@@ -113,13 +132,22 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
                 setIsCreatingNew(false);
                 setIsOpen(true);
               }}
-              className="h-20 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white p-2 text-left shadow-md transition hover:border-slate-400 hover:shadow-lg"
+              className="relative h-20 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white p-2 text-left transition hover:border-slate-400 hover:"
             >
+              {t && (
+                <span className={`absolute -right-1.5 -top-2 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${t.pct >= 100 ? "bg-[#346538] text-white" : "bg-[#956400] text-white"}`}>{t.pct}%</span>
+              )}
               <p className="line-clamp-2 min-h-8 whitespace-pre-wrap break-words text-xs text-slate-800">{note.content}</p>
+              {t && (
+                <div className="mt-1 h-1.5 rounded bg-slate-100">
+                  <div className={`h-full rounded ${t.pct >= 100 ? "bg-[#346538]" : "bg-[#956400]"}`} style={{ width: `${t.pct}%` }} />
+                </div>
+              )}
               <p className="mt-1 truncate text-[10px] text-slate-400">{new Date(note.updatedAt).toLocaleDateString("id-ID")}</p>
             </button>
-          )) : (
-            <div className="h-20 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white p-2 shadow-md">
+            );
+          }) : (
+            <div className="h-20 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white p-2">
               <p className="text-xs text-slate-500">Belum ada catatan.</p>
             </div>
           )}
@@ -128,22 +156,32 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
 
       {isOpen && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-y-auto bg-slate-900/60 p-4" onClick={() => setIsOpen(false)}>
-          <div role="dialog" aria-label="Catatan pribadi" className="my-auto max-h-[calc(100vh-2rem)] w-full max-w-xl overflow-y-auto rounded-xl bg-white p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}>
+          <div role="dialog" aria-label="Catatan pribadi" className="my-auto max-h-[calc(100vh-2rem)] w-full max-w-xl overflow-y-auto rounded-lg bg-white p-5" onClick={(event) => event.stopPropagation()}>
             <div className="flex items-center justify-between gap-4 border-b border-slate-200 pb-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Pribadi</p>
-                <h2 className="mt-1 text-xl font-semibold text-slate-900">
+                <h2 className="mt-1 text-sm font-semibold text-slate-900">
                   {editingId ? "Edit Catatan" : isCreatingNew ? "Catatan Baru" : "Catatan"}
                 </h2>
               </div>
-              <button type="button" onClick={() => setIsOpen(false)} aria-label="Tutup catatan" className="rounded-lg px-2 py-1 text-2xl leading-none text-slate-400 hover:bg-slate-100 hover:text-slate-700">×</button>
+              <button type="button" onClick={() => setIsOpen(false)} aria-label="Tutup catatan" className="rounded-lg px-2 py-1 text-lg leading-none text-slate-400 hover:bg-slate-100 hover:text-slate-700">×</button>
             </div>
 
             {!isCreatingNew && (
               <div className="mt-4 space-y-3">
-                {notes.map((note) => (
+                {notes.map((note) => {
+                  const t = parseTargetNote(note.content);
+                  return (
                   <article key={note.id} className="rounded-lg border border-slate-200 p-3">
                     <p className="whitespace-pre-wrap break-words text-sm text-slate-800">{note.content}</p>
+                    {t && (
+                      <div className="mt-2 flex items-center gap-2">
+                        <div className="h-2 flex-1 rounded bg-slate-100">
+                          <div className={`h-full rounded ${t.pct >= 100 ? "bg-[#346538]" : "bg-[#956400]"}`} style={{ width: `${t.pct}%` }} />
+                        </div>
+                        <span className={`text-xs font-semibold ${t.pct >= 100 ? "text-[#346538]" : "text-[#956400]"}`}>{t.pct}%</span>
+                      </div>
+                    )}
                     <div className="mt-3 flex items-center justify-between gap-3 border-t border-slate-100 pt-2">
                       <time className="text-xs text-slate-400">{new Date(note.updatedAt).toLocaleString("id-ID")}</time>
                       <div className="flex gap-2">
@@ -152,7 +190,8 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
                       </div>
                     </div>
                   </article>
-                ))}
+                  );
+                })}
                 {notes.length === 0 && <p className="border-y border-dashed border-slate-300 py-6 text-center text-sm text-slate-500">Belum ada catatan.</p>}
               </div>
             )}

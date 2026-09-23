@@ -32,28 +32,28 @@ export default async function ManagerFileDetailPage({ params }: FileDetailPagePr
     : null;
 
   if (!upload) {
-    return <p className="text-sm text-slate-600">Berkas tidak ditemukan.</p>;
+    return <p className="text-sm text-[#6b7280]">Berkas tidak ditemukan.</p>;
   }
 
   return (
-    <main className="min-h-screen text-slate-900">
-      <div className="mx-auto max-w-3xl space-y-5">
-        <div className="border-b border-slate-200 pb-4">
-          <h1 className="mt-2 text-xl font-semibold">Pratinjau Berkas</h1>
+    <main className="min-h-screen text-[#111111]">
+      <div className="mx-auto max-w-3xl space-y-4">
+        <div className="border-b border-[#e5e7eb] pb-4">
+          <h1 className="text-base font-bold">Pratinjau Berkas</h1>
         </div>
 
         <section className="space-y-2">
-          <p className="text-lg font-semibold">{upload.fileName}</p>
-          <p className="text-sm text-slate-600">Kategori: {upload.category.replace("DATA_", "Data ")}</p>
-          <p className="text-sm text-slate-600">Karyawan: {upload.user.name}</p>
-          <p className="text-xs text-slate-500">
+          <p className="text-sm font-medium">{upload.fileName}</p>
+          <p className="text-sm text-[#6b7280]">Kategori: {upload.category.replace("DATA_", "Data ")}</p>
+          <p className="text-sm text-[#6b7280]">Karyawan: {upload.user.name}</p>
+          <p className="text-xs text-[#6b7280]">
             Dikirim: {new Date(upload.submissionDate).toLocaleString("id-ID")}
           </p>
           <a
             href={upload.filePath}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-3 inline-flex rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+            className="mt-3 inline-flex rounded-lg bg-[#111111] px-4 py-2 text-sm font-medium text-white hover:bg-[#333333]"
           >
             Lihat / Unduh Berkas
           </a>

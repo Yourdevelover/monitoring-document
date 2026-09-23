@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+﻿import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { ManagerSearchList } from "./manager-search-list";
 
@@ -20,11 +20,11 @@ export default async function AdminManagersPage() {
   });
 
   return (
-    <main className="space-y-5 p-4 text-slate-900">
-      <header className="border-b border-slate-300 pb-4">
-        <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Manajemen akun</p>
-        <h1 className="mt-1 text-xl font-semibold">Kelola Manajer</h1>
-        <p className="mt-1 text-sm text-slate-500">Daftar manajer dan informasi tim yang dikelola.</p>
+    <main className="space-y-4 p-4 text-[#111111]">
+      <header className="border-b border-[#e5e7eb] pb-4">
+        <p className="text-xs uppercase tracking-[0.16em] text-[#6b7280]">Manajemen akun</p>
+        <h1 className="mt-1 text-base font-semibold">Kelola Manajer</h1>
+        <p className="mt-1 text-sm text-[#6b7280]">Daftar manajer dan informasi tim yang dikelola.</p>
       </header>
 
       {managers.length > 0 ? (
@@ -46,7 +46,7 @@ export default async function AdminManagersPage() {
           }))}
         />
       ) : (
-        <p className="py-8 text-center text-sm text-slate-500">Belum ada akun manajer.</p>
+        <p className="py-8 text-center text-sm text-[#6b7280]">Belum ada akun manajer.</p>
       )}
     </main>
   );

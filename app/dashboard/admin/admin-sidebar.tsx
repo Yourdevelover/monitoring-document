@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -13,14 +13,14 @@ export function AdminSidebar({ navItems }: AdminSidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className={`${isOpen ? "w-56" : "w-14"} shrink-0 bg-slate-900 text-slate-100 transition-[width] duration-200`}>
-      <div className="flex items-center justify-between border-b border-slate-800 px-3 py-3">
-        {isOpen && <span className="text-sm font-semibold">Panel Administrasi</span>}
+    <aside className={`${isOpen ? "w-60" : "w-14"} shrink-0 border-r border-[#e5e7eb] bg-[#111111] text-[#9ca3af] transition-[width] duration-200`}>
+      <div className="flex items-center justify-between border-b border-[#2a2a2a] px-3 py-3">
+        {isOpen && <span className="text-xs font-semibold uppercase tracking-[0.08em] text-white">Panel Administrasi</span>}
         <button
           type="button"
           onClick={() => setIsOpen((open) => !open)}
           aria-label={isOpen ? "Tutup sidebar" : "Buka sidebar"}
-          className="flex h-8 w-8 items-center justify-center text-lg text-slate-300 hover:bg-slate-800 hover:text-white"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-sm text-[#9ca3af] transition hover:bg-[#1c1c1c] hover:text-white"
         >
           {isOpen ? "‹" : "›"}
         </button>
@@ -28,15 +28,15 @@ export function AdminSidebar({ navItems }: AdminSidebarProps) {
 
       {isOpen && (
         <>
-          <nav className="space-y-1 px-2 py-4">
+          <nav className="space-y-0.5 px-2 py-4">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`block border-l-2 px-3 py-2 text-sm font-medium transition ${
+                className={`block rounded-md px-3 py-2 text-sm font-medium transition ${
                   pathname === item.href
-                    ? "border-slate-300 bg-slate-800 text-white"
-                    : "border-transparent text-slate-200 hover:border-slate-500 hover:bg-slate-800"
+                    ? "bg-[#222222] text-white"
+                    : "text-[#9ca3af] hover:bg-[#1c1c1c] hover:text-white"
                 }`}
               >
                 {item.label}
@@ -47,7 +47,7 @@ export function AdminSidebar({ navItems }: AdminSidebarProps) {
           <form action="/api/logout" method="POST" className="px-2 pt-2">
             <button
               type="submit"
-              className="w-full border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-100 hover:bg-slate-700"
+              className="w-full rounded-md border border-[#2a2a2a] bg-[#1c1c1c] px-3 py-2 text-sm font-medium text-[#9ca3af] transition hover:border-[#444] hover:bg-[#222222] hover:text-white active:scale-[0.98]"
             >
               Keluar
             </button>

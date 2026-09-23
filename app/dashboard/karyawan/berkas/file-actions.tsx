@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 
@@ -53,7 +53,7 @@ export function FileActions({
           <button
             onClick={() => handleAction("add-important")}
             disabled={isSubmitting || isAlreadySaved}
-            className="inline-flex items-center rounded-lg border border-yellow-300 bg-yellow-50 px-3 py-1.5 text-xs font-medium text-yellow-700 hover:bg-yellow-100 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center rounded-lg border border-[#e8d9a8] bg-[#fbf3db] px-3 py-1.5 text-xs font-medium text-[#956400] hover:bg-[#fbf3db] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isAlreadySaved ? "✓ Data Penting" : "Simpan"}
           </button>
@@ -61,7 +61,7 @@ export function FileActions({
             <button
               onClick={() => importantFileId && handleAction("delete-important", importantFileId)}
               disabled={isSubmitting || !importantFileId}
-              className="inline-flex items-center rounded-lg border border-red-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center rounded-lg border border-red-300 bg-[#fdebec] px-3 py-1.5 text-xs font-medium text-[#9f2f2d] hover:bg-[#fdebec] disabled:cursor-not-allowed disabled:opacity-60"
             >
               Hapus
             </button>
@@ -69,7 +69,7 @@ export function FileActions({
             <button
               onClick={() => handleAction("delete")}
               disabled={isSubmitting}
-              className="inline-flex items-center rounded-lg border border-red-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100 disabled:cursor-not-allowed"
+              className="inline-flex items-center rounded-lg border border-red-300 bg-[#fdebec] px-3 py-1.5 text-xs font-medium text-[#9f2f2d] hover:bg-[#fdebec] disabled:cursor-not-allowed"
             >
               Hapus
             </button>

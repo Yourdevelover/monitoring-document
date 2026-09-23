@@ -29,11 +29,11 @@ export default async function EmployeeProfilePage({ searchParams }: EmployeeProf
         <header className="border-b border-slate-300 bg-white px-5 py-5 sm:px-7">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Profil</p>
           <div className="mt-4 flex items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-800 text-lg font-semibold text-white">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-800 text-sm font-medium text-white">
               {profile.name.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase()}
             </div>
             <div className="min-w-0">
-              <h1 className="truncate text-2xl font-bold">{profile.name}</h1>
+              <h1 className="truncate text-base font-bold">{profile.name}</h1>
               <p className="mt-1 text-sm text-slate-500">Informasi karyawan</p>
             </div>
           </div>
@@ -47,7 +47,7 @@ export default async function EmployeeProfilePage({ searchParams }: EmployeeProf
               ["Tim", profile.team?.name ?? "Belum ditentukan"],
               ["Role", profile.role],
             ].map(([label, value]) => (
-              <div key={label} className="flex items-center justify-between gap-6 py-4">
+              <div key={label} className="flex items-center justify-between gap-4 py-4">
                 <p className="shrink-0 text-sm text-slate-500">{label}</p>
                 <p className="break-words text-right text-sm font-medium text-slate-900">{value}</p>
               </div>
@@ -57,7 +57,7 @@ export default async function EmployeeProfilePage({ searchParams }: EmployeeProf
 
         {profile.id === employee.id && <section className="bg-white px-5 py-5 sm:px-7">
           <div className="mb-5 border-b border-slate-200 pb-4">
-            <h2 className="text-lg font-semibold">Edit Profil</h2>
+            <h2 className="text-sm font-semibold">Edit Profil</h2>
             <p className="mt-1 text-sm text-slate-500">Perubahan akan dikirim ke persetujuan manajer.</p>
           </div>
 
@@ -71,7 +71,7 @@ export default async function EmployeeProfilePage({ searchParams }: EmployeeProf
                 name="name"
                 type="text"
                 defaultValue={profile?.name ?? ""}
-                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-700 outline-none transition focus:border-slate-500"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-700 outline-none transition focus:border-slate-500"
               />
             </div>
 
@@ -84,7 +84,7 @@ export default async function EmployeeProfilePage({ searchParams }: EmployeeProf
                 name="phoneNumber"
                 type="tel"
                 defaultValue={profile?.phoneNumber ?? ""}
-                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-700 outline-none transition focus:border-slate-500"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-700 outline-none transition focus:border-slate-500"
               />
             </div>
 
@@ -97,7 +97,7 @@ export default async function EmployeeProfilePage({ searchParams }: EmployeeProf
                 name="email"
                 type="email"
                 defaultValue={profile?.email ?? ""}
-                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-700 outline-none transition focus:border-slate-500"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-700 outline-none transition focus:border-slate-500"
               />
             </div>
 
@@ -110,7 +110,7 @@ export default async function EmployeeProfilePage({ searchParams }: EmployeeProf
                 name="password"
                 type="password"
                 placeholder="Kosongkan jika tidak ingin mengganti password"
-                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-700 outline-none transition focus:border-slate-500"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-700 outline-none transition focus:border-slate-500"
               />
             </div>
 

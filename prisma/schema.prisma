@@ -63,6 +63,7 @@ model User {
   sentMessages    Message[]        @relation("UserSentMessages")
   receivedMessages Message[]      @relation("UserReceivedMessages")
   notes         PersonalNote[]
+  targets       Target[]
 
   @@map("users")
 }
@@ -225,4 +226,22 @@ model PersonalNote {
 
   @@index([userId, updatedAt])
   @@map("personal_notes")
+}
+
+model Target {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  name         String
+  targetValue  Float
+  currentValue Float    @default(0)
+  formula      String
+  threshold    Float    @default(20)
+  period       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, period, name])
+  @@map("targets")
 }

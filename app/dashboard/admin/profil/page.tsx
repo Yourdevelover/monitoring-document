@@ -5,10 +5,10 @@ export default async function AdminProfilePage() {
 
   return (
     <main className="min-h-screen text-slate-900">
-      <div className="mx-auto max-w-3xl space-y-5">
+      <div className="mx-auto max-w-3xl space-y-4">
         <header className="border-b border-slate-300 pb-4">
           <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Profil</p>
-          <h1 className="mt-1 text-xl font-semibold">Profil Admin</h1>
+          <h1 className="mt-1 text-base font-semibold">Profil Admin</h1>
         </header>
         <section>
           <div className="grid gap-3 border-y border-slate-200 py-3 sm:grid-cols-2">

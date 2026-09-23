@@ -1,4 +1,4 @@
-import { requireEmployee } from "@/lib/auth";
+﻿import { requireEmployee } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { KaryawanSidebar } from "./karyawan-sidebar";
 
@@ -25,11 +25,12 @@ export default async function EmployeeLayout({
     { href: "/dashboard/karyawan/berkas", label: "Berkas" },
     { href: "/dashboard/karyawan/data-penting", label: "Data Penting" },
     { href: "/dashboard/karyawan/pengumuman", label: "Pengumuman" },
+    { href: "/dashboard/karyawan/target", label: "Target" },
     { href: "/dashboard/karyawan/profil", label: "Profil" },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-[#f8f9fa]">
       <div className="flex min-h-screen">
         <KaryawanSidebar navItems={navItems} />
 

@@ -1,4 +1,4 @@
-import { requireManager } from "@/lib/auth";
+﻿import { requireManager } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ManagerSidebar } from "./manager-sidebar";
 
@@ -29,12 +29,13 @@ export default async function ManagerLayout({
     { href: "/dashboard/manajer/berkas", label: "Berkas" },
     { href: "/dashboard/manajer/histori-berkas", label: "Histori Berkas" },
     { href: "/dashboard/manajer/pengumuman", label: "Pengumuman" },
+    { href: "/dashboard/manajer/target", label: "Target" },
     { href: "/dashboard/manajer/pengajuan-profil", label: "Persetujuan Profil" },
     { href: "/dashboard/manajer/profil", label: "Profil" },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-[#f8f9fa]">
       <div className="flex min-h-screen">
         <ManagerSidebar navItems={navItems} />
         <div className="manager-content min-w-0 flex-1">

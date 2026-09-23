@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { ConfirmActionForm } from "@/app/components/confirm-action-form";
@@ -33,27 +33,27 @@ export default async function AdminUsersPage({
   });
 
   return (
-    <main className="space-y-6 p-2">
-      <header className="rounded-2xl bg-white p-6 shadow-sm">
+    <main className="space-y-4 p-2">
+      <header className="rounded-lg border border-[#e5e7eb] bg-white p-5">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm text-slate-500">Admin Management</p>
-            <h1 className="text-2xl font-bold">Kelola Admin</h1>
+            <p className="text-sm text-[#6b7280]">Admin Management</p>
+            <h1 className="text-base font-bold">Kelola Admin</h1>
           </div>
           <Link
             href="/dashboard/admin/users/create"
-            className="rounded-xl bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700"
+            className="rounded-lg bg-[#2563eb] px-4 py-2 font-semibold text-white transition hover:bg-[#1d4ed8]"
           >
             + Tambah Admin
           </Link>
         </div>
       </header>
 
-      <section className="rounded-2xl bg-white p-6 shadow-sm">
+      <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-slate-500">
+              <tr className="border-b border-[#e5e7eb] text-[#6b7280]">
                 <th className="py-2 pr-4">Nama</th>
                 <th className="py-2 pr-4">Email</th>
                 <th className="py-2 pr-4">Telepon</th>
@@ -63,7 +63,7 @@ export default async function AdminUsersPage({
             </thead>
             <tbody>
               {users.map((user) => (
-                <tr key={user.id} className="border-b border-slate-100">
+                <tr key={user.id} className="border-b border-[#e5e7eb]">
                   <td className="py-3 pr-4">{user.name}</td>
                   <td className="py-3 pr-4">{user.email}</td>
                   <td className="py-3 pr-4">{user.phoneNumber ?? "-"}</td>
@@ -72,7 +72,7 @@ export default async function AdminUsersPage({
                     <div className="flex gap-2">
                       <a
                         href={`/dashboard/admin/users/${user.id}`}
-                        className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                        className="rounded-lg bg-[#f8f9fa] px-3 py-1.5 text-xs font-semibold text-[#111111] hover:bg-[#e5e7eb]"
                       >
                         Detail
                       </a>
@@ -83,7 +83,7 @@ export default async function AdminUsersPage({
                         <input type="hidden" name="userId" value={user.id} />
                         <button
                           type="submit"
-                          className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100"
+                          className="rounded-lg bg-[#fdebec] px-3 py-1.5 text-xs font-semibold text-[#9f2f2d] hover:bg-[#fdebec]"
                         >
                           Hapus
                         </button>

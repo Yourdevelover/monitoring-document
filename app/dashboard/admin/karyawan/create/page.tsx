@@ -11,10 +11,10 @@ export default async function CreateEmployeePage() {
   });
 
   return (
-    <main className="space-y-5 p-4 text-slate-900">
+    <main className="space-y-4 p-4 text-slate-900">
       <header className="border-b border-slate-300 pb-4">
         <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Manajemen akun</p>
-        <h1 className="mt-1 text-xl font-semibold">Tambah Karyawan</h1>
+        <h1 className="mt-1 text-base font-semibold">Tambah Karyawan</h1>
         <p className="mt-1 text-sm text-slate-500">Pilih tim yang sudah terdaftar untuk menentukan manajer karyawan.</p>
       </header>
 

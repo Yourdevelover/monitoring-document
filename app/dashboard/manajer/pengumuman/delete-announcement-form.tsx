@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 type DeleteAnnouncementFormProps = {
   announcementId: number;
@@ -20,7 +20,7 @@ export function DeleteAnnouncementForm({ announcementId }: DeleteAnnouncementFor
       <input type="hidden" name="announcementId" value={announcementId} />
       <button
         type="submit"
-        className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
+        className="rounded-lg border border-[#fdebec] px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-[#fdebec]"
       >
         Hapus
       </button>

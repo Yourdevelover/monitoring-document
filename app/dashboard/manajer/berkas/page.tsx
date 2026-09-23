@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+﻿import { prisma } from "@/lib/prisma";
 import { requireManager } from "@/lib/auth";
 import Link from "next/link";
 import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
@@ -44,114 +44,104 @@ export default async function ManagerFilesPage() {
     }).format(date);
 
   return (
-    <main className="min-h-screen text-slate-900">
-      <div className="mx-auto max-w-7xl space-y-5">
-        <header className="border-b border-slate-200 pb-4">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Monitoring</p>
-          <h1 className="mt-1 text-2xl font-bold">Berkas Tim</h1>
-          <p className="mt-1 text-sm text-slate-500">Pilih kategori untuk melihat semua berkas yang masuk.</p>
+    <main className="min-h-screen bg-[#f8f9fa] px-4 py-5 text-[#111111]">
+      <div className="mx-auto max-w-7xl space-y-4">
+        <header className="flex flex-col gap-3 rounded-lg border border-[#e5e7eb] bg-white px-4 py-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">Monitoring</p>
+            <h1 className="mt-1 text-[15px] font-semibold tracking-tight">Berkas Tim</h1>
+            <p className="mt-0.5 text-xs text-[#6b7280]">Pilih kategori untuk melihat semua berkas yang masuk.</p>
+          </div>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="rounded-md bg-[#e1f3fe] px-2.5 py-1.5 font-medium text-[#1f6c9f]">{uploads.length} file</span>
+            <span className="rounded-md bg-[#fbf3db] px-2.5 py-1.5 font-medium text-[#956400]">{managerUploads.length} milik saya</span>
+          </div>
         </header>
 
-        <section>
-          <div className="grid gap-4 md:grid-cols-3" aria-label="Kategori berkas">
-            {CATEGORIES.map((category) => (
-              <Link
-                key={category.key}
-                href={`/dashboard/manajer/berkas/${category.key.toLowerCase().replace("data_", "data-")}`}
-                className="min-h-32 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-400 hover:shadow-md"
-              >
-                <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">Kategori</p>
-                <p className="mt-2 text-xl font-semibold text-slate-900">{category.label}</p>
-                <p className="mt-2 text-sm text-slate-500">
-                  {uploads.filter((upload) => upload.category === category.key).length} file aktif
-                </p>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        <section>
-          <div className="mb-4 flex items-center justify-between border-b border-slate-200 pb-3">
-            <div>
-              <h2 className="text-lg font-semibold">Berkas Terbaru</h2>
-              <p className="text-sm text-slate-500">Karyawan yang baru mengirim berkas.</p>
-            </div>
-            <span className="text-xs text-slate-500">{uploads.length} file aktif</span>
-          </div>
-
-          {uploads.length > 0 ? (
-            <div className="divide-y divide-slate-200">
-              {uploads.slice(0, 10).map((upload) => (
-                <div key={upload.id} className="py-4">
-                  <div className="min-w-0">
-                    <p className="break-all font-semibold text-slate-900">{upload.fileName}</p>
-                    <p className="mt-1 text-sm text-slate-600">
-                      {upload.user.name} • {upload.category.replace("DATA_", "Data ")}
-                    </p>
-                    <p className="text-xs text-slate-500">Dikirim {formatDateTime(upload.submissionDate)}</p>
+        <section aria-label="Kategori berkas">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {CATEGORIES.map((category) => {
+              const count = uploads.filter((u) => u.category === category.key).length;
+              return (
+                <Link
+                  key={category.key}
+                  href={`/dashboard/manajer/berkas/${category.key.toLowerCase().replace("data_", "data-")}`}
+                  className="flex items-center justify-between rounded-lg border border-[#e5e7eb] bg-white px-4 py-3 transition hover:border-[#2563eb]"
+                >
+                  <div>
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-[#6b7280]">{category.label}</p>
+                    <p className="mt-1 text-[15px] font-semibold">{count} file</p>
                   </div>
-                </div>
-              ))}
+                  <span className="flex h-8 w-8 items-center justify-center rounded-md bg-[#f1f3f5] text-[11px] font-bold text-[#111111]">{category.label.replace("Berkas ", "")}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
+          <div className="rounded-lg border border-[#e5e7eb] bg-white">
+            <div className="flex items-center justify-between border-b border-[#e5e7eb] px-4 py-3">
+              <h2 className="text-xs font-semibold uppercase tracking-wide">Berkas Terbaru</h2>
+              <span className="text-[11px] text-[#6b7280]">{uploads.length} file</span>
             </div>
-          ) : (
-            <p className="border-y border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-600">
-              Belum ada berkas aktif dari karyawan.
-            </p>
-          )}
-        </section>
-
-        <section className="rounded-2xl bg-white p-6 shadow-sm">
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold">Unggah Berkas untuk Tim</h2>
-            <p className="text-sm text-slate-500">Bagikan file ke seluruh anggota tim.</p>
-          </div>
-          <div className="max-w-md">
-            <ManagerUploadForm />
-          </div>
-        </section>
-
-        {managerUploads.length > 0 && (
-          <section>
-            <div className="mb-4 flex items-center justify-between border-b border-slate-200 pb-3">
-              <div>
-                <h2 className="text-lg font-semibold">Berkas Saya</h2>
-                <p className="text-sm text-slate-500">Berkas yang sudah Anda bagikan ke tim.</p>
+            {uploads.length > 0 ? (
+              <div className="divide-y divide-[#f1f3f5]">
+                {uploads.slice(0, 8).map((upload) => (
+                  <div key={upload.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
+                    <div className="min-w-0">
+                      <p className="truncate text-[13px] font-medium">{upload.fileName}</p>
+                      <p className="mt-0.5 text-xs text-[#6b7280]">{upload.user.name} • {upload.category.replace("DATA_", "Data ")}</p>
+                    </div>
+                    <span className="shrink-0 text-[11px] text-[#9ca3af]">{new Date(upload.submissionDate).toLocaleDateString("id-ID", { dateStyle: "short" })}</span>
+                  </div>
+                ))}
               </div>
-              <span className="text-xs text-slate-500">{managerUploads.length} file dibagikan</span>
-            </div>
-            <div className="divide-y divide-slate-200">
-              {managerUploads.map((upload) => (
-                <div key={upload.id} className="py-4">
-                  <div className="min-w-0 flex items-center justify-between gap-4">
-                    <div>
-                      <p className="break-all font-semibold text-slate-900">{upload.fileName}</p>
-                      <p className="mt-1 text-sm text-slate-600">
-                        {upload.category.replace("DATA_", "Data ")} • Dibagikan {formatDateTime(upload.submissionDate)}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <a
-                        href={upload.filePath}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="whitespace-nowrap rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100"
-                      >
-                        Lihat
-                      </a>
-                      <ManagerFileDeleteButton uploadId={upload.id} />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <p className="text-[13px] text-[#6b7280]">Belum ada berkas aktif dari karyawan.</p>
+                <p className="mt-1 text-[11px] text-[#9ca3af]">Upload pertama akan muncul di sini.</p>
+              </div>
+            )}
+          </div>
 
-        <section className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4">
-          <p className="text-xs text-slate-500">Unduh seluruh file melalui halaman kategori masing-masing.</p>
-          <Link href="/dashboard/manajer/histori-berkas" className="text-sm font-semibold text-blue-600 hover:text-blue-800">
-            Lihat histori berkas →
-          </Link>
+          <div className="space-y-4">
+            <div className="rounded-lg border border-[#e5e7eb] bg-white p-4">
+              <h2 className="text-xs font-semibold uppercase tracking-wide">Unggah Berkas untuk Tim</h2>
+              <p className="mt-1 text-xs text-[#6b7280]">Bagikan file ke seluruh anggota tim.</p>
+              <div className="mt-3">
+                <ManagerUploadForm />
+              </div>
+            </div>
+
+            {managerUploads.length > 0 && (
+              <div className="rounded-lg border border-[#e5e7eb] bg-white">
+                <div className="flex items-center justify-between border-b border-[#e5e7eb] px-4 py-3">
+                  <h2 className="text-xs font-semibold uppercase tracking-wide">Berkas Saya</h2>
+                  <span className="text-[11px] text-[#6b7280]">{managerUploads.length} file</span>
+                </div>
+                <div className="divide-y divide-[#f1f3f5]">
+                  {managerUploads.map((upload) => (
+                    <div key={upload.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
+                      <div className="min-w-0">
+                        <p className="truncate text-[13px] font-medium">{upload.fileName}</p>
+                        <p className="mt-0.5 text-xs text-[#6b7280]">{upload.category.replace("DATA_", "Data ")} • {formatDateTime(upload.submissionDate)}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <a href={upload.filePath} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-[#e5e7eb] px-2.5 py-1.5 text-[11px] font-medium text-[#111111] hover:bg-[#f8f9fa]">Lihat</a>
+                        <ManagerFileDeleteButton uploadId={upload.id} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className="flex items-center justify-between border-t border-[#e5e7eb] pt-3">
+          <p className="text-[11px] text-[#6b7280]">Unduh seluruh file melalui halaman kategori masing-masing.</p>
+          <Link href="/dashboard/manajer/histori-berkas" className="text-xs font-semibold text-[#2563eb] hover:text-[#1d4ed8]">Lihat histori berkas →</Link>
         </section>
       </div>
     </main>

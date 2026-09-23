@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+﻿import { prisma } from "@/lib/prisma";
 import { requireEmployee } from "@/lib/auth";
 import Link from "next/link";
 import { UploadForm } from "./upload-form";
@@ -27,6 +27,7 @@ const CATEGORY_DETAILS = [
 
 export default async function EmployeeFilesPage() {
   const employee = await requireEmployee();
+  const startOfToday = getStartOfCurrentJakartaDay(new Date());
 
   const [managerSharedFiles, employeeUploads, importantFiles] = await Promise.all([
     prisma.upload.findMany({
@@ -35,6 +36,9 @@ export default async function EmployeeFilesPage() {
         user: {
           role: "MANAGER",
         },
+        isSubmitted: true,
+        isImportant: false,
+        submissionDate: { gte: startOfToday },
       },
       include: {
         user: true,
@@ -57,8 +61,6 @@ export default async function EmployeeFilesPage() {
     }),
   ]);
 
-  const now = new Date();
-  const startOfToday = getStartOfCurrentJakartaDay(now);
   const activeUploads = employeeUploads.filter(
     (upload) =>
       !upload.isImportant &&
@@ -71,21 +73,23 @@ export default async function EmployeeFilesPage() {
     importantFiles.map((file) => [file.sourceUploadId, file.id])
   );
   return (
-    <main className="min-h-screen text-slate-900">
+    <main className="min-h-screen bg-[#f8f9fa] px-4 py-5 text-[#111111]">
       <div className="mx-auto max-w-7xl space-y-4">
-        <header className="pb-4">
-          <h1 className="mt-1 text-2xl font-bold">Berkas dari Manajer</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            File yang dibagikan oleh manajer untuk diunduh oleh tim.
-          </p>
+        <header className="rounded-lg border border-[#e5e7eb] bg-white px-4 py-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">Monitoring</p>
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <h1 className="text-[15px] font-semibold tracking-tight">Berkas dari Manajer</h1>
+            <span className="rounded-md bg-[#e1f3fe] px-2 py-1 text-xs font-medium text-[#1f6c9f]">{managerSharedFiles.length} file dibagikan</span>
+          </div>
+          <p className="mt-1 text-xs text-[#6b7280]">File yang dibagikan oleh manajer untuk diunduh oleh tim.</p>
 
-          {managerSharedFiles.length > 0 ? (
-            <div className="mt-2 grid max-w-md gap-1.5 sm:grid-cols-2">
+          {managerSharedFiles.length > 0 && (
+            <div className="mt-3 grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
               {managerSharedFiles.map((upload) => (
-                <div key={upload.id} className="flex items-center justify-between gap-2 bg-slate-50 px-2.5 py-1.5">
-                  <div className="min-w-0 max-w-[130px]">
-                    <p className="truncate text-sm font-medium text-slate-700">{upload.title}</p>
-                    <p className="truncate text-xs text-slate-500">{upload.fileName}</p>
+                <div key={upload.id} className="flex items-center justify-between gap-2 rounded-md bg-[#f8f9fa] px-2.5 py-1.5">
+                  <div className="min-w-0">
+                    <p className="truncate text-[13px] font-medium text-[#111111]">{upload.title}</p>
+                    <p className="truncate text-xs text-[#6b7280]">{upload.fileName}</p>
                   </div>
                   <ManagerFilePopover
                     file={{
@@ -100,48 +104,45 @@ export default async function EmployeeFilesPage() {
                 </div>
               ))}
             </div>
-          ) : (
-            <p className="mt-2 text-slate-600">Belum ada berkas yang dibagikan oleh manajer.</p>
           )}
         </header>
 
-        <section className="rounded-2xl bg-white px-6 pb-6 pt-2 shadow-sm">
-          <div className="grid gap-4 lg:grid-cols-3">
+        <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
+          <div className="grid gap-3 lg:grid-cols-3">
             {CATEGORY_DETAILS.map((category) => {
               const uploadedFile = uploadedByCategory.get(category.key);
 
               return (
-                <div key={category.key} className="bg-slate-50 p-4">
-                  <div className="mb-3">
-                    <p className="text-sm font-medium uppercase tracking-[0.14em] text-slate-500">
+                <div key={category.key} className="rounded-md border border-[#e5e7eb] bg-[#f8f9fa] p-3">
+                  <div className="mb-2">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">
                       {category.label}
                     </p>
-                    <p className="mt-1 text-sm text-slate-600">{category.description}</p>
+                    <p className="mt-0.5 text-xs text-[#6b7280]">{category.description}</p>
                   </div>
 
                   {uploadedFile ? (
-                    <div className="space-y-3 p-3" style={{
-                      backgroundColor: uploadedFile.isSubmitted ? '#ecfdf5' : '#fffbeb'
+                    <div className="space-y-2.5 rounded-md p-2.5" style={{
+                      backgroundColor: uploadedFile.isSubmitted ? '#edf3ec' : '#fbf3db'
                     }}>
                       <div>
-                        <p className="text-sm font-medium" style={{ color: uploadedFile.isSubmitted ? '#047857' : '#d97706' }}>
+                        <p className="text-[13px] font-semibold" style={{ color: uploadedFile.isSubmitted ? '#346538' : '#956400' }}>
                           {uploadedFile.isSubmitted ? '✓ Sudah Dikirim' : '⏳ Belum Dikirim'}
                         </p>
-                        <p className="text-xs" style={{ color: uploadedFile.isSubmitted ? '#10b981' : '#b45309' }}>
+                        <p className="mt-0.5 truncate text-xs" style={{ color: uploadedFile.isSubmitted ? '#4a7a4e' : '#a06a00' }}>
                           {uploadedFile.fileName}
                         </p>
                       </div>
 
-                      <div className="flex flex-nowrap items-center gap-2 overflow-x-auto">
+                      <div className="flex flex-nowrap items-center gap-1.5 overflow-x-auto">
                         <a
                           href={uploadedFile.filePath}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center rounded-lg bg-slate-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-500"
+                          className="inline-flex items-center rounded-md bg-[#111111] px-2.5 py-1.5 text-[11px] font-medium text-white hover:bg-[#333333]"
                         >
                           Lihat file
                         </a>
-                        
                         {!uploadedFile.isSubmitted && (
                           <FileConfirmationDialog
                             uploadId={uploadedFile.id}
@@ -150,7 +151,6 @@ export default async function EmployeeFilesPage() {
                             isNewUpload={false}
                           />
                         )}
-                        
                         {uploadedFile.isSubmitted && (
                           <FileActions
                             uploadId={uploadedFile.id}
@@ -163,16 +163,15 @@ export default async function EmployeeFilesPage() {
                             }
                           />
                         )}
-
                         {!uploadedFile.isSubmitted && (
-                          <span className="inline-flex items-center rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-slate-700">
+                          <span className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-[11px] font-medium text-[#111111]">
                             {uploadedFile.status}
                           </span>
                         )}
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-white p-3 text-sm text-slate-500">
+                    <div className="rounded-md bg-white p-2.5 text-xs text-[#6b7280]">
                       Belum ada file untuk kategori ini.
                     </div>
                   )}
@@ -188,16 +187,14 @@ export default async function EmployeeFilesPage() {
             })}
           </div>
 
-          <div className="mt-6 border-t border-slate-200 pt-4 flex items-end justify-between">
+          <div className="mt-4 flex items-end justify-between border-t border-[#e5e7eb] pt-3">
             <div>
-              <h2 className="text-xl font-semibold">Unggah Berkas</h2>
-              <p className="text-sm text-slate-500">
-                Jangan lupa untuk simpan data penting.
-              </p>
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-[#111111]">Unggah Berkas</h2>
+              <p className="mt-0.5 text-xs text-[#6b7280]">Jangan lupa untuk simpan data penting.</p>
             </div>
             <Link
               href="/dashboard/karyawan/histori-berkas"
-              className="text-sm font-semibold text-blue-600 hover:text-blue-800"
+              className="text-xs font-semibold text-[#2563eb] hover:text-[#1d4ed8]"
             >
               Histori Berkas →
             </Link>

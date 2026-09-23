@@ -52,21 +52,21 @@ export default async function ManagerEmployeesPage({
       })
     : [];
   return (
-    <main className="min-h-screen bg-slate-100 px-6 py-8 text-slate-900">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <header className="flex flex-wrap items-end justify-between gap-4 rounded-2xl bg-white p-6 shadow-sm">
+    <main className="min-h-screen bg-slate-100 px-4 py-5 text-slate-900">
+      <div className="mx-auto max-w-7xl space-y-4">
+        <header className="flex flex-wrap items-end justify-between gap-4 rounded-lg bg-white p-4">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500">
               Kelola
             </p>
-            <h1 className="mt-2 text-3xl font-bold">Karyawan Tim</h1>
+            <h1 className="mt-2 text-base font-bold">Karyawan Tim</h1>
           </div>
 
         </header>
 
-        <section className="rounded-2xl bg-white p-6 shadow-sm">
+        <section className="rounded-lg bg-white p-4">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
-            <h2 className="text-xl font-semibold">Daftar Karyawan</h2>
+            <h2 className="text-sm font-semibold">Daftar Karyawan</h2>
             <div className="flex flex-wrap items-center gap-3">
               <EmployeeSearch initialValue={searchTerm} />
               <Link

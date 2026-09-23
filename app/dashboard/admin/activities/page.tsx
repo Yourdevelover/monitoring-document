@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/auth";
+﻿import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PaginationControls } from "@/app/components/pagination-controls";
 
@@ -25,17 +25,17 @@ export default async function AdminActivitiesPage({
   });
 
   return (
-    <main className="space-y-6 p-2">
-      <header className="rounded-2xl bg-white p-6 shadow-sm">
-        <p className="text-sm text-slate-500">Audit Log</p>
-        <h1 className="text-2xl font-bold">Log Aktivitas</h1>
+    <main className="space-y-4 p-2">
+      <header className="rounded-lg border border-[#e5e7eb] bg-white p-5">
+        <p className="text-sm text-[#6b7280]">Audit Log</p>
+        <h1 className="text-base font-bold">Log Aktivitas</h1>
       </header>
 
-      <section className="rounded-2xl bg-white p-6 shadow-sm">
+      <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-slate-500">
+              <tr className="border-b border-[#e5e7eb] text-[#6b7280]">
                 <th className="py-2 pr-4">Waktu</th>
                 <th className="py-2 pr-4">Aktor</th>
                 <th className="py-2 pr-4">Aksi</th>
@@ -44,7 +44,7 @@ export default async function AdminActivitiesPage({
             </thead>
             <tbody>
               {activities.map((activity) => (
-                <tr key={activity.id} className="border-b border-slate-100">
+                <tr key={activity.id} className="border-b border-[#e5e7eb]">
                   <td className="py-3 pr-4">{new Date(activity.createdAt).toLocaleString("id-ID")}</td>
                   <td className="py-3 pr-4">{activity.actor?.name ?? "System"}</td>
                   <td className="py-3 pr-4">{activity.action}</td>

@@ -30,38 +30,38 @@ export default async function AdminUserDetailPage({
   }
 
   return (
-    <main className="space-y-6 p-2">
-      <section className="rounded-2xl bg-white p-6 shadow-sm">
+    <main className="space-y-4 p-2">
+      <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <p className="text-sm text-slate-500">Admin Management</p>
-            <h1 className="text-2xl font-bold">Detail Admin</h1>
+            <p className="text-sm text-[#6b7280]">Admin Management</p>
+            <h1 className="text-base font-bold">Detail Admin</h1>
           </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-xl bg-slate-50 p-4">
-            <p className="text-sm text-slate-500">Nama</p>
+          <div className="rounded-lg bg-[#f8f9fa] p-4">
+            <p className="text-sm text-[#6b7280]">Nama</p>
             <p className="mt-1 font-semibold">{user.name}</p>
           </div>
-          <div className="rounded-xl bg-slate-50 p-4">
-            <p className="text-sm text-slate-500">Email</p>
+          <div className="rounded-lg bg-[#f8f9fa] p-4">
+            <p className="text-sm text-[#6b7280]">Email</p>
             <p className="mt-1 font-semibold">{user.email}</p>
           </div>
-          <div className="rounded-xl bg-slate-50 p-4">
-            <p className="text-sm text-slate-500">Role</p>
+          <div className="rounded-lg bg-[#f8f9fa] p-4">
+            <p className="text-sm text-[#6b7280]">Role</p>
             <p className="mt-1 font-semibold">{user.role}</p>
           </div>
-          <div className="rounded-xl bg-slate-50 p-4">
-            <p className="text-sm text-slate-500">Status</p>
+          <div className="rounded-lg bg-[#f8f9fa] p-4">
+            <p className="text-sm text-[#6b7280]">Status</p>
             <p className="mt-1 font-semibold">{user.isActive}</p>
           </div>
-          <div className="rounded-xl bg-slate-50 p-4">
-            <p className="text-sm text-slate-500">Dibuat</p>
+          <div className="rounded-lg bg-[#f8f9fa] p-4">
+            <p className="text-sm text-[#6b7280]">Dibuat</p>
             <p className="mt-1 font-semibold">{new Date(user.createdAt).toLocaleString("id-ID")}</p>
           </div>
-          <div className="rounded-xl bg-slate-50 p-4">
-            <p className="text-sm text-slate-500">Update</p>
+          <div className="rounded-lg bg-[#f8f9fa] p-4">
+            <p className="text-sm text-[#6b7280]">Update</p>
             <p className="mt-1 font-semibold">{new Date(user.updatedAt).toLocaleString("id-ID")}</p>
           </div>
         </div>
@@ -69,7 +69,7 @@ export default async function AdminUserDetailPage({
         <div className="mt-6 flex justify-end gap-3">
           <a
             href={`/dashboard/admin/users/${user.id}/edit`}
-            className="rounded-xl bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700"
+            className="rounded-lg bg-[#2563eb] px-4 py-2 font-semibold text-white transition hover:bg-[#1d4ed8]"
           >
             Edit Admin
           </a>
@@ -80,7 +80,7 @@ export default async function AdminUserDetailPage({
             <input type="hidden" name="userId" value={user.id} />
             <button
               type="submit"
-              className="rounded-xl bg-red-600 px-4 py-2 font-semibold text-white transition hover:bg-red-700"
+              className="rounded-lg bg-[#9f2f2d] px-4 py-2 font-semibold text-white transition hover:bg-[#7f1f1f]"
             >
               Hapus Admin
             </button>

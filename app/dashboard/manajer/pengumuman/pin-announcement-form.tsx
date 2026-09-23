@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 type PinAnnouncementFormProps = {
   announcementId: number;
@@ -12,8 +12,8 @@ export function PinAnnouncementForm({ announcementId, isPinned }: PinAnnouncemen
       <button
         type="submit"
         className={isPinned
-          ? "rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-100"
-          : "rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"}
+          ? "rounded-lg border border-amber-300 bg-[#fbf3db] px-3 py-1.5 text-xs font-semibold text-[#956400] hover:bg-[#fbf3db]"
+          : "rounded-lg border border-[#e5e7eb] px-3 py-1.5 text-xs font-semibold text-[#6b7280] hover:bg-[#f8f9fa]"}
       >
         {isPinned ? "Lepas Sematan" : "Sematkan"}
       </button>

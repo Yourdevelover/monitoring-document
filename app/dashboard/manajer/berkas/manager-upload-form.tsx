@@ -68,56 +68,47 @@ export function ManagerUploadForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <label className="block text-sm font-medium text-slate-700">
-        Kategori
-        <select
-          value={category}
-          onChange={(event) => setCategory(event.target.value)}
-          className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700"
-        >
-          {CATEGORY_OPTIONS.map((option) => (
-            <option key={option.key} value={option.key}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </label>
+    <form onSubmit={handleSubmit} className="space-y-2.5">
+      <div className="grid grid-cols-2 gap-2">
+        <label className="block text-[11px] font-medium uppercase tracking-wide text-[#6b7280]">
+          Kategori
+          <select
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+            className="mt-1 block w-full rounded-lg border border-[#e5e7eb] bg-white px-3 py-2 text-[13px] text-[#111111]"
+          >
+            {CATEGORY_OPTIONS.map((option) => (
+              <option key={option.key} value={option.key}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
 
-      <label className="block text-sm font-medium text-slate-700">
-        Pilih file
-        <input
-          ref={fileInputRef}
-          type="file"
-          name="file"
-          onChange={handleFileChange}
-          className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700"
-          required
-        />
-      </label>
+        <label className="block text-[11px] font-medium uppercase tracking-wide text-[#6b7280]">
+          Pilih file
+          <input
+            ref={fileInputRef}
+            type="file"
+            name="file"
+            onChange={handleFileChange}
+            className="mt-1 block w-full rounded-lg border border-[#e5e7eb] bg-white px-3 py-1.5 text-[13px] text-[#111111] file:mr-2 file:rounded file:border-0 file:bg-[#111111] file:px-2 file:py-1 file:text-[11px] file:font-medium file:text-white"
+            required
+          />
+        </label>
+      </div>
 
       {selectedFile && (
-        <p className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
-          File dipilih: <span className="font-medium">{selectedFile.name}</span>
-        </p>
+        <p className="rounded-md bg-[#e1f3fe] px-3 py-1.5 text-[12px] font-medium text-[#1f6c9f]">Dipilih: {selectedFile.name}</p>
       )}
 
-      {error ? (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {error}
-        </p>
-      ) : null}
-
-      {success ? (
-        <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-          {success}
-        </p>
-      ) : null}
+      {error && <p className="rounded-md bg-[#fdebec] px-3 py-1.5 text-[12px] font-medium text-[#9f2f2d]">{error}</p>}
+      {success && <p className="rounded-md bg-[#edf3ec] px-3 py-1.5 text-[12px] font-medium text-[#346538]">{success}</p>}
 
       <button
         type="submit"
         disabled={isSubmitting || !selectedFile}
-        className="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-500"
+        className="inline-flex w-full items-center justify-center rounded-lg bg-[#111111] px-4 py-2 text-[13px] font-medium text-white transition hover:bg-[#333333] disabled:cursor-not-allowed disabled:bg-[#9ca3af]"
       >
         {isSubmitting ? "Mengunggah..." : "Bagikan ke Tim"}
       </button>

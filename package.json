@@ -22,7 +22,7 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/archiver": "^8.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -30,7 +30,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
     "prisma": "^5.22.0",
-    "tailwindcss": "^4",
+    "tailwindcss": "^4.3.3",
     "typescript": "^5"
   }
 }

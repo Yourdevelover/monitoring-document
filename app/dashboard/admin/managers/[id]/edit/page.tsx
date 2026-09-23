@@ -12,9 +12,9 @@ export default async function EditManagerPage({ params }: EditManagerProps) {
   if (!manager) notFound();
 
   return (
-    <main className="space-y-5 p-4 text-slate-900">
+    <main className="space-y-4 p-4 text-slate-900">
       <header className="border-b border-slate-300 pb-4">
-        <h1 className="mt-2 text-xl font-semibold">Edit Manajer</h1>
+        <h1 className="mt-2 text-base font-semibold">Edit Manajer</h1>
       </header>
       <form action="/api/admin/managers/update" method="POST" className="grid max-w-2xl gap-3">
         <input type="hidden" name="userId" value={manager.id} />

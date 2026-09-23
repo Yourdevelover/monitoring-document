@@ -62,7 +62,7 @@ export default async function ManagerHistoryPage({
         <header className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-4">
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Riwayat tim</p>
-            <h1 className="mt-1 text-xl font-semibold">Histori Berkas</h1>
+            <h1 className="mt-1 text-base font-semibold">Histori Berkas</h1>
             <p className="mt-1 text-xs text-slate-500">Pilih kategori dan tanggal untuk melihat berkas yang masuk.</p>
           </div>
           {selectedCategory && (
@@ -78,7 +78,7 @@ export default async function ManagerHistoryPage({
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-slate-500">{selectedCategoryLabel}</p>
-                  <h2 className="mt-1 text-lg font-semibold">{formatDate(selectedDate)}</h2>
+                  <h2 className="mt-1 text-sm font-semibold">{formatDate(selectedDate)}</h2>
                 </div>
                 <a
                   href={`/api/manajer/berkas/download?category=${selectedCategory}&history=true&date=${selectedDate}`}
@@ -119,7 +119,7 @@ export default async function ManagerHistoryPage({
               const categoryDateEntries = [...groupedDates.entries()].sort(([first], [second]) => second.localeCompare(first));
 
               return (
-                <section key={category.key} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <section key={category.key} className="rounded-lg border border-slate-200 bg-white p-4">
                   <div className="mb-3 flex items-center justify-between border-b border-slate-200 pb-3">
                     <h2 className="text-sm font-semibold text-slate-800">{category.label}</h2>
                   </div>

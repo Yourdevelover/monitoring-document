@@ -9,7 +9,7 @@ export default async function ManagerHistoryPage({ params }: { params: Promise<{
     where: { id: Number(id), role: "MANAGER" },
     include: { managedTeam: true },
   });
-  if (!manager) return <p className="p-4 text-sm text-slate-600">Manajer tidak ditemukan.</p>;
+  if (!manager) return <p className="p-4 text-sm text-[#6b7280]">Manajer tidak ditemukan.</p>;
 
   const files = manager.managedTeam
     ? await prisma.uploadHistory.findMany({
@@ -20,27 +20,27 @@ export default async function ManagerHistoryPage({ params }: { params: Promise<{
     : [];
 
   return (
-    <main className="space-y-5 p-4 text-slate-900">
-      <header className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-300 pb-4">
+    <main className="space-y-4 p-4 text-[#111111]">
+      <header className="flex flex-wrap items-end justify-between gap-3 border-b border-[#e5e7eb] pb-4">
         <div>
-          <h1 className="mt-2 text-xl font-semibold">Histori Berkas {manager.name}</h1>
+          <h1 className="text-base font-bold">Histori Berkas {manager.name}</h1>
         </div>
-        <span className="text-xs text-slate-500">{files.length} file</span>
+        <span className="text-xs text-[#6b7280]">{files.length} file</span>
       </header>
-      <div className="divide-y divide-slate-200 border-y border-slate-300">
+      <div className="divide-y divide-slate-200 border-y border-[#e5e7eb]">
         {files.length > 0 ? files.map((file) => (
           <a
             key={file.id}
             href={file.filePath}
             target="_blank"
             rel="noopener noreferrer"
-            className="grid gap-2 py-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] hover:bg-slate-50"
+            className="grid gap-2 py-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] hover:bg-[#f8f9fa]"
           >
             <span className="truncate font-medium" title={file.fileName}>{file.fileName}</span>
-            <span className="truncate text-sm text-slate-600">{file.user.name} • {file.category}</span>
-            <span className="text-xs text-slate-500">{file.submittedAt.toLocaleString("id-ID")}</span>
+            <span className="truncate text-sm text-[#6b7280]">{file.user.name} • {file.category}</span>
+            <span className="text-xs text-[#6b7280]">{file.submittedAt.toLocaleString("id-ID")}</span>
           </a>
-        )) : <p className="py-8 text-center text-sm text-slate-500">Belum ada histori berkas.</p>}
+        )) : <p className="py-8 text-center text-sm text-[#6b7280]">Belum ada histori berkas.</p>}
       </div>
 
       <div className="flex justify-end">

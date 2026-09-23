@@ -1,12 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #172033;
-  --content-background: #f8fafc;
-  --content-line: #d8dee8;
-  --content-muted: #64748b;
-  --content-accent: #1d4ed8;
+  --background: #f8f9fa;
+  --foreground: #111111;
+  --content-background: #f8f9fa;
+  --content-line: #e5e7eb;
+  --content-muted: #6b7280;
+  --content-accent: #2563eb;
+  --surface: #ffffff;
+  --surface-hover: #f1f3f5;
+  --sidebar-bg: #111111;
+  --sidebar-hover: #1c1c1c;
+  --sidebar-active: #222222;
+  --sidebar-text: #9ca3af;
+  --sidebar-text-active: #ffffff;
+  --sidebar-border: #2a2a2a;
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+  --badge-pale-red-bg: #fdebec;
+  --badge-pale-red-text: #9f2f2d;
+  --badge-pale-blue-bg: #e1f3fe;
+  --badge-pale-blue-text: #1f6c9f;
+  --badge-pale-green-bg: #edf3ec;
+  --badge-pale-green-text: #346538;
+  --badge-pale-yellow-bg: #fbf3db;
+  --badge-pale-yellow-text: #956400;
 }
 
 @theme inline {
@@ -16,24 +34,21 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+h1, h2, h3 { letter-spacing: -0.02em; }
+
+/* Emoji picker */
 .announcement-emoji-picker .epr-category-label {
   font-size: 10px !important;
   font-weight: 400 !important;
 }
-
 .announcement-emoji-picker .epr-preview .epr-emoji-native,
 .announcement-emoji-picker .epr-preview .epr-emoji-img {
   width: 22px !important;
@@ -41,101 +56,135 @@ body {
   font-size: 22px !important;
 }
 
+/* ── Announcement bar ── */
 .manager-announcement-bar {
   display: flex;
   align-items: center;
-  min-height: 2.5rem;
+  min-height: 2.75rem;
   overflow: hidden;
   border-bottom: 1px solid var(--content-line);
-  background: #ffffff;
-  color: #172033;
+  background: var(--surface);
+  color: var(--foreground);
 }
-
 .manager-announcement-label {
   flex: 0 0 auto;
   border-right: 1px solid var(--content-line);
   padding: 0.65rem 1rem;
-  color: var(--content-muted);
-  font-size: 0.7rem;
+  color: var(--badge-pale-yellow-text);
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  background: var(--badge-pale-yellow-bg);
 }
-
 .manager-announcement-viewport {
   min-width: 0;
   flex: 1;
   overflow: hidden;
   white-space: nowrap;
 }
-
 .manager-announcement-single {
   display: block;
   width: max-content;
   margin: 0;
   padding: 0.65rem 3rem;
   font-size: 0.8125rem;
-  font-weight: 400;
   line-height: 1.25rem;
   white-space: nowrap;
   animation: manager-announcement-slide 24s linear infinite;
   will-change: transform;
 }
-
-.manager-announcement-important {
-  color: #dc2626;
-  font-weight: 700;
-}
-
+.manager-announcement-important { color: var(--badge-pale-red-text); font-weight: 600; }
 .manager-announcement-empty {
-  margin: 0;
-  padding: 0.65rem 1rem;
-  font-size: 0.8125rem;
-  font-weight: 400;
-  line-height: 1.25rem;
-  white-space: nowrap;
-  color: var(--content-muted);
+  margin: 0; padding: 0.65rem 1rem;
+  font-size: 0.8125rem; line-height: 1.25rem;
+  white-space: nowrap; color: var(--content-muted);
 }
-
 @keyframes manager-announcement-slide {
-  from {
-    transform: translateX(100%);
-  }
-
-  to {
-    transform: translateX(-100%);
-  }
+  from { transform: translateX(100%); }
+  to { transform: translateX(-100%); }
 }
 
-
-.manager-content,
-.admin-content,
-.employee-content {
-  font-size: 0.875rem;
+/* ── Content containers ── */
+.manager-content, .admin-content, .employee-content {
   background: var(--content-background);
-  color: #172033;
-  line-height: 1.4;
+  color: var(--foreground);
+  line-height: 1.6;
 }
-
-.manager-content main,
-.admin-content main,
-.employee-content main {
+.manager-content main, .admin-content main, .employee-content main {
   min-height: 100vh;
-  padding: 1rem !important;
+  padding: 1.5rem !important;
   background: var(--content-background) !important;
   text-align: left;
+  max-width: 88rem;
+  margin-inline: auto;
 }
-
-.manager-content main header,
-.admin-content main header,
-.employee-content main header {
+.manager-content main header, .admin-content main header, .employee-content main header {
   text-align: left;
 }
 
-.dashboard-notes-slot {
-  margin-left: auto;
+/* ── Inputs ── */
+.manager-content input:not([type="hidden"]), .manager-content select, .manager-content textarea,
+.admin-content input:not([type="hidden"]), .admin-content select, .admin-content textarea,
+.employee-content input:not([type="hidden"]), .employee-content select, .employee-content textarea {
+  border-radius: 6px !important;
+  background: #ffffff !important;
+  border-color: var(--border) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+  padding: 0.625rem 0.75rem !important;
+}
+.manager-content input:focus, .manager-content select:focus, .manager-content textarea:focus,
+.admin-content input:focus, .admin-content select:focus, .admin-content textarea:focus,
+.employee-content input:focus, .employee-content select:focus, .employee-content textarea:focus {
+  outline: 2px solid var(--content-accent);
+  outline-offset: 1px;
+  border-color: var(--content-accent) !important;
 }
 
+/* ── Tables ── */
+.manager-content table, .admin-content table, .employee-content table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.manager-content thead th, .admin-content thead th, .employee-content thead th {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--content-muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+.manager-content tbody td, .admin-content tbody td, .employee-content tbody td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.875rem;
+}
+.manager-content tbody tr, .admin-content tbody tr, .employee-content tbody tr {
+  transition: background 200ms;
+}
+.manager-content tbody tr:hover, .admin-content tbody tr:hover, .employee-content tbody tr:hover {
+  background: var(--surface-hover);
+}
+
+/* ── Links ── */
+.manager-content a:not([class*="bg-"]):not([class*="border"]),
+.admin-content a:not([class*="bg-"]):not([class*="border"]),
+.employee-content a:not([class*="bg-"]):not([class*="border"]) {
+  color: var(--content-accent);
+}
+
+/* ── Micro-interactions ── */
+button, a[class*="bg-"] {
+  transition: transform 150ms, background 200ms, border-color 200ms, box- 200ms;
+}
+button:active { transform: scale(0.98); }
+:focus-visible { outline: 2px solid var(--content-accent); outline-offset: 2px; }
+
+/* ── Responsive notes widget ── */
+.dashboard-notes-slot { margin-left: auto; }
 .manager-content main header:has(.dashboard-notes-slot),
 .admin-content main header:has(.dashboard-notes-slot),
 .employee-content main header:has(.dashboard-notes-slot) {
@@ -145,7 +194,6 @@ body {
   min-height: 8rem;
   padding: 1.25rem calc(17rem + var(--dashboard-notes-right)) 1.25rem 1.25rem !important;
 }
-
 .manager-content main header:has(.dashboard-notes-slot) > .dashboard-notes-slot,
 .admin-content main header:has(.dashboard-notes-slot) > .dashboard-notes-slot,
 .employee-content main header:has(.dashboard-notes-slot) > .dashboard-notes-slot {
@@ -156,7 +204,6 @@ body {
   max-width: 22rem;
   margin: 0;
 }
-
 @media (max-width: 1100px) {
   .manager-content main header:has(.dashboard-notes-slot),
   .admin-content main header:has(.dashboard-notes-slot),
@@ -165,7 +212,6 @@ body {
     min-height: 0;
     padding: 1.25rem !important;
   }
-
   .manager-content main header:has(.dashboard-notes-slot) > .dashboard-notes-slot,
   .admin-content main header:has(.dashboard-notes-slot) > .dashboard-notes-slot,
   .employee-content main header:has(.dashboard-notes-slot) > .dashboard-notes-slot {
@@ -173,166 +219,5 @@ body {
     max-width: none;
     margin-top: 1rem;
   }
-
-  .dashboard-notes-slot {
-    margin-left: 0;
-  }
+  .dashboard-notes-slot { margin-left: 0; }
 }
-
-.manager-content .rounded-2xl,
-.manager-content .rounded-xl,
-.manager-content .rounded-lg,
-.manager-content .rounded-full,
-.admin-content .rounded-2xl,
-.admin-content .rounded-xl,
-.admin-content .rounded-lg,
-.admin-content .rounded-full,
-.employee-content .rounded-2xl,
-.employee-content .rounded-xl,
-.employee-content .rounded-lg,
-.employee-content .rounded-full {
-  border-radius: 0 !important;
-}
-
-.manager-content [class*="shadow"],
-.admin-content [class*="shadow"],
-.employee-content [class*="shadow"] {
-  box-shadow: none !important;
-}
-
-/* Content uses one work canvas; elevation is reserved for dialogs. */
-.manager-content main > div > header,
-.manager-content main > div > section,
-.manager-content main > div > div > header,
-.manager-content main > div > div > section,
-.admin-content main > div > header,
-.admin-content main > div > section,
-.admin-content main > div > div > header,
-.admin-content main > div > div > section,
-.employee-content main > div > header,
-.employee-content main > div > section,
-.employee-content main > div > div > header,
-.employee-content main > div > div > section {
-  background: transparent !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  border-left: 0 !important;
-  border-right: 0 !important;
-}
-
-.manager-content main > div > section > div,
-.admin-content main > div > section > div,
-.employee-content main > div > section > div {
-  background: transparent !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
-
-.manager-content main > div > div > section,
-.admin-content main > div > div > section,
-.employee-content main > div > div > section {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
-
-.manager-content table,
-.admin-content table,
-.employee-content table {
-  border-collapse: collapse;
-}
-
-.manager-content input:not([type="hidden"]),
-.manager-content select,
-.manager-content textarea,
-.admin-content input:not([type="hidden"]),
-.admin-content select,
-.admin-content textarea,
-.employee-content input:not([type="hidden"]),
-.employee-content select,
-.employee-content textarea {
-  border-radius: 0 !important;
-  background: #ffffff !important;
-}
-
-.manager-content a:not([class*="bg-"]):not([class*="border"]),
-.admin-content a:not([class*="bg-"]):not([class*="border"]),
-.employee-content a:not([class*="bg-"]):not([class*="border"]) {
-  color: var(--content-accent);
-}
-
-.manager-content section,
-.manager-content header,
-.admin-content section,
-.admin-content header,
-.employee-content section,
-.employee-content header {
-  margin-bottom: 1.25rem;
-}
-
-.manager-content section > div:first-child,
-.manager-content header,
-.admin-content section > div:first-child,
-.admin-content header,
-.employee-content section > div:first-child,
-.employee-content header {
-  border-bottom: 1px solid var(--content-line);
-}
-
-.manager-content article,
-.manager-content section > div > div,
-.admin-content article,
-.admin-content section > div > div,
-.employee-content article,
-.employee-content section > div > div {
-  border-color: var(--content-line);
-  border-left-width: 0 !important;
-  border-right-width: 0 !important;
-  border-radius: 0 !important;
-}
-
-.manager-content h1,
-.admin-content h1,
-.employee-content h1 {
-  font-size: 1.125rem !important;
-  line-height: 1.375rem !important;
-}
-
-.manager-content h2,
-.admin-content h2,
-.employee-content h2 {
-  font-size: 0.9375rem !important;
-  line-height: 1.25rem !important;
-}
-
-.manager-content h3,
-.admin-content h3,
-.employee-content h3 {
-  font-size: 0.875rem !important;
-  line-height: 1.125rem !important;
-}
-
-.manager-content p,
-.manager-content a,
-.manager-content button,
-.manager-content label,
-.manager-content input,
-.manager-content select,
-.manager-content textarea,
-.admin-content p,
-.admin-content a,
-.admin-content button,
-.admin-content label,
-.admin-content input,
-.admin-content select,
-.admin-content textarea,
-.employee-content p,
-.employee-content a,
-.employee-content button,
-.employee-content label,
-.employee-content input,
-.employee-content select,
-.employee-content textarea {
-  font-size: 0.8125rem !important;
-  line-height: 1.25rem !important;
-}
-

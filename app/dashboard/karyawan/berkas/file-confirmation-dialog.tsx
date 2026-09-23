@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 
@@ -107,21 +107,21 @@ export function FileConfirmationDialog({
       <>
         <button
           onClick={() => setIsOpen(true)}
-          className="inline-flex items-center rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-500"
+          className="inline-flex items-center rounded-lg bg-[#346538] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#2d5a30]"
         >
           Apakah data sudah benar?
         </button>
 
         {isOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-lg">
-              <h3 className="mb-2 text-lg font-semibold text-slate-900">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111111]/50 p-4">
+            <div className="w-full max-w-sm rounded-lg border border-[#e5e7eb] bg-white p-4">
+              <h3 className="mb-2 text-sm font-semibold text-[#111111]">
                 Konfirmasi Data
               </h3>
-              <p className="mb-4 text-sm text-slate-600">
+              <p className="mb-4 text-sm text-[#6b7280]">
                 File: <span className="font-medium">{fileName}</span>
               </p>
-              <p className="mb-6 text-sm text-slate-600">
+              <p className="mb-6 text-sm text-[#6b7280]">
                 Apakah data file ini sudah benar dan siap untuk dikirim?
               </p>
 
@@ -129,28 +129,28 @@ export function FileConfirmationDialog({
                 <button
                   onClick={() => handleSubmit("submit")}
                   disabled={isSubmitting}
-                  className="inline-flex w-full items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-emerald-400"
+                  className="inline-flex w-full items-center justify-center rounded-lg bg-[#346538] px-4 py-2 text-sm font-medium text-white hover:bg-[#2d5a30] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isSubmitting ? "Mengirim..." : "Ya, Kirim File"}
                 </button>
                 <button
                   onClick={() => handleSubmit("delete")}
                   disabled={isSubmitting}
-                  className="inline-flex w-full items-center justify-center rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:bg-red-100"
+                  className="inline-flex w-full items-center justify-center rounded-lg border border-red-300 bg-[#fdebec] px-4 py-2 text-sm font-medium text-[#9f2f2d] hover:bg-[#fdebec] disabled:cursor-not-allowed disabled:bg-[#fdebec]"
                 >
                   Tidak, Hapus File
                 </button>
                 <button
                   onClick={() => handleSubmit("replace")}
                   disabled={isSubmitting}
-                  className="inline-flex w-full items-center justify-center rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-2 text-sm font-medium text-yellow-700 hover:bg-yellow-100 disabled:cursor-not-allowed disabled:bg-yellow-100"
+                  className="inline-flex w-full items-center justify-center rounded-lg border border-[#e8d9a8] bg-[#fbf3db] px-4 py-2 text-sm font-medium text-[#956400] hover:bg-[#fbf3db] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Ganti File
                 </button>
                 <button
                   onClick={() => !isSubmitting && setIsOpen(false)}
                   disabled={isSubmitting}
-                  className="inline-flex w-full items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed"
+                  className="inline-flex w-full items-center justify-center rounded-lg border border-[#e5e7eb] bg-[#f8f9fa] px-4 py-2 text-sm font-medium text-[#111111] hover:bg-[#f8f9fa] disabled:cursor-not-allowed"
                 >
                   Batal
                 </button>
@@ -166,15 +166,15 @@ export function FileConfirmationDialog({
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-lg">
-            <h3 className="mb-2 text-lg font-semibold text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111111]/50 p-4">
+          <div className="w-full max-w-sm rounded-lg border border-[#e5e7eb] bg-white p-4">
+            <h3 className="mb-2 text-sm font-semibold text-[#111111]">
               Konfirmasi Data
             </h3>
-            <p className="mb-4 text-sm text-slate-600">
+            <p className="mb-4 text-sm text-[#6b7280]">
               File: <span className="font-medium">{fileName}</span>
             </p>
-            <p className="mb-6 text-sm text-slate-600">
+            <p className="mb-6 text-sm text-[#6b7280]">
               Apakah data file ini sudah benar dan siap untuk dikirim?
             </p>
 
@@ -182,21 +182,21 @@ export function FileConfirmationDialog({
               <button
                 onClick={() => handleSubmit("submit")}
                 disabled={isSubmitting}
-                className="inline-flex w-full items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-emerald-400"
+                className="inline-flex w-full items-center justify-center rounded-lg bg-[#346538] px-4 py-2 text-sm font-medium text-white hover:bg-[#2d5a30] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting ? "Mengirim..." : "Ya, Kirim File"}
               </button>
               <button
                 onClick={() => handleSubmit("replace")}
                 disabled={isSubmitting}
-                className="inline-flex w-full items-center justify-center rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-2 text-sm font-medium text-yellow-700 hover:bg-yellow-100 disabled:cursor-not-allowed disabled:bg-yellow-100"
+                className="inline-flex w-full items-center justify-center rounded-lg border border-[#e8d9a8] bg-[#fbf3db] px-4 py-2 text-sm font-medium text-[#956400] hover:bg-[#fbf3db] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Ganti File
               </button>
               <button
                 onClick={() => !isSubmitting && handleClose()}
                 disabled={isSubmitting}
-                className="inline-flex w-full items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed"
+                className="inline-flex w-full items-center justify-center rounded-lg border border-[#e5e7eb] bg-[#f8f9fa] px-4 py-2 text-sm font-medium text-[#111111] hover:bg-[#f8f9fa] disabled:cursor-not-allowed"
               >
                 Batal
               </button>

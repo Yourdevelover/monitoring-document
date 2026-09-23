@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 
@@ -43,7 +43,7 @@ export function ManagerFileDeleteButton({ uploadId }: ManagerFileDeleteButtonPro
     <button
       onClick={handleDelete}
       disabled={isDeleting}
-      className="whitespace-nowrap rounded-lg border border-red-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:bg-red-100"
+      className="whitespace-nowrap rounded-lg border border-red-300 bg-[#fdebec] px-3 py-1.5 text-xs font-medium text-[#9f2f2d] hover:bg-[#fdebec] disabled:cursor-not-allowed disabled:bg-[#fdebec]"
     >
       {isDeleting ? "Menghapus..." : "Hapus"}
     </button>

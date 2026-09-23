@@ -1,11 +1,11 @@
-import { BulkEmployeeForm } from "./bulk-employee-form";
+﻿import { BulkEmployeeForm } from "./bulk-employee-form";
 
 export default function CreateEmployeePage() {
   return (
-    <main className="min-h-screen bg-slate-100 px-6 py-8 text-slate-900">
-      <div className="mx-auto max-w-3xl rounded-2xl bg-white p-6 shadow-sm">
-        <h1 className="text-3xl font-bold">Tambah Karyawan</h1>
-        <p className="mt-2 text-slate-600">Tambahkan satu karyawan atau beberapa karyawan sekaligus.</p>
+    <main className="min-h-screen bg-[#f8f9fa] px-4 py-5 text-[#111111]">
+      <div className="mx-auto max-w-3xl rounded-lg border border-[#e5e7eb] bg-white p-4">
+        <h1 className="text-base font-semibold">Tambah Karyawan</h1>
+        <p className="mt-2 text-[#6b7280]">Tambahkan satu karyawan atau beberapa karyawan sekaligus.</p>
 
         <form id="single-employee-form" action="/api/manager/employee/create" method="POST" className="mt-6 space-y-4">
           <div>
@@ -17,7 +17,7 @@ export default function CreateEmployeePage() {
               name="name"
               type="text"
               required
-              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2"
+              className="w-full rounded-lg border border-[#e5e7eb] bg-[#f8f9fa] px-3 py-2"
             />
           </div>
 
@@ -30,7 +30,7 @@ export default function CreateEmployeePage() {
               name="email"
               type="email"
               required
-              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2"
+              className="w-full rounded-lg border border-[#e5e7eb] bg-[#f8f9fa] px-3 py-2"
             />
           </div>
 
@@ -43,7 +43,7 @@ export default function CreateEmployeePage() {
               name="password"
               type="password"
               required
-              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2"
+              className="w-full rounded-lg border border-[#e5e7eb] bg-[#f8f9fa] px-3 py-2"
             />
           </div>
 
@@ -53,7 +53,7 @@ export default function CreateEmployeePage() {
           <button
             type="submit"
             form="single-employee-form"
-            className="rounded-xl bg-blue-600 px-4 py-2 font-semibold text-white"
+            className="rounded-lg bg-[#2563eb] px-4 py-2 font-semibold text-white"
           >
             Simpan Karyawan
           </button>

@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+﻿import { prisma } from "@/lib/prisma";
 import { requireEmployee } from "@/lib/auth";
 import { PaginationControls } from "@/app/components/pagination-controls";
 
@@ -22,14 +22,14 @@ export default async function DataPentingPage({ searchParams }: { searchParams: 
   });
 
   return (
-    <main className="min-h-screen text-slate-900">
+    <main className="min-h-screen text-[#111111]">
       <div className="mx-auto max-w-7xl space-y-4">
-        <header className="rounded-2xl bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500">
+        <header className="rounded-lg border border-[#e5e7eb] bg-white p-5">
+          <p className="text-sm font-medium uppercase tracking-[0.18em] text-[#6b7280]">
             Penyimpanan permanen
           </p>
-          <h1 className="mt-2 text-2xl font-bold">Data Penting</h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <h1 className="mt-2 text-base font-bold">Data Penting</h1>
+          <p className="mt-1 text-sm text-[#6b7280]">
             File yang disimpan di sini tidak mengikuti batas waktu berkas biasa.
           </p>
         </header>
@@ -37,12 +37,12 @@ export default async function DataPentingPage({ searchParams }: { searchParams: 
         {importantFiles.length > 0 ? (
           <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {importantFiles.map((file) => (
-              <article key={file.id} className="rounded-xl border-2 border-yellow-300 bg-yellow-50 p-4">
+              <article key={file.id} className="rounded-lg border-2 border-[#e8d9a8] bg-[#fbf3db] p-4">
                 <p className="font-medium text-yellow-900">{file.title}</p>
-                <p className="mt-1 text-sm text-yellow-700">
+                <p className="mt-1 text-sm text-[#956400]">
                   {file.fileName} • {file.category}
                 </p>
-                <p className="mt-1 text-xs text-yellow-700">
+                <p className="mt-1 text-xs text-[#956400]">
                   {new Date(file.savedAt).toLocaleDateString("id-ID")}
                 </p>
 
@@ -51,7 +51,7 @@ export default async function DataPentingPage({ searchParams }: { searchParams: 
                     href={file.filePath}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center rounded-lg bg-yellow-600 px-4 py-2 text-sm font-medium text-white hover:bg-yellow-500"
+                    className="inline-flex items-center rounded-lg bg-[#956400] px-4 py-2 text-sm font-medium text-white hover:bg-[#956400]"
                   >
                     Lihat file
                   </a>
@@ -60,7 +60,7 @@ export default async function DataPentingPage({ searchParams }: { searchParams: 
                     <input type="hidden" name="uploadId" value={file.id} />
                     <button
                       type="submit"
-                      className="inline-flex items-center rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
+                      className="inline-flex items-center rounded-lg border border-red-300 bg-[#fdebec] px-4 py-2 text-sm font-medium text-[#9f2f2d] hover:bg-[#fdebec]"
                     >
                       Hapus
                     </button>
@@ -70,7 +70,7 @@ export default async function DataPentingPage({ searchParams }: { searchParams: 
             ))}
           </section>
         ) : (
-          <p className="rounded-xl bg-yellow-50 px-4 py-3 text-sm text-yellow-700">
+          <p className="rounded-lg bg-[#fbf3db] px-4 py-3 text-sm text-[#956400]">
             Belum ada file data penting.
           </p>
         )}

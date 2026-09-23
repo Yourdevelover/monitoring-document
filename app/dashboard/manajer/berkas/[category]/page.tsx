@@ -90,10 +90,10 @@ export default async function ManagerCategoryPage({ params, searchParams }: Cate
 
   return (
     <main className="min-h-screen text-slate-900">
-      <div className="mx-auto max-w-7xl space-y-5">
+      <div className="mx-auto max-w-7xl space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-4">
           <div>
-            <h1 className="mt-2 text-xl font-semibold">{categoryInfo.label}</h1>
+            <h1 className="mt-2 text-base font-semibold">{categoryInfo.label}</h1>
             <p className="mt-1 text-sm text-slate-500">Berkas yang diterima dalam 12 jam terakhir.</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
