@@ -55,7 +55,7 @@ export default async function EmployeeDashboardPage() {
 
   const todayUploads = myUploads.filter((u) => u.submissionDate >= startOfToday);
   const byCategory = new Map(todayUploads.map((u) => [u.category, u]));
-  const categories = ["DATA_A", "DATA_B", "DATA_C"] as const;
+  const categories = ["DAILY", "CHAT", "PAYMENT"] as const;
   const submittedCount = categories.filter((c) => {
     const u = byCategory.get(c);
     return u?.isSubmitted;
@@ -75,7 +75,7 @@ export default async function EmployeeDashboardPage() {
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {categories.map((cat) => {
             const u = byCategory.get(cat);
-            const label = cat.replace("DATA_", "Data ");
+            const label = cat.toLowerCase();
             return (
               <div key={cat} className="rounded-lg border border-[#e5e7eb] bg-white px-3.5 py-3">
                 <p className="text-[11px] font-medium uppercase tracking-wide text-[#6b7280]">{label}</p>
@@ -133,7 +133,7 @@ export default async function EmployeeDashboardPage() {
                 const u = byCategory.get(cat);
                 return (
                   <div key={cat} className="flex items-center justify-between px-4 py-2.5">
-                    <p className="text-[13px] font-medium">{cat.replace("DATA_", "Data ")}</p>
+                    <p className="text-[13px] font-medium">{cat.toLowerCase()}</p>
                     {u?.isSubmitted ? (
                       <span className="rounded bg-[#edf3ec] px-1.5 py-0.5 text-[11px] font-medium text-[#346538]">✓ Terkirim</span>
                     ) : (

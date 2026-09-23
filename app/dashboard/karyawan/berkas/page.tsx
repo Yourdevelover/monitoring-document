@@ -9,19 +9,19 @@ import { ManagerFilePopover } from "./manager-file-popover";
 
 const CATEGORY_DETAILS = [
   {
-    key: "DATA_A",
-    label: "Data A",
-    description: "Unggah file utama untuk Data A.",
+    key: "DAILY",
+    label: "daily",
+    description: "Unggah file utama untuk daily.",
   },
   {
-    key: "DATA_B",
-    label: "Data B",
-    description: "Unggah file utama untuk Data B.",
+    key: "CHAT",
+    label: "chat",
+    description: "Unggah file utama untuk chat.",
   },
   {
-    key: "DATA_C",
-    label: "Data C",
-    description: "Unggah file utama untuk Data C.",
+    key: "PAYMENT",
+    label: "payment",
+    description: "Unggah file utama untuk payment.",
   },
 ] as const;
 
@@ -71,10 +71,13 @@ export default async function EmployeeFilesPage() {
       !upload.isImportant &&
       (!upload.isSubmitted || (upload.submissionDate && upload.submissionDate < startOfToday))
   );
-  // map all uploads (including submitted) for display
-  const uploadedByCategory = new Map(
-    employeeUploads.map((upload) => [upload.category, upload])
-  );
+  // group all uploads per category (multi-file for CHAT/PAYMENT, single for DAILY)
+  const uploadsByCategory = new Map<string, typeof employeeUploads>();
+  for (const upload of employeeUploads) {
+    const list = uploadsByCategory.get(upload.category) ?? [];
+    list.push(upload);
+    uploadsByCategory.set(upload.category, list);
+  }
   const importantBySourceUpload = new Map(
     importantFiles.map((file) => [file.sourceUploadId, file.id])
   );
@@ -116,7 +119,9 @@ export default async function EmployeeFilesPage() {
         <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
           <div className="grid gap-3 lg:grid-cols-3">
             {CATEGORY_DETAILS.map((category) => {
-              const uploadedFile = uploadedByCategory.get(category.key);
+              const categoryUploads = uploadsByCategory.get(category.key) ?? [];
+              const isMulti = category.key !== "DAILY";
+              const uploadedFile = categoryUploads[0];
 
               return (
                 <div key={category.key} className="rounded-md border border-[#e5e7eb] bg-[#f8f9fa] p-3">
@@ -127,66 +132,22 @@ export default async function EmployeeFilesPage() {
                     <p className="mt-0.5 text-xs text-[#6b7280]">{category.description}</p>
                   </div>
 
-                  {uploadedFile ? (
-                    <div className="space-y-2.5 rounded-md p-2.5" style={{
-                      backgroundColor: uploadedFile.isSubmitted ? '#edf3ec' : '#fbf3db'
-                    }}>
-                      <div>
-                        <p className="text-[13px] font-semibold" style={{ color: uploadedFile.isSubmitted ? '#346538' : '#956400' }}>
-                          {uploadedFile.isSubmitted ? '✓ Sudah Dikirim' : '⏳ Belum Dikirim'}
-                        </p>
-                        <p className="mt-0.5 truncate text-xs" style={{ color: uploadedFile.isSubmitted ? '#4a7a4e' : '#a06a00' }}>
-                          {uploadedFile.fileName}
-                        </p>
-                      </div>
-
-                      <div className="flex flex-nowrap items-center gap-1.5 overflow-x-auto">
-                        <a
-                          href={uploadedFile.filePath}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center rounded-md bg-[#111111] px-2.5 py-1.5 text-[11px] font-medium text-white hover:bg-[#333333]"
-                        >
-                          Lihat file
-                        </a>
-                        {!uploadedFile.isSubmitted && (
-                          <FileConfirmationDialog
-                            uploadId={uploadedFile.id}
-                            fileName={uploadedFile.fileName}
-                            categoryKey={category.key}
-                            isNewUpload={false}
-                          />
-                        )}
-                        {uploadedFile.isSubmitted && (
-                          <FileActions
-                            uploadId={uploadedFile.id}
-                            isSubmitted={uploadedFile.isSubmitted}
-                            isImportant={uploadedFile.isImportant}
-                            importantSaved={uploadedFile.importantSaved}
-                            importantFileId={
-                              importantBySourceUpload.get(uploadedFile.id) ??
-                              importantFiles.find((file) => file.category === uploadedFile.category)?.id
-                            }
-                          />
-                        )}
-                        {!uploadedFile.isSubmitted && (
-                          <span className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-[11px] font-medium text-[#111111]">
-                            {uploadedFile.status}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="rounded-md bg-white p-2.5 text-xs text-[#6b7280]">
-                      Belum ada file untuk kategori ini.
-                    </div>
-                  )}
-
-                  {!uploadedFile && (
+                  {isMulti && (
                     <UploadForm
                       categoryKey={category.key}
                       categoryLabel={category.label}
                     />
+                  )}
+                  {!isMulti && !uploadedFile && (
+                    <UploadForm
+                      categoryKey={category.key}
+                      categoryLabel={category.label}
+                    />
+                  )}
+                  {!isMulti && uploadedFile && (
+                    <div className="rounded-md bg-white p-2.5 text-xs text-[#6b7280]">
+                      File daily sudah dikirim hari ini. Kelola di daftar berkas di bawah.
+                    </div>
                   )}
                 </div>
               );
@@ -205,6 +166,80 @@ export default async function EmployeeFilesPage() {
               Histori Berkas →
             </Link>
           </div>
+        </section>
+
+        <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
+          <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-3">
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-[#111111]">Daftar Berkas Saya</h2>
+              <p className="mt-0.5 text-xs text-[#6b7280]">Kelola file: lihat, kirim, ganti, hapus, atau simpan ke data penting.</p>
+            </div>
+            <span className="text-[11px] text-[#6b7280]">{employeeUploads.length} file</span>
+          </div>
+
+          {employeeUploads.length > 0 ? (
+            <div className="mt-3 space-y-2.5">
+              {employeeUploads.map((uploadedFile) => (
+                <div key={uploadedFile.id} className="flex flex-col gap-2.5 rounded-md p-3 sm:flex-row sm:items-center sm:justify-between" style={{
+                  backgroundColor: uploadedFile.isSubmitted ? '#edf3ec' : '#fbf3db'
+                }}>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded bg-white/70 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#6b7280]">
+                        {uploadedFile.category.toLowerCase()}
+                      </span>
+                      <p className="text-[13px] font-semibold" style={{ color: uploadedFile.isSubmitted ? '#346538' : '#956400' }}>
+                        {uploadedFile.isSubmitted ? '✓ Sudah Dikirim' : '⏳ Belum Dikirim'}
+                      </p>
+                    </div>
+                    <p className="mt-1 truncate text-xs" style={{ color: uploadedFile.isSubmitted ? '#4a7a4e' : '#a06a00' }}>
+                      {uploadedFile.fileName}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-nowrap items-center gap-1.5 overflow-x-auto">
+                    <a
+                      href={uploadedFile.filePath}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center rounded-md bg-[#111111] px-2.5 py-1.5 text-[11px] font-medium text-white hover:bg-[#333333]"
+                    >
+                      Lihat file
+                    </a>
+                    {!uploadedFile.isSubmitted && (
+                      <FileConfirmationDialog
+                        uploadId={uploadedFile.id}
+                        fileName={uploadedFile.fileName}
+                        categoryKey={uploadedFile.category as "DAILY" | "CHAT" | "PAYMENT"}
+                        isNewUpload={false}
+                      />
+                    )}
+                    {uploadedFile.isSubmitted && (
+                      <FileActions
+                        uploadId={uploadedFile.id}
+                        isSubmitted={uploadedFile.isSubmitted}
+                        isImportant={uploadedFile.isImportant}
+                        importantSaved={uploadedFile.importantSaved}
+                        importantFileId={
+                          importantBySourceUpload.get(uploadedFile.id) ??
+                          importantFiles.find((file) => file.category === uploadedFile.category)?.id
+                        }
+                      />
+                    )}
+                    {!uploadedFile.isSubmitted && (
+                      <span className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-[11px] font-medium text-[#111111]">
+                        {uploadedFile.status}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-3 rounded-md bg-[#f8f9fa] p-4 text-center text-xs text-[#6b7280]">
+              Belum ada berkas. Gunakan form di atas untuk mengunggah.
+            </div>
+          )}
         </section>
       </div>
     </main>

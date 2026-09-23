@@ -5,7 +5,7 @@ import { requireManager } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { enqueueFileTask } from "@/lib/upload-queue";
 
-const VALID_CATEGORIES = new Set(["DATA_A", "DATA_B", "DATA_C"]);
+const VALID_CATEGORIES = new Set(["DAILY", "CHAT", "PAYMENT"]);
 
 export async function POST(request: Request) {
   try {
@@ -126,7 +126,7 @@ export async function POST(request: Request) {
           fileName: safeFileName,
           filePath: publicFilePath,
           fileType: file.type || "application/octet-stream",
-          category: category as "DATA_A" | "DATA_B" | "DATA_C",
+          category: category as "DAILY" | "CHAT" | "PAYMENT",
           status: "COMPLETED",
           isSubmitted: true,
           submissionDate: new Date(),

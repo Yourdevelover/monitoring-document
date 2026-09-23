@@ -3,9 +3,9 @@ import { requireManager } from "@/lib/auth";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
 
 const categories = [
-  { key: "DATA_A", label: "Berkas A" },
-  { key: "DATA_B", label: "Berkas B" },
-  { key: "DATA_C", label: "Berkas C" },
+  { key: "DAILY", label: "daily" },
+  { key: "CHAT", label: "chat" },
+  { key: "PAYMENT", label: "payment" },
 ] as const;
 
 type CategoryKey = (typeof categories)[number]["key"];

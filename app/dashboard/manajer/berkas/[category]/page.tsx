@@ -6,9 +6,9 @@ import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
 import { PaginationControls } from "@/app/components/pagination-controls";
 
 const CATEGORY_LABELS = {
-  "data-a": { key: "DATA_A", label: "Berkas A" },
-  "data-b": { key: "DATA_B", label: "Berkas B" },
-  "data-c": { key: "DATA_C", label: "Berkas C" },
+  "daily": { key: "DAILY", label: "daily" },
+  "chat": { key: "CHAT", label: "chat" },
+  "payment": { key: "PAYMENT", label: "payment" },
 } as const;
 
 type CategoryPageProps = {

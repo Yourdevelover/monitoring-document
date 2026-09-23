@@ -7,7 +7,7 @@ type PaginationControlsProps = {
   page: number;
   totalItems: number;
   pageSize?: number;
-  query?: Record<string, string | undefined>;
+  query?: Record<string, string | null | undefined>;
 };
 
 export function PaginationControls({

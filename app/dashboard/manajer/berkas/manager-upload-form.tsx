@@ -3,9 +3,9 @@
 import { FormEvent, useRef, useState } from "react";
 
 const CATEGORY_OPTIONS = [
-  { key: "DATA_A", label: "Berkas A" },
-  { key: "DATA_B", label: "Berkas B" },
-  { key: "DATA_C", label: "Berkas C" },
+  { key: "DAILY", label: "daily" },
+  { key: "CHAT", label: "chat" },
+  { key: "PAYMENT", label: "payment" },
 ] as const;
 
 export function ManagerUploadForm() {
@@ -13,7 +13,7 @@ export function ManagerUploadForm() {
   const [success, setSuccess] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [category, setCategory] = useState<string>("DATA_A");
+  const [category, setCategory] = useState<string>("DAILY");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -47,7 +47,7 @@ export function ManagerUploadForm() {
 
       setSuccess("Berkas berhasil dibagikan ke tim.");
       setSelectedFile(null);
-      setCategory("DATA_A");
+      setCategory("DAILY");
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }

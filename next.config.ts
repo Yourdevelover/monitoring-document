@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
   },
   // Allow Next.js dev resources (HMR) from LAN IP used in browser
   allowedDevOrigins: ["10.248.186.186"],
+  images: {
+    localPatterns: [
+      { pathname: "/logo/**" },
+    ],
+  },
 };
 
 export default nextConfig;

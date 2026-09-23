@@ -4,11 +4,12 @@ import { requireAdmin } from "@/lib/auth";
 export default async function AdminDashboardPage() {
   await requireAdmin();
 
-  const [users, teams, allTargets, recentUploads, pendingApprovals, recentActivities] = await Promise.all([
+  const [users, teams, allTargets, recentUploads, uploadCount, pendingApprovals, recentActivities] = await Promise.all([
     prisma.user.findMany({ orderBy: { createdAt: "desc" }, select: { id: true, name: true, email: true, role: true, isActive: true, teamId: true, createdAt: true } }),
     prisma.team.findMany({ orderBy: { createdAt: "desc" }, include: { members: true } }),
     prisma.target.findMany({ select: { userId: true, currentValue: true, targetValue: true, name: true, period: true, user: { select: { name: true } } } }),
     prisma.upload.findMany({ orderBy: { createdAt: "desc" }, take: 8, include: { user: { select: { name: true } }, team: { select: { name: true } } } }),
+    prisma.upload.count(),
     prisma.profileRequest.count({ where: { status: "PENDING" } }),
     prisma.activityLog.findMany({ orderBy: { createdAt: "desc" }, take: 8, include: { actor: true } }),
   ]);
@@ -20,10 +21,11 @@ export default async function AdminDashboardPage() {
     totalEmployees: users.filter((item) => item.role === "KARYAWAN").length,
     activeTeams: teams.filter((team) => team.isActive).length,
     pendingApprovals,
+    totalUploads: uploadCount,
     inactiveUsers: users.filter((item) => item.isActive === "INACTIVE").length,
   };
 
-  const targetAgg = new Map<string, { cur: number; tgt: number }>();
+  const targetAgg = new Map<number, { cur: number; tgt: number }>();
   for (const t of allTargets) {
     const a = targetAgg.get(t.userId) ?? { cur: 0, tgt: 0 };
     a.cur += t.currentValue; a.tgt += t.targetValue;
@@ -146,8 +148,8 @@ export default async function AdminDashboardPage() {
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide">Daftar Target Karyawan</h2>
           {targetPctList.length ? (
             <div className="space-y-2">
-              {targetPctList.map((t) => (
-                <div key={t.name} className="flex items-center gap-2">
+              {targetPctList.map((t, idx) => (
+                <div key={`${t.name}-${idx}`} className="flex items-center gap-2">
                   <p className="flex-1 truncate text-[12px] font-medium">{t.name}</p>
                   <div className="h-4 w-32 flex-shrink-0 rounded bg-[#f1f3f5]">
                     <div className={`h-full rounded ${t.pct >= 100 ? "bg-[#346538]" : "bg-[#956400]"}`} style={{ width: `${Math.min(100, t.pct)}%` }} />

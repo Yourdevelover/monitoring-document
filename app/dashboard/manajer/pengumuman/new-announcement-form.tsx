@@ -65,7 +65,7 @@ export function NewAnnouncementForm() {
                   onClick={() => setShowEmojiPicker((current) => !current)}
                   className="border border-[#e5e7eb] px-3 py-1.5 text-sm text-[#111111] hover:bg-[#f8f9fa]"
                 >
-                  ðŸ˜Š Pilih Emoji
+                  Pilih Emoji
                 </button>
                 {showEmojiPicker && (
                   <div className="absolute bottom-full left-0 z-20 mb-2">

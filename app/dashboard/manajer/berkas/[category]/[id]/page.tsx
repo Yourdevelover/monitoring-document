@@ -3,9 +3,9 @@ import { requireManager } from "@/lib/auth";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
 
 const CATEGORY_KEYS = {
-  "data-a": "DATA_A",
-  "data-b": "DATA_B",
-  "data-c": "DATA_C",
+  "daily": "DAILY",
+  "chat": "CHAT",
+  "payment": "PAYMENT",
 } as const;
 
 type FileDetailPageProps = {
@@ -44,7 +44,7 @@ export default async function ManagerFileDetailPage({ params }: FileDetailPagePr
 
         <section className="space-y-2">
           <p className="text-sm font-medium">{upload.fileName}</p>
-          <p className="text-sm text-[#6b7280]">Kategori: {upload.category.replace("DATA_", "Data ")}</p>
+          <p className="text-sm text-[#6b7280]">Kategori: {upload.category.toLowerCase()}</p>
           <p className="text-sm text-[#6b7280]">Karyawan: {upload.user.name}</p>
           <p className="text-xs text-[#6b7280]">
             Dikirim: {new Date(upload.submissionDate).toLocaleString("id-ID")}

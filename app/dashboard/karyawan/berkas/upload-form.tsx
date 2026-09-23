@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react";
 import { FileConfirmationDialog } from "./file-confirmation-dialog";
 
 type UploadFormProps = {
-  categoryKey: "DATA_A" | "DATA_B" | "DATA_C";
+  categoryKey: "DAILY" | "CHAT" | "PAYMENT";
   categoryLabel: string;
   isDisabled?: boolean;
 };

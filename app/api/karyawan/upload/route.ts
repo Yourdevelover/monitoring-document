@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { enqueueFileTask } from "@/lib/upload-queue";
 import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
 
-const VALID_CATEGORIES = new Set(["DATA_A", "DATA_B", "DATA_C"]);
+const VALID_CATEGORIES = new Set(["DAILY", "CHAT", "PAYMENT"]);
 
 export async function POST(request: Request) {
   try {
@@ -363,7 +363,7 @@ export async function POST(request: Request) {
       const activeUpload = await prisma.upload.findFirst({
         where: {
           userId: employee.id,
-          category: category as "DATA_A" | "DATA_B" | "DATA_C",
+          category: category as "DAILY" | "CHAT" | "PAYMENT",
           isImportant: false,
           isSubmitted: false,
         },
@@ -409,7 +409,7 @@ export async function POST(request: Request) {
           fileName: safeFileName,
           filePath: publicFilePath,
           fileType: file.type || "application/octet-stream",
-          category: category as "DATA_A" | "DATA_B" | "DATA_C",
+          category: category as "DAILY" | "CHAT" | "PAYMENT",
           status: "COMPLETED",
         },
       });

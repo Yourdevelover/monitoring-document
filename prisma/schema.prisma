@@ -25,9 +25,9 @@ enum ApprovalStatus {
 }
 
 enum FileCategory {
-  DATA_A
-  DATA_B
-  DATA_C
+  DAILY
+  CHAT
+  PAYMENT
 }
 
 enum UploadStatus {

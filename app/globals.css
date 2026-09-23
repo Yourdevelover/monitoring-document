@@ -93,12 +93,13 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 .manager-announcement-single {
   display: block;
   width: max-content;
+  flex-shrink: 0;
   margin: 0;
-  padding: 0.65rem 3rem;
+  padding: 0.65rem 0 0.65rem 100%;
   font-size: 0.8125rem;
   line-height: 1.25rem;
   white-space: nowrap;
-  animation: manager-announcement-slide 24s linear infinite;
+  animation: manager-announcement-slide 12s linear infinite;
   will-change: transform;
 }
 .manager-announcement-important { color: var(--badge-pale-red-text); font-weight: 600; }
@@ -108,11 +109,8 @@ h1, h2, h3 { letter-spacing: -0.02em; }
   white-space: nowrap; color: var(--content-muted);
 }
 @keyframes manager-announcement-slide {
-  from { transform: translateX(100%); }
+  from { transform: translateX(0); }
   to { transform: translateX(-100%); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .manager-announcement-single { animation: none; }
 }
 
 /* ── Content containers ── */

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-export function ActivityRow({ activity }: { activity: { id: string; createdAt: string; action: string; description: string | null; actor: { name: string | null } | null } }) {
+export function ActivityRow({ activity }: { activity: { id: number; createdAt: string; action: string; description: string | null; actor: { name: string | null } | null } }) {
   const [open, setOpen] = useState(false);
 
   return (

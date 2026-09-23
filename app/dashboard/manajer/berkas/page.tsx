@@ -6,9 +6,9 @@ import { ManagerUploadForm } from "./manager-upload-form";
 import { ManagerFileDeleteButton } from "./manager-file-delete-button";
 
 const CATEGORIES = [
-  { key: "DATA_A", label: "Berkas A" },
-  { key: "DATA_B", label: "Data B" },
-  { key: "DATA_C", label: "Berkas C" },
+  { key: "DAILY", label: "daily" },
+  { key: "CHAT", label: "chat" },
+  { key: "PAYMENT", label: "payment" },
 ] as const;
 
 export default async function ManagerFilesPage() {
@@ -65,7 +65,7 @@ export default async function ManagerFilesPage() {
               return (
                 <Link
                   key={category.key}
-                  href={`/dashboard/manajer/berkas/${category.key.toLowerCase().replace("data_", "data-")}`}
+                  href={`/dashboard/manajer/berkas/${category.key.toLowerCase()}`}
                   className="flex items-center justify-between rounded-lg border border-[#e5e7eb] bg-white px-4 py-3 transition hover:border-[#2563eb]"
                 >
                   <div>
@@ -80,31 +80,6 @@ export default async function ManagerFilesPage() {
         </section>
 
         <section className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
-          <div className="rounded-lg border border-[#e5e7eb] bg-white">
-            <div className="flex items-center justify-between border-b border-[#e5e7eb] px-4 py-3">
-              <h2 className="text-xs font-semibold uppercase tracking-wide">Berkas Terbaru</h2>
-              <span className="text-[11px] text-[#6b7280]">{uploads.length} file</span>
-            </div>
-            {uploads.length > 0 ? (
-              <div className="divide-y divide-[#f1f3f5]">
-                {uploads.slice(0, 8).map((upload) => (
-                  <div key={upload.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
-                    <div className="min-w-0">
-                      <p className="truncate text-[13px] font-medium">{upload.fileName}</p>
-                      <p className="mt-0.5 text-xs text-[#6b7280]">{upload.user.name} • {upload.category.replace("DATA_", "Data ")}</p>
-                    </div>
-                    <span className="shrink-0 text-[11px] text-[#9ca3af]">{new Date(upload.submissionDate).toLocaleDateString("id-ID", { dateStyle: "short" })}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <p className="text-[13px] text-[#6b7280]">Belum ada berkas aktif dari karyawan.</p>
-                <p className="mt-1 text-[11px] text-[#9ca3af]">Upload pertama akan muncul di sini.</p>
-              </div>
-            )}
-          </div>
-
           <div className="space-y-4">
             <div className="rounded-lg border border-[#e5e7eb] bg-white p-4">
               <h2 className="text-xs font-semibold uppercase tracking-wide">Unggah Berkas untuk Tim</h2>
@@ -112,6 +87,33 @@ export default async function ManagerFilesPage() {
               <div className="mt-3">
                 <ManagerUploadForm />
               </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="rounded-lg border border-[#e5e7eb] bg-white">
+              <div className="flex items-center justify-between border-b border-[#e5e7eb] px-4 py-3">
+                <h2 className="text-xs font-semibold uppercase tracking-wide">Berkas Terbaru</h2>
+                <span className="text-[11px] text-[#6b7280]">{uploads.length} file</span>
+              </div>
+              {uploads.length > 0 ? (
+                <div className="divide-y divide-[#f1f3f5]">
+                  {uploads.slice(0, 8).map((upload) => (
+                    <div key={upload.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
+                      <div className="min-w-0">
+                        <p className="truncate text-[13px] font-medium">{upload.fileName}</p>
+                        <p className="mt-0.5 text-xs text-[#6b7280]">{upload.user.name} • {upload.category.toLowerCase()}</p>
+                      </div>
+                      <span className="shrink-0 text-[11px] text-[#9ca3af]">{new Date(upload.submissionDate).toLocaleDateString("id-ID", { dateStyle: "short" })}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <p className="text-[13px] text-[#6b7280]">Belum ada berkas aktif dari karyawan.</p>
+                  <p className="mt-1 text-[11px] text-[#9ca3af]">Upload pertama akan muncul di sini.</p>
+                </div>
+              )}
             </div>
 
             {managerUploads.length > 0 && (
@@ -125,7 +127,7 @@ export default async function ManagerFilesPage() {
                     <div key={upload.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
                       <div className="min-w-0">
                         <p className="truncate text-[13px] font-medium">{upload.fileName}</p>
-                        <p className="mt-0.5 text-xs text-[#6b7280]">{upload.category.replace("DATA_", "Data ")} • {formatDateTime(upload.submissionDate)}</p>
+                        <p className="mt-0.5 text-xs text-[#6b7280]">{upload.category.toLowerCase()} • {formatDateTime(upload.submissionDate)}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <a href={upload.filePath} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-[#e5e7eb] px-2.5 py-1.5 text-[11px] font-medium text-[#111111] hover:bg-[#f8f9fa]">Lihat</a>
