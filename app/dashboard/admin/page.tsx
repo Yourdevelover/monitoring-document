@@ -151,10 +151,9 @@ export default async function AdminDashboardPage() {
               {targetPctList.map((t, idx) => (
                 <div key={`${t.name}-${idx}`} className="flex items-center gap-2">
                   <p className="flex-1 truncate text-[12px] font-medium">{t.name}</p>
-                  <div className="h-4 w-32 flex-shrink-0 rounded bg-[#f1f3f5]">
+                  <div className="h-4 flex-1 max-w-[120px] flex-shrink-0 rounded bg-[#f1f3f5]">
                     <div className={`h-full rounded ${t.pct >= 100 ? "bg-[#346538]" : "bg-[#956400]"}`} style={{ width: `${Math.min(100, t.pct)}%` }} />
                   </div>
-                  <p className="w-16 text-right text-[11px] text-[#6b7280]">{t.current.toLocaleString("id-ID")}/{t.target.toLocaleString("id-ID")}</p>
                   <p className={`w-10 text-right text-[11px] font-semibold ${t.pct >= 100 ? "text-[#346538]" : t.pct >= 50 ? "text-[#956400]" : "text-[#9f2f2d]"}`}>{t.pct}%</p>
                 </div>
               ))}

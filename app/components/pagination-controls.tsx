@@ -30,15 +30,15 @@ export function PaginationControls({
   };
 
   return (
-    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#e5e7eb] pt-4 text-sm">
+    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#e5e7eb] pt-3 text-xs">
         <div className="flex items-center gap-2 text-[#6b7280]">
           Jumlah data:
           <span className="text-[#6b7280]">{pageSize} data per halaman</span>
         </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <span className="text-[#6b7280]">Halaman</span>
         {page > 1 && (
-          <Link href={buildUrl(page - 1)} className="border border-[#e5e7eb] px-3 py-1 hover:bg-[#f8f9fa]">
+          <Link href={buildUrl(page - 1)} className="inline-flex h-[28px] items-center rounded-md border border-[#e5e7eb] px-2.5 text-xs hover:bg-[#f8f9fa]">
             Sebelumnya
           </Link>
         )}
@@ -48,14 +48,14 @@ export function PaginationControls({
             href={buildUrl(pageNumber)}
             aria-current={pageNumber === page ? "page" : undefined}
             className={pageNumber === page
-              ? "border border-[#111111] bg-[#111111] px-3 py-1 text-white"
-              : "border border-[#e5e7eb] px-3 py-1 hover:bg-[#f8f9fa]"}
+              ? "inline-flex h-[28px] w-[28px] items-center justify-center rounded-md bg-[#111111] text-xs text-white"
+              : "inline-flex h-[28px] w-[28px] items-center justify-center rounded-md border border-[#e5e7eb] text-xs hover:bg-[#f8f9fa]"}
           >
             {pageNumber}
           </Link>
         ))}
         {page < totalPages && (
-          <Link href={buildUrl(page + 1)} className="border border-[#e5e7eb] px-3 py-1 hover:bg-[#f8f9fa]">
+          <Link href={buildUrl(page + 1)} className="inline-flex h-[28px] items-center rounded-md border border-[#e5e7eb] px-2.5 text-xs hover:bg-[#f8f9fa]">
             Berikutnya
           </Link>
         )}

@@ -16,7 +16,7 @@ export function BackToPreviousButton({
       type="button"
       onClick={() => router.back()}
       className={
-        `inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 ${className}`.trim()
+        `inline-flex h-[30px] items-center justify-center rounded-md border border-[#e5e7eb] bg-white px-3 text-xs font-medium text-[#111111] transition hover:bg-[#f8f9fa] ${className}`.trim()
       }
     >
       {label}

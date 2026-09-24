@@ -19,18 +19,18 @@ export default async function EditAdminPage({
   }
 
   return (
-    <main className="space-y-4 p-2">
+    <main className="space-y-4">
       <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
         <div className="mb-6">
-          <p className="text-sm text-[#6b7280]">Admin Management</p>
-          <h1 className="text-base font-bold">Edit Admin</h1>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">Admin Management</p>
+          <h1 className="text-[13px] font-semibold tracking-tight">Edit Admin</h1>
         </div>
 
         <form action="/api/admin/update" method="POST" className="grid gap-4 md:grid-cols-2">
           <input type="hidden" name="userId" value={user.id} />
 
           <div>
-            <label htmlFor="name" className="mb-1 block text-sm font-medium text-[#111111]">
+            <label htmlFor="name" className="mb-1 block text-xs font-medium text-[#111111]">
               Nama
             </label>
             <input
@@ -39,12 +39,12 @@ export default async function EditAdminPage({
               type="text"
               defaultValue={user.name}
               required
-              className="w-full rounded-lg border border-[#e5e7eb] bg-[#f8f9fa] px-3 py-2 outline-none transition focus:border-blue-500 focus:bg-white"
+              className="w-full rounded-md border border-[#e5e7eb] bg-white px-3 py-2 outline-none transition focus:border-[#2563eb] focus:bg-white"
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium text-[#111111]">
+            <label htmlFor="email" className="mb-1 block text-xs font-medium text-[#111111]">
               Email
             </label>
             <input
@@ -53,12 +53,12 @@ export default async function EditAdminPage({
               type="email"
               defaultValue={user.email}
               required
-              className="w-full rounded-lg border border-[#e5e7eb] bg-[#f8f9fa] px-3 py-2 outline-none transition focus:border-blue-500 focus:bg-white"
+              className="w-full rounded-md border border-[#e5e7eb] bg-white px-3 py-2 outline-none transition focus:border-[#2563eb] focus:bg-white"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label htmlFor="password" className="mb-1 block text-sm font-medium text-[#111111]">
+            <label htmlFor="password" className="mb-1 block text-xs font-medium text-[#111111]">
               Password Baru (opsional)
             </label>
             <input
@@ -66,20 +66,20 @@ export default async function EditAdminPage({
               name="password"
               type="password"
               minLength={6}
-              className="w-full rounded-lg border border-[#e5e7eb] bg-[#f8f9fa] px-3 py-2 outline-none transition focus:border-blue-500 focus:bg-white"
+              className="w-full rounded-md border border-[#e5e7eb] bg-white px-3 py-2 outline-none transition focus:border-[#2563eb] focus:bg-white"
             />
           </div>
 
-          <div className="md:col-span-2 flex justify-end gap-3">
+          <div className="md:col-span-2 flex justify-end gap-2">
             <a
               href={`/dashboard/admin/users/${user.id}`}
-              className="rounded-lg border border-[#e5e7eb] bg-white px-4 py-2 font-medium text-[#111111] transition hover:bg-[#f8f9fa]"
+              className="btn"
             >
               Batal
             </a>
             <button
               type="submit"
-              className="rounded-lg bg-[#2563eb] px-4 py-2 font-semibold text-white transition hover:bg-[#1d4ed8]"
+              className="btn btn-primary"
             >
               Simpan Perubahan
             </button>

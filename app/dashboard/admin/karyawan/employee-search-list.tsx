@@ -28,15 +28,15 @@ function AdminEmployeeCard({ employee }: { employee: EmployeeSearchListProps["em
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="grid w-full cursor-pointer gap-3 py-3 text-left transition-colors hover:bg-[#f8f9fa] sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center"
+        className="grid w-full cursor-pointer gap-2 px-3 py-2.5 text-left transition-colors hover:bg-[#f8f9fa] sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center"
       >
         <div className="min-w-0">
-          <p className="truncate font-semibold">{employee.name}</p>
-          <p className="truncate text-sm text-[#6b7280]">{employee.email}</p>
+          <p className="truncate text-[13px] font-medium">{employee.name}</p>
+          <p className="truncate text-xs text-[#6b7280]">{employee.email}</p>
         </div>
-        <p className="truncate text-sm text-[#6b7280]">Tim: {employee.team?.name ?? 'Belum memiliki tim'}</p>
-        <p className="truncate text-sm text-[#6b7280]">Manajer: {employee.team?.manager?.name ?? 'Belum ditugaskan'}</p>
-        <span className="flex items-center gap-2 text-xs text-[#6b7280]">
+        <p className="truncate text-xs text-[#6b7280]">Tim: {employee.team?.name ?? 'Belum memiliki tim'}</p>
+        <p className="truncate text-xs text-[#6b7280]">Manajer: {employee.team?.manager?.name ?? 'Belum ditugaskan'}</p>
+        <span className="flex items-center gap-2 text-[11px] text-[#6b7280]">
           <span>{employee.team?.members.length ?? 0} anggota</span>
           <span className="hidden sm:inline">Lihat info</span> →
         </span>
@@ -45,9 +45,9 @@ function AdminEmployeeCard({ employee }: { employee: EmployeeSearchListProps["em
       {isOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-[#111111]/50 p-4" onClick={() => setIsOpen(false)}>
           <div role="dialog" aria-label={`Informasi ${employee.name}`} className="my-auto max-h-[calc(100vh-2rem)] w-full max-w-sm overflow-y-auto rounded-lg border border-[#e5e7eb] bg-white p-4" onClick={(event) => event.stopPropagation()}>
-            <h2 className="break-words text-base font-semibold text-[#111111]">{employee.name}</h2>
-            <p className="mt-1 text-sm text-[#6b7280]">{employee.email}</p>
-            <dl className="mt-4 divide-y divide-slate-100 text-sm">
+            <h2 className="break-words text-[13px] font-semibold text-[#111111]">{employee.name}</h2>
+            <p className="mt-1 text-xs text-[#6b7280]">{employee.email}</p>
+            <dl className="mt-4 divide-y divide-slate-100 text-xs">
               {[
                 ["Status", employee.isActive],
                 ["Nomor telepon", employee.phoneNumber ?? "-"],
@@ -65,8 +65,8 @@ function AdminEmployeeCard({ employee }: { employee: EmployeeSearchListProps["em
                 <dd className="min-w-0 break-words text-right font-medium">{employee.team?.manager ? <a href={`/dashboard/admin/managers/${employee.team.manager.id}`} className="text-[#1f6c9f] hover:underline">{employee.team.manager.name}</a> : "Belum ditugaskan"}</dd>
               </div>
             </dl>
-            <a href={`/dashboard/admin/karyawan/${employee.id}`} className="mt-4 block w-full rounded-lg border border-[#e1f3fe] px-3 py-2 text-center text-sm font-medium text-[#1f6c9f] hover:bg-[#e1f3fe]">Lihat info lebih lanjut</a>
-            <button type="button" onClick={() => setIsOpen(false)} className="mt-2 w-full rounded-lg bg-[#111111] px-3 py-2 text-sm font-medium text-white hover:bg-[#333333]">Tutup</button>
+            <a href={`/dashboard/admin/karyawan/${employee.id}`} className="mt-4 block w-full rounded-md border border-[#e1f3fe] px-3 py-2 text-center text-xs font-medium text-[#1f6c9f] hover:bg-[#e1f3fe]">Lihat info lebih lanjut</a>
+            <button type="button" onClick={() => setIsOpen(false)} className="mt-2 w-full rounded-md bg-[#111111] px-3 py-2 text-xs font-medium text-white hover:bg-[#333333]">Tutup</button>
           </div>
         </div>
       )}
@@ -116,18 +116,18 @@ export function EmployeeSearchList({ employees }: EmployeeSearchListProps) {
               setPage(1);
             }}
             placeholder="Ketik nama atau email karyawan..."
-            className="w-full rounded-lg border border-[#e5e7eb] bg-white px-3 py-2 text-sm text-[#111111] outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
+            className="w-full rounded-md border border-[#e5e7eb] bg-white px-3 py-2 text-xs text-[#111111] outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
           />
         </div>
 
         <Link
           href="/dashboard/admin/karyawan/create"
-          className="inline-flex shrink-0 items-center justify-center rounded-lg bg-[#111111] px-3 py-2 text-sm font-medium text-white transition hover:bg-[#1c1c1c]"
+          className="inline-flex shrink-0 items-center justify-center rounded-md bg-[#111111] px-3 py-2 text-xs font-medium text-white transition hover:bg-[#1c1c1c]"
         >
           Tambah Karyawan
         </Link>
         {filteredEmployees.length > 0 && (
-          <div className="flex shrink-0 items-center gap-2 text-sm">
+          <div className="flex shrink-0 items-center gap-2 text-xs">
             <span className="text-[#6b7280]">6 data per halaman</span>
             <button type="button" disabled={page === 1} onClick={() => setPage((current) => current - 1)} className="border border-[#e5e7eb] px-2 py-1 disabled:cursor-not-allowed disabled:opacity-40">‹</button>
             {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
@@ -138,7 +138,7 @@ export function EmployeeSearchList({ employees }: EmployeeSearchListProps) {
         )}
       </div>
 
-      <p className="text-xs text-[#6b7280]">
+      <p className="text-[11px] text-[#6b7280]">
         {filteredEmployees.length} hasil cocok
       </p>
 

@@ -121,7 +121,7 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 }
 .manager-content main, .admin-content main, .employee-content main {
   min-height: 100vh;
-  padding: 1.5rem !important;
+  padding: 1.25rem !important;
   background: var(--content-background) !important;
   text-align: left;
   max-width: 88rem;
@@ -138,9 +138,9 @@ h1, h2, h3 { letter-spacing: -0.02em; }
   border-radius: 6px !important;
   background: #ffffff !important;
   border-color: var(--border) !important;
-  font-size: 0.875rem !important;
+  font-size: 0.8125rem !important;
   line-height: 1.25rem !important;
-  padding: 0.625rem 0.75rem !important;
+  padding: 0.5rem 0.625rem !important;
 }
 .manager-content input:focus, .manager-content select:focus, .manager-content textarea:focus,
 .admin-content input:focus, .admin-content select:focus, .admin-content textarea:focus,
@@ -150,43 +150,61 @@ h1, h2, h3 { letter-spacing: -0.02em; }
   border-color: var(--content-accent) !important;
 }
 
-/* ── Tables ── */
-.manager-content table, .admin-content table, .employee-content table {
-  border-collapse: collapse;
-  width: 100%;
+/* ── Buttons: seragam klasik kecil ── */
+.admin-content .btn, .manager-content .btn, .employee-content .btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.375rem !important;
+  height: 30px !important;
+  padding: 0 0.625rem !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  border: 1px solid var(--border) !important;
+  background: #fff !important;
+  color: var(--foreground) !important;
+}
+.admin-content .btn-primary, .manager-content .btn-primary, .employee-content .btn-primary {
+  background: #111111 !important;
+  border-color: #111111 !important;
+  color: #fff !important;
+}
+.admin-content .btn-danger, .manager-content .btn-danger, .employee-content .btn-danger {
+  background: var(--badge-pale-red-bg) !important;
+  border-color: var(--badge-pale-red-bg) !important;
+  color: var(--badge-pale-red-text) !important;
 }
 .manager-content thead th, .admin-content thead th, .employee-content thead th {
-  font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--content-muted);
-  font-weight: 600;
-  border-bottom: 1px solid var(--border);
-  padding: 0.75rem 1rem;
-  text-align: left;
+  font-size: 0.6875rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  color: var(--content-muted) !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid var(--border) !important;
+  padding: 0.5rem 0.75rem !important;
+  text-align: left !important;
 }
 .manager-content tbody td, .admin-content tbody td, .employee-content tbody td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border);
-  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem !important;
+  border-bottom: 1px solid var(--border) !important;
+  font-size: 0.8125rem !important;
 }
 .manager-content tbody tr, .admin-content tbody tr, .employee-content tbody tr {
-  transition: background 200ms;
+  transition: background 200ms !important;
 }
 .manager-content tbody tr:hover, .admin-content tbody tr:hover, .employee-content tbody tr:hover {
-  background: var(--surface-hover);
+  background: var(--surface-hover) !important;
 }
-
-/* ── Links ── */
 .manager-content a:not([class*="bg-"]):not([class*="border"]),
 .admin-content a:not([class*="bg-"]):not([class*="border"]),
 .employee-content a:not([class*="bg-"]):not([class*="border"]) {
-  color: var(--content-accent);
+  color: var(--content-accent) !important;
 }
-
-/* ── Micro-interactions ── */
 button, a[class*="bg-"] {
-  transition: transform 150ms, background 200ms, border-color 200ms, box- 200ms;
+  transition: transform 150ms, background 200ms, border-color 200ms, box-shadow 200ms !important;
 }
 button:active { transform: scale(0.98); }
 :focus-visible { outline: 2px solid var(--content-accent); outline-offset: 2px; }

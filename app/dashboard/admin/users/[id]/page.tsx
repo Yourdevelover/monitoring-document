@@ -30,46 +30,28 @@ export default async function AdminUserDetailPage({
   }
 
   return (
-    <main className="space-y-4 p-2">
+    <main className="space-y-4">
       <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between">
           <div>
-            <p className="text-sm text-[#6b7280]">Admin Management</p>
-            <h1 className="text-base font-bold">Detail Admin</h1>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">Detail</p>
+            <h1 className="mt-1 text-[13px] font-semibold tracking-tight">Detail Admin</h1>
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-lg bg-[#f8f9fa] p-4">
-            <p className="text-sm text-[#6b7280]">Nama</p>
-            <p className="mt-1 font-semibold">{user.name}</p>
-          </div>
-          <div className="rounded-lg bg-[#f8f9fa] p-4">
-            <p className="text-sm text-[#6b7280]">Email</p>
-            <p className="mt-1 font-semibold">{user.email}</p>
-          </div>
-          <div className="rounded-lg bg-[#f8f9fa] p-4">
-            <p className="text-sm text-[#6b7280]">Role</p>
-            <p className="mt-1 font-semibold">{user.role}</p>
-          </div>
-          <div className="rounded-lg bg-[#f8f9fa] p-4">
-            <p className="text-sm text-[#6b7280]">Status</p>
-            <p className="mt-1 font-semibold">{user.isActive}</p>
-          </div>
-          <div className="rounded-lg bg-[#f8f9fa] p-4">
-            <p className="text-sm text-[#6b7280]">Dibuat</p>
-            <p className="mt-1 font-semibold">{new Date(user.createdAt).toLocaleString("id-ID")}</p>
-          </div>
-          <div className="rounded-lg bg-[#f8f9fa] p-4">
-            <p className="text-sm text-[#6b7280]">Update</p>
-            <p className="mt-1 font-semibold">{new Date(user.updatedAt).toLocaleString("id-ID")}</p>
-          </div>
+        <div className="grid gap-3 rounded-lg border border-[#e5e7eb] bg-[#f8f9fa] p-4 md:grid-cols-2">
+          <div><p className="text-[11px] text-[#6b7280]">Nama</p><p className="mt-1 text-[13px] font-medium">{user.name}</p></div>
+          <div><p className="text-[11px] text-[#6b7280]">Email</p><p className="mt-1 text-[13px] font-medium">{user.email}</p></div>
+          <div><p className="text-[11px] text-[#6b7280]">Role</p><p className="mt-1 text-[13px] font-medium">{user.role}</p></div>
+          <div><p className="text-[11px] text-[#6b7280]">Status</p><p className="mt-1 text-[13px] font-medium">{user.isActive}</p></div>
+          <div><p className="text-[11px] text-[#6b7280]">Dibuat</p><p className="mt-1 text-[13px] font-medium">{new Date(user.createdAt).toLocaleString("id-ID")}</p></div>
+          <div><p className="text-[11px] text-[#6b7280]">Update</p><p className="mt-1 text-[13px] font-medium">{new Date(user.updatedAt).toLocaleString("id-ID")}</p></div>
         </div>
 
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="mt-4 flex flex-wrap justify-end gap-2">
           <a
             href={`/dashboard/admin/users/${user.id}/edit`}
-            className="rounded-lg bg-[#2563eb] px-4 py-2 font-semibold text-white transition hover:bg-[#1d4ed8]"
+            className="inline-flex h-[30px] items-center justify-center rounded-md border border-[#e5e7eb] bg-white px-3 text-xs font-medium text-[#111111] hover:bg-[#f8f9fa]"
           >
             Edit Admin
           </a>
@@ -80,14 +62,14 @@ export default async function AdminUserDetailPage({
             <input type="hidden" name="userId" value={user.id} />
             <button
               type="submit"
-              className="rounded-lg bg-[#9f2f2d] px-4 py-2 font-semibold text-white transition hover:bg-[#7f1f1f]"
+              className="inline-flex h-[30px] items-center justify-center rounded-md bg-[#fdebec] px-3 text-xs font-medium text-[#9f2f2d] hover:bg-[#fbd5d7]"
             >
               Hapus Admin
             </button>
           </ConfirmActionForm>
         </div>
 
-        <div className="mt-6 flex justify-end">
+        <div className="mt-4 flex justify-end">
           <BackToPreviousButton />
         </div>
       </section>

@@ -15,11 +15,11 @@ export function AdminSidebar({ navItems }: AdminSidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className={`relative ${isOpen ? "w-60" : "w-14"} shrink-0 bg-[#18181b] text-[#d4d4d8] transition-[width] duration-200`}>
-      <div className="border-b border-[#27272a] px-4 py-5">
+    <aside className={`relative ${isOpen ? "w-56" : "w-14"} shrink-0 bg-[#18181b] text-[#d4d4d8] transition-[width] duration-200`}>
+      <div className="border-b border-[#27272a] px-3 py-4">
         <div className="flex items-center justify-between">
           {isOpen ? (
-            <Logo className="h-8 w-auto" />
+            <Logo className="h-7 w-auto" />
           ) : (
             <div />
           )}
@@ -27,25 +27,25 @@ export function AdminSidebar({ navItems }: AdminSidebarProps) {
             type="button"
             onClick={() => setIsOpen((open) => !open)}
             aria-label={isOpen ? "Tutup sidebar" : "Buka sidebar"}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-[#27272a] bg-[#1f1f23] text-base text-[#fafafa] shadow-md transition hover:bg-[#27272a] active:scale-95"
+            className="flex h-7 w-7 items-center justify-center rounded-md border border-[#27272a] bg-[#1f1f23] text-xs text-[#fafafa] shadow-sm transition hover:bg-[#27272a] active:scale-95"
           >
             {isOpen ? "‹" : "›"}
           </button>
         </div>
         {isOpen && (
-          <p className="mt-3 text-xs font-semibold uppercase tracking-[0.08em] text-white">
+          <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-white">
             Panel Administrasi
           </p>
         )}
       </div>
 
       {isOpen ? (
-        <nav className="space-y-0.5 px-2 py-4">
+        <nav className="space-y-0.5 px-2 py-3">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`block rounded-md px-3 py-2 text-sm font-medium transition ${
+              className={`block rounded-md px-3 py-2 text-[13px] font-medium transition ${
                 pathname === item.href
                   ? "bg-[#27272a] text-[#fafafa]"
                   : "text-[#d4d4d8] hover:bg-[#1f1f23] hover:text-[#fafafa]"
@@ -56,7 +56,7 @@ export function AdminSidebar({ navItems }: AdminSidebarProps) {
           ))}
         </nav>
       ) : (
-        <nav className="flex flex-col items-center gap-1 px-2 py-4">
+        <nav className="flex flex-col items-center gap-1 px-2 py-3">
           {navItems.map((item) => {
             const Icon = getNavIcon(item.label);
             return (
@@ -64,13 +64,13 @@ export function AdminSidebar({ navItems }: AdminSidebarProps) {
                 key={item.href}
                 href={item.href}
                 title={item.label}
-                className={`flex h-9 w-9 items-center justify-center rounded-md transition ${
+                className={`flex h-8 w-8 items-center justify-center rounded-md transition ${
                   pathname === item.href
                     ? "bg-[#27272a] text-[#fafafa]"
                     : "text-[#d4d4d8] hover:bg-[#1f1f23] hover:text-[#fafafa]"
                 }`}
               >
-                {Icon && <Icon className="h-5 w-5" />}
+                {Icon && <Icon className="h-4 w-4" />}
               </Link>
             );
           })}
@@ -81,7 +81,7 @@ export function AdminSidebar({ navItems }: AdminSidebarProps) {
         <form action="/api/logout" method="POST" className="px-2 pt-2">
           <button
             type="submit"
-            className="flex w-full items-center justify-between rounded-md border border-[#27272a] bg-[#1f1f23] px-3 py-2.5 text-sm font-medium text-[#d4d4d8] transition hover:border-[#3f3f46] hover:bg-[#27272a] hover:text-[#fafafa] active:scale-[0.98]"
+            className="flex w-full items-center justify-between rounded-md border border-[#27272a] bg-[#1f1f23] px-3 py-2 text-[13px] font-medium text-[#d4d4d8] transition hover:border-[#3f3f46] hover:bg-[#27272a] hover:text-[#fafafa] active:scale-[0.98]"
           >
             <span>Keluar</span>
             <IconLogout className="h-4 w-4 shrink-0" />
@@ -92,7 +92,7 @@ export function AdminSidebar({ navItems }: AdminSidebarProps) {
           <button
             type="submit"
             title="Keluar"
-            className="flex h-9 w-9 items-center justify-center rounded-md border border-[#27272a] bg-[#1f1f23] text-[#d4d4d8] transition hover:border-[#3f3f46] hover:bg-[#27272a] hover:text-[#fafafa] active:scale-[0.98]"
+            className="flex h-8 w-8 items-center justify-center rounded-md border border-[#27272a] bg-[#1f1f23] text-[#d4d4d8] transition hover:border-[#3f3f46] hover:bg-[#27272a] hover:text-[#fafafa] active:scale-[0.98]"
           >
             <IconLogout className="h-4 w-4" />
           </button>

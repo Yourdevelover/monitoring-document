@@ -36,14 +36,14 @@ export function FilterSelect({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-2 rounded-lg border border-[#e5e7eb] bg-white px-3 py-2 text-[11px] font-medium hover:bg-[#f8f9fa]"
+        className="flex w-full items-center justify-between gap-2 rounded-md border border-[#e5e7eb] bg-white px-3 py-2 text-[11px] font-medium hover:bg-[#f8f9fa]"
       >
         <span className="truncate">{label}</span>
         <span className="shrink-0 text-[#6b7280]">{open ? "▲" : "▼"}</span>
       </button>
 
       {open && (
-        <div className="absolute left-0 right-0 z-20 mt-1 max-h-56 overflow-y-auto rounded-lg border border-[#e5e7eb] bg-white shadow-lg">
+        <div className="absolute left-0 right-0 z-20 mt-1 max-h-56 overflow-y-auto rounded-md border border-[#e5e7eb] bg-white shadow-lg">
           {options.map((opt) => (
             <div
               key={opt}

@@ -40,7 +40,7 @@ export function SearchInput({
       value={value}
       onChange={(e) => setValue(e.target.value)}
       placeholder="Cari..."
-      className="h-9 min-w-0 flex-1 rounded-sm border border-[#e5e7eb] bg-white px-2 text-[11px] outline-none focus:border-[#2563eb]"
+      className="h-[30px] min-w-0 flex-1 rounded-md border border-[#e5e7eb] bg-white px-2 text-xs outline-none focus:border-[#2563eb]"
     />
   );
 }

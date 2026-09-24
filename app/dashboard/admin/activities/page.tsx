@@ -69,41 +69,39 @@ export default async function AdminActivitiesPage({
   });
 
   return (
-    <main className="space-y-2 p-2">
-      <header className="rounded-lg border border-[#e5e7eb] bg-white px-3 py-2">
-        <div className="mb-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">Audit Log</p>
-          <h1 className="text-[13px] font-bold">Log Aktivitas</h1>
-        </div>
-
+    <main className="space-y-4">
+      <header className="rounded-lg border border-[#e5e7eb] bg-white px-4 py-3">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">Audit Log</p>
+        <h1 className="mt-1 text-[13px] font-semibold tracking-tight">Log Aktivitas</h1>
+        <p className="mt-1 text-xs text-[#6b7280]">Catat aktivitas sistem.</p>
         <div className="flex items-center gap-2">
           <div className="flex min-w-0 flex-1">
             <SearchInput initialQuery={searchQuery} date={selectedDate} action={selectedAction} />
           </div>
           <div className="flex shrink-0 items-center gap-2">
-          <FilterSelect
-            name="action"
-            placeholder="Pilih aksi"
-            options={actionList}
-            selected={selectedAction}
-            params={{ date: selectedDate }}
-          />
-          <DateFilter dateList={dateList} selectedDate={selectedDate} />
-          <a href="/dashboard/admin/activities" className="rounded-lg border border-[#e5e7eb] bg-white px-3 py-2 text-[11px] font-medium hover:bg-[#f8f9fa]">
-            Reset filter
-          </a>
-          {selectedDate ? (
-            <DeleteSelectedButton selectedDate={selectedDate} />
-          ) : (
-            <button
-              type="button"
-              disabled
-              title="Pilih tanggal dulu untuk menghapus"
-              className="cursor-not-allowed rounded-lg border border-[#e5e7eb] bg-[#f8f9fa] px-3 py-2 text-[11px] font-medium text-[#9ca3af]"
-            >
-              Hapus
-            </button>
-          )}
+            <FilterSelect
+              name="action"
+              placeholder="Pilih aksi"
+              options={actionList}
+              selected={selectedAction}
+              params={{ date: selectedDate }}
+            />
+            <DateFilter dateList={dateList} selectedDate={selectedDate} />
+            <a href="/dashboard/admin/activities" className="inline-flex h-[30px] items-center rounded-md border border-[#e5e7eb] bg-white px-3 text-xs font-medium hover:bg-[#f8f9fa]">
+              Reset filter
+            </a>
+            {selectedDate ? (
+              <DeleteSelectedButton selectedDate={selectedDate} />
+            ) : (
+              <button
+                type="button"
+                disabled
+                title="Pilih tanggal dulu untuk menghapus"
+                className="inline-flex h-[30px] cursor-not-allowed items-center rounded-md border border-[#e5e7eb] bg-[#f8f9fa] px-3 text-xs font-medium text-[#9ca3af]"
+              >
+                Hapus
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -114,15 +112,15 @@ export default async function AdminActivitiesPage({
         </p>
       )}
 
-      <section className="rounded-lg border border-[#e5e7eb] bg-white p-2">
+      <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
         <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-[11px] leading-tight">
+          <table className="min-w-full text-left text-xs">
             <thead>
               <tr className="border-b border-[#e5e7eb] text-[10px] uppercase tracking-wide text-[#6b7280]">
                 <th className="whitespace-nowrap px-2 py-1 font-semibold">Waktu</th>
                 <th className="whitespace-nowrap px-2 py-1 font-semibold">Aktor</th>
                 <th className="whitespace-nowrap px-2 py-1 font-semibold">Aksi</th>
-                <th className="px-2 py-1 font-semibold">Deskripsi</th>
+                <th className="whitespace-nowrap px-2 py-1 font-semibold">Deskripsi</th>
               </tr>
             </thead>
             <tbody>
