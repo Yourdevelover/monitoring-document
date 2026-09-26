@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireManager } from "@/lib/auth";
 import { hash } from "bcryptjs";
+import { getBaseUrl } from "@/lib/redirect";
 
 export async function POST(request: Request) {
   try {
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
         });
 
     if (profileRequests.length === 0) {
-      return NextResponse.redirect(new URL("/dashboard/manajer/pengajuan-profil", request.url));
+      return NextResponse.redirect(new URL("/dashboard/manajer/pengajuan-profil?toast=" + encodeURIComponent("Tidak ada permintaan yang perlu diproses."), getBaseUrl(request)));
     }
 
     const processedRequestIds = [] as number[];
@@ -113,7 +114,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.redirect(new URL("/dashboard/manajer/pengajuan-profil", request.url));
+    return NextResponse.redirect(new URL("/dashboard/manajer/pengajuan-profil?toast=" + encodeURIComponent(action === "approve" ? "Permintaan profil disetujui." : "Permintaan profil ditolak."), getBaseUrl(request)));
   } catch (error) {
     console.error(error);
     return NextResponse.json(

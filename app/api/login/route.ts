@@ -5,39 +5,34 @@ import { prisma } from "@/lib/prisma";
 
 const SESSION_COOKIE = "monitoring_admin_session";
 
-function getBaseUrl(request: Request) {
-  const forwarded = request.headers.get("x-forwarded-host");
-  const proto = request.headers.get("x-forwarded-proto") ?? "http";
-  const host = forwarded ?? request.headers.get("host") ?? "localhost:3000";
-  return `${proto}://${host}`;
-}
-
 export async function POST(request: Request) {
   try {
-    const formData = await request.formData();
-    const email = String(formData.get("email") ?? "").trim().toLowerCase();
-    const password = String(formData.get("password") ?? "");
+    let email = "";
+    let password = "";
+    const contentType = request.headers.get("content-type") ?? "";
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      email = String(formData.get("email") ?? "").trim().toLowerCase();
+      password = String(formData.get("password") ?? "");
+    } else {
+      const text = await request.text();
+      const params = new URLSearchParams(text);
+      email = String(params.get("email") ?? "").trim().toLowerCase();
+      password = String(params.get("password") ?? "");
+    }
 
     if (!email || !password) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Email dan password wajib diisi.",
-        },
+        { success: false, error: "Email dan password wajib diisi." },
         { status: 400 }
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user || user.isActive !== "ACTIVE") {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Akun tidak ditemukan atau tidak aktif.",
-        },
+        { success: false, error: "Akun tidak ditemukan atau tidak aktif." },
         { status: 401 }
       );
     }
@@ -46,33 +41,23 @@ export async function POST(request: Request) {
 
     if (!isPasswordValid) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Password salah.",
-        },
+        { success: false, error: "Password salah." },
         { status: 401 }
       );
     }
 
     const token = await createSessionToken(user.id);
 
-    let redirectPath = "/";
+    let redirect = "/dashboard/karyawan";
+    if (user.role === "ADMIN") redirect = "/dashboard/admin";
+    else if (user.role === "MANAGER") redirect = "/dashboard/manajer";
 
-    if (user.role === "ADMIN") {
-      redirectPath = "/dashboard/admin";
-    } else if (user.role === "MANAGER") {
-      redirectPath = "/dashboard/manajer";
-    } else if (user.role === "KARYAWAN") {
-      redirectPath = "/dashboard/karyawan";
-    }
-
-    const baseUrl = getBaseUrl(request);
-    const response = NextResponse.redirect(new URL(redirectPath, baseUrl));
+    const response = NextResponse.json({ success: true, redirect });
 
     response.cookies.set(SESSION_COOKIE, token, {
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      secure: false,
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
     });
@@ -91,10 +76,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Terjadi kesalahan server saat login.",
-      },
+      { success: false, error: "Terjadi kesalahan server saat login." },
       { status: 500 }
     );
   }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getBaseUrl } from "@/lib/redirect";
 
 export async function POST(request: Request) {
   try {
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
     });
 
     const dashboardRole = user.role === "ADMIN" ? "admin" : user.role === "MANAGER" ? "manajer" : "karyawan";
-    return NextResponse.redirect(new URL(`/dashboard/${dashboardRole}/profil`, request.url));
+    return NextResponse.redirect(new URL(`/dashboard/${dashboardRole}/profil`, getBaseUrl(request)));
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Gagal memperbarui profil." }, { status: 500 });

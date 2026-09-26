@@ -2,6 +2,7 @@ import { hash } from "bcryptjs";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireManager } from "@/lib/auth";
+import { getBaseUrl } from "@/lib/redirect";
 
 export async function POST(request: Request) {
   try {
@@ -101,7 +102,7 @@ export async function POST(request: Request) {
         }
       });
 
-      return NextResponse.redirect(new URL("/dashboard/manajer/karyawan", request.url));
+      return NextResponse.redirect(new URL("/dashboard/manajer/karyawan", getBaseUrl(request)));
     }
 
     if (!name || !email || password.length < 6) {
@@ -157,7 +158,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.redirect(new URL("/dashboard/manajer/karyawan", request.url));
+    return NextResponse.redirect(new URL("/dashboard/manajer/karyawan", getBaseUrl(request)));
   } catch (error) {
     console.error(error);
 

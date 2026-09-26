@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireEmployee } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getBaseUrl } from "@/lib/redirect";
 
 export async function POST(request: Request) {
   try {
@@ -94,7 +95,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.redirect(new URL("/dashboard/karyawan/profil", request.url));
+    return NextResponse.redirect(new URL("/dashboard/karyawan/profil?toast=" + encodeURIComponent("Pengajuan perubahan profil berhasil dikirim ke manajer."), getBaseUrl(request)));
   } catch (error) {
     console.error(error);
     return NextResponse.json(

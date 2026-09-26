@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getBaseUrl } from "@/lib/redirect";
 
 export async function POST(request: Request) {
   const admin = await getSessionUser();
@@ -63,5 +64,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Aksi tidak valid." }, { status: 400 });
   }
 
-  return NextResponse.redirect(new URL("/dashboard/admin/karyawan", request.url));
+  return NextResponse.redirect(new URL("/dashboard/admin/karyawan", getBaseUrl(request)));
 }

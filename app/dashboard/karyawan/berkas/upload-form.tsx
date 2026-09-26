@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { FileConfirmationDialog } from "./file-confirmation-dialog";
+import { toast } from "@/app/components/toast";
 
 type UploadFormProps = {
   categoryKey: "DAILY" | "CHAT" | "PAYMENT";
@@ -18,6 +19,7 @@ export function UploadForm({ categoryKey, categoryLabel, isDisabled = false }: U
     event.preventDefault();
     
     if (!selectedFile) {
+      toast("Silakan pilih file terlebih dahulu.", "error");
       setError("Silakan pilih file terlebih dahulu.");
       return;
     }

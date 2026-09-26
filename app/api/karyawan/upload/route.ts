@@ -1,7 +1,7 @@
 import { copyFile, mkdir, unlink, writeFile } from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
-import { requireEmployee } from "@/lib/auth";
+import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { enqueueFileTask } from "@/lib/upload-queue";
 import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
@@ -10,7 +10,10 @@ const VALID_CATEGORIES = new Set(["DAILY", "CHAT", "PAYMENT"]);
 
 export async function POST(request: Request) {
   try {
-    const employee = await requireEmployee();
+    const employee = await getSessionUser();
+    if (!employee || employee.role !== "KARYAWAN") {
+      return NextResponse.json({ success: false, error: "Sesi berakhir. Login ulang." }, { status: 401 });
+    }
 
     const teamId = employee.teamId;
 

@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState } from "react";
+import { toast } from "@/app/components/toast";
 
 type FileActionsProps = {
   uploadId: number;
@@ -37,10 +38,10 @@ export function FileActions({
         throw new Error(data?.error || "Gagal memproses berkas");
       }
 
-      window.location.href = "/dashboard/karyawan/berkas";
+      window.location.href = "/dashboard/karyawan/berkas?toast=" + encodeURIComponent("Berkas diproses.");
     } catch (error) {
       console.error(error);
-      alert("Terjadi kesalahan. Silakan coba lagi.");
+      toast(error instanceof Error ? error.message : "Terjadi kesalahan. Silakan coba lagi.", "error");
     } finally {
       setIsSubmitting(false);
     }

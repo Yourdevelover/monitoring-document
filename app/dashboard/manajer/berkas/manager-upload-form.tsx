@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useRef, useState } from "react";
+import { toast } from "@/app/components/toast";
 
 const CATEGORY_OPTIONS = [
   { key: "DAILY", label: "daily" },
@@ -45,7 +46,7 @@ export function ManagerUploadForm() {
         throw new Error(data?.error || "Gagal mengunggah berkas");
       }
 
-      setSuccess("Berkas berhasil dibagikan ke tim.");
+      toast("Berkas berhasil dibagikan ke tim.", "success");
       setSelectedFile(null);
       setCategory("DAILY");
       if (fileInputRef.current) {
@@ -53,7 +54,9 @@ export function ManagerUploadForm() {
       }
       window.location.reload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Terjadi kesalahan. Silakan coba lagi.");
+      const msg = err instanceof Error ? err.message : "Terjadi kesalahan. Silakan coba lagi.";
+      setError(msg);
+      toast(msg, "error");
     } finally {
       setIsSubmitting(false);
     }

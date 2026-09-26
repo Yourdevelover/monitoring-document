@@ -2,6 +2,7 @@ import { hash } from "bcryptjs";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth";
+import { getBaseUrl } from "@/lib/redirect";
 
 export async function POST(request: Request) {
   try {
@@ -68,7 +69,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.redirect(new URL("/dashboard/admin", request.url));
+    return NextResponse.redirect(new URL("/dashboard/admin", getBaseUrl(request)));
   } catch (error) {
     console.error(error);
     return NextResponse.json(

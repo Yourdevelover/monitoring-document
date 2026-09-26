@@ -2,6 +2,7 @@ import { hash } from "bcryptjs";
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getBaseUrl } from "@/lib/redirect";
 
 export async function POST(request: Request) {
   const admin = await getSessionUser();
@@ -17,5 +18,5 @@ export async function POST(request: Request) {
   const duplicate = await prisma.user.findFirst({ where: { email, NOT: { id: userId } } });
   if (duplicate) return NextResponse.json({ error: "Email sudah digunakan." }, { status: 409 });
   await prisma.user.update({ where: { id: userId }, data: { name, email, phoneNumber: phoneNumber || null, ...(password ? { passwordHash: await hash(password, 10) } : {}) } });
-  return NextResponse.redirect(new URL(`/dashboard/admin/managers/${userId}`, request.url));
+  return NextResponse.redirect(new URL(`/dashboard/admin/managers/${userId}`, getBaseUrl(request)));
 }

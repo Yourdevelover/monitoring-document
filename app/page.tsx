@@ -1,6 +1,7 @@
 ﻿import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { Logo } from "@/app/components/logo";
+import { LoginForm } from "@/app/login-form";
 
 export default async function HomePage() {
   const user = await getSessionUser();
@@ -24,42 +25,7 @@ export default async function HomePage() {
         </div>
 
         <section className="rounded-lg border border-[#e5e7eb] bg-white p-6">
-          <form action="/api/login" method="POST" className="space-y-4">
-            <div>
-              <label htmlFor="email" className="mb-1.5 block text-sm font-medium">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                defaultValue="admin@monitoring.local"
-                className="w-full rounded-md border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="mb-1.5 block text-sm font-medium">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                defaultValue="admin"
-                className="w-full rounded-md border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full rounded-md bg-[#111111] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#333333] active:scale-[0.98]"
-            >
-              Masuk
-            </button>
-          </form>
+          <LoginForm />
 
           <div className="mt-4 text-center text-sm text-[#6b7280]">
             Daftar sebagai manajer{" "}

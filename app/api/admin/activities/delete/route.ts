@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth";
+import { getBaseUrl } from "@/lib/redirect";
 
 export async function POST(request: Request) {
   const admin = await getSessionUser();
@@ -27,5 +28,5 @@ export async function POST(request: Request) {
       description: `Hapus ${result.count} log tanggal ${date} oleh ${admin.email}`,
     },
   });
-  return NextResponse.redirect(new URL(`/dashboard/admin/activities?deleted=${result.count}&date=${date}`, request.url));
+  return NextResponse.redirect(new URL(`/dashboard/admin/activities?deleted=${result.count}&date=${date}`, getBaseUrl(request)));
 }

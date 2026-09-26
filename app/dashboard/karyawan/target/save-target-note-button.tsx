@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "@/app/components/toast";
 
 export function SaveTargetNoteButton({
   name,
@@ -30,9 +31,12 @@ export function SaveTargetNoteButton({
       setSaved(true);
       const note = await res.json();
       window.dispatchEvent(new CustomEvent("note-saved", { detail: note }));
+      toast("Catatan tersimpan.", "success");
     } else {
       const r = await res.json();
-      setError(r.error ?? "Gagal menyimpan.");
+      const msg = r.error ?? "Gagal menyimpan.";
+      setError(msg);
+      toast(msg, "error");
     }
   }
 

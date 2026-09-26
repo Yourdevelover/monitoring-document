@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+function getBaseUrl(request: Request) {
+  const host = request.headers.get("host") ?? "localhost:3000";
+  const safeHost = host.replace(/^0\.0\.0\.0/, "localhost");
+  const proto = request.headers.get("x-forwarded-proto") ?? "http";
+  return `${proto}://${safeHost}`;
+}
+
 export async function POST(request: Request) {
   const manager = await getSessionUser();
 
@@ -35,5 +42,5 @@ export async function POST(request: Request) {
     data: { isPinned: !announcement.isPinned },
   });
 
-  return NextResponse.redirect(new URL("/dashboard/manajer/pengumuman", request.url));
+  return NextResponse.redirect(new URL("/dashboard/manajer/pengumuman", getBaseUrl(request)));
 }

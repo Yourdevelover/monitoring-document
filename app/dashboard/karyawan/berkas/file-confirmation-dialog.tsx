@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState } from "react";
+import { toast } from "@/app/components/toast";
 
 type FileConfirmationDialogProps = {
   fileName: string;
@@ -62,6 +63,7 @@ export function FileConfirmationDialog({
           if (onSuccess) {
             onSuccess();
           }
+          toast("Berkas terkirim.", "success");
         } else if (action === "replace") {
           // Just close dialog and let user pick another file
           if (onClose) {
@@ -84,11 +86,12 @@ export function FileConfirmationDialog({
           throw new Error("Gagal memproses berkas");
         }
 
-        window.location.href = "/dashboard/karyawan/berkas";
+        toast("Berkas terkirim.", "success");
+        window.location.href = "/dashboard/karyawan/berkas?toast=" + encodeURIComponent("Berkas terkirim.");
       }
     } catch (error) {
       console.error(error);
-      alert(error instanceof Error ? error.message : "Terjadi kesalahan. Silakan coba lagi.");
+      toast(error instanceof Error ? error.message : "Terjadi kesalahan. Silakan coba lagi.", "error");
     } finally {
       setIsSubmitting(false);
     }

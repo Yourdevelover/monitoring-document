@@ -2,6 +2,7 @@ import { hash } from "bcryptjs";
 import { NextResponse } from "next/server";
 import { createSessionToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getBaseUrl } from "@/lib/redirect";
 
 export async function POST(request: Request) {
   try {
@@ -65,12 +66,12 @@ export async function POST(request: Request) {
     });
 
     const token = await createSessionToken(manager.id);
-    const response = NextResponse.redirect(new URL("/dashboard/manajer", request.url));
+    const response = NextResponse.redirect(new URL("/dashboard/manajer", getBaseUrl(request)));
 
     response.cookies.set("monitoring_admin_session", token, {
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      secure: false,
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
     });

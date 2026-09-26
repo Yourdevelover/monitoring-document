@@ -3,16 +3,24 @@ import { requireEmployee } from "@/lib/auth";
 
 const OPS = ["bagi", "kali", "tambah", "kurang"] as const;
 
+function getBaseUrl(req: Request) {
+  const host = req.headers.get("host") ?? "localhost:3000";
+  const safeHost = host.replace(/^0\.0\.0\.0/, "localhost");
+  const proto = req.headers.get("x-forwarded-proto") ?? "http";
+  return `${proto}://${safeHost}`;
+}
+
 export async function POST(req: Request) {
   const employee = await requireEmployee();
   const form = await req.formData();
   const action = String(form.get("action") ?? "upsert");
+  const base = getBaseUrl(req);
 
   if (action === "delete") {
     const id = Number(form.get("id"));
     if (!isFinite(id)) return Response.json({ error: "ID tidak valid" }, { status: 400 });
     await prisma.target.deleteMany({ where: { id, userId: employee.id } });
-    return Response.redirect(new URL("/dashboard/karyawan/target", req.url), 303);
+    return Response.redirect(new URL("/dashboard/karyawan/target?toast=" + encodeURIComponent("Target dihapus."), base), 303);
   }
 
   if (action === "update") {
@@ -26,7 +34,7 @@ export async function POST(req: Request) {
       return Response.json({ error: "Data tidak valid" }, { status: 400 });
     }
     await prisma.target.updateMany({ where: { id, userId: employee.id }, data: { name, targetValue, currentValue, formula, threshold } });
-    return Response.redirect(new URL("/dashboard/karyawan/target", req.url), 303);
+    return Response.redirect(new URL("/dashboard/karyawan/target?toast=" + encodeURIComponent("Progres tersimpan."), base), 303);
   }
 
   const name = String(form.get("name") ?? "").trim();
@@ -46,5 +54,5 @@ export async function POST(req: Request) {
     update: { targetValue, currentValue, formula, threshold },
   });
 
-  return Response.redirect(new URL("/dashboard/karyawan/target", req.url), 303);
+  return Response.redirect(new URL("/dashboard/karyawan/target?toast=" + encodeURIComponent("Target tersimpan."), base), 303);
 }

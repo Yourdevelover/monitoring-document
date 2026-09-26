@@ -16,12 +16,15 @@ export async function POST(request: Request) {
     });
   }
 
-  const response = NextResponse.redirect(new URL("/", request.url));
+  const host = request.headers.get("host") ?? "localhost:3000";
+  const safeHost = host.replace(/^0\.0\.0\.0/, "localhost");
+  const proto = request.headers.get("x-forwarded-proto") ?? "http";
+  const response = NextResponse.redirect(new URL("/?toast=" + encodeURIComponent("Berhasil keluar."), `${proto}://${safeHost}`));
 
   response.cookies.set("monitoring_admin_session", "", {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: false,
     path: "/",
     maxAge: 0,
   });

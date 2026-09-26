@@ -61,7 +61,7 @@ export default async function EmployeeProfilePage({ searchParams }: EmployeeProf
             <p className="mt-1 text-sm text-[#6b7280]">Perubahan akan dikirim ke persetujuan manajer.</p>
           </div>
 
-          <form action="/api/profile" method="POST" className="grid gap-4 sm:grid-cols-2">
+          <form action="/api/karyawan/profile-request" method="POST" className="grid gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="name" className="mb-1 block text-sm font-medium text-[#374151]">
                 Nama

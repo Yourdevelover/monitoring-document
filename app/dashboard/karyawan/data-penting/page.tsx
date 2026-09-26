@@ -1,6 +1,7 @@
 ﻿import { prisma } from "@/lib/prisma";
 import { requireEmployee } from "@/lib/auth";
 import { PaginationControls } from "@/app/components/pagination-controls";
+import { DeleteImportantButton } from "./delete-important-button";
 
 export default async function DataPentingPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const employee = await requireEmployee();
@@ -55,16 +56,7 @@ export default async function DataPentingPage({ searchParams }: { searchParams: 
                   >
                     Lihat file
                   </a>
-                  <form action="/api/karyawan/upload" method="POST">
-                    <input type="hidden" name="action" value="delete-important" />
-                    <input type="hidden" name="uploadId" value={file.id} />
-                    <button
-                      type="submit"
-                      className="inline-flex items-center rounded-lg border border-red-300 bg-[#fdebec] px-4 py-2 text-sm font-medium text-[#9f2f2d] hover:bg-[#fdebec]"
-                    >
-                      Hapus
-                    </button>
-                  </form>
+                  <DeleteImportantButton fileId={file.id} />
                 </div>
               </article>
             ))}
@@ -79,3 +71,5 @@ export default async function DataPentingPage({ searchParams }: { searchParams: 
     </main>
   );
 }
+
+
