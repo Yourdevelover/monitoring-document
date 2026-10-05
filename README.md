@@ -28,7 +28,7 @@ npm install
 Buat file `.env`:
 
 ```env
-DATABASE_URL="postgresql://postgres:admin@localhost:5432/Data_monitoring?schema=public"
+DATABASE_URL="postgresql://postgres:<PASSWORD>@localhost:5432/Data_monitoring?schema=public"
 JWT_SECRET="ganti-dengan-secret-acak-minimal-32-karakter"
 ```
 
@@ -37,6 +37,7 @@ Sinkronisasi database dan seed admin:
 ```bash
 npx prisma db push
 npx prisma generate
+# Set ADMIN_EMAIL and ADMIN_PASSWORD in the process environment before seeding.
 npm run db:seed
 ```
 
@@ -48,7 +49,7 @@ npm run build  # build produksi
 npm start      # jalankan hasil build
 ```
 
-Buka `http://localhost:3000`. Login default: `admin@monitoring.local` / `admin`.
+Buka `http://localhost:3000`. Akun admin dibuat dari nilai `ADMIN_EMAIL` dan `ADMIN_PASSWORD`; tidak ada kredensial default.
 
 ## Struktur Direktori
 
@@ -67,7 +68,7 @@ monitoring-web/
 │   │   ├── confirm-action-form.tsx
 │   │   ├── notes-widget.tsx
 │   │   ├── sidebar-icons.tsx
-│   │   ├── logo.tsx / logo-footer.tsx
+│   │   ├── logo.tsx
 │   ├── api/
 │   │   ├── login/route.ts          # Login, set cookie JWT
 │   │   ├── logout/route.ts         # Logout, hapus cookie
@@ -130,7 +131,7 @@ monitoring-web/
 │   ├── redirect.ts      # getBaseUrl() — redirect aman di balik proxy
 │   ├── upload-queue.ts  # Antrean serial operasi file
 │   └── upload-time.ts   # Helper zona Asia/Jakarta
-├── middleware.ts        # Rewrite /uploads/* → /api/files/*
+├── proxy.ts             # Rewrite /uploads/* → /api/files/*
 ├── prisma/schema.prisma # Skema database
 ├── scripts/
 │   ├── seed-admin.mjs   # Seed akun admin
@@ -200,39 +201,50 @@ npm run db:seed
 
 Semua redirect API memakai `getBaseUrl(request)` dari `lib/redirect.ts` agar host benar saat di balik Nginx/proxy.
 
-## File & Middleware
+## File Access Proxy
 
 - File tersimpan di `public/uploads/teams/{teamId}/{employees|managers}/{userId}/[{important/}]{timestamp}-{namaAman}`.
-- `middleware.ts` me-rewrite `/uploads/*` → `/api/files/uploads/*` agar file tetap bisa diakses pada `next start` (produksi) dengan pengecekan akses tim.
+- `proxy.ts` me-rewrite `/uploads/*` → `/api/files/uploads/*` agar file tetap bisa diakses pada `next start` (produksi) dengan pengecekan akses tim.
 - Operasi file diserialkan via `enqueueFileTask()` (`lib/upload-queue.ts`) untuk mencegah race condition.
 - Batas waktu memakai zona `Asia/Jakarta` (`lib/upload-time.ts`).
 
 ## Deploy LAN dengan Nginx
 
-Contoh `nginx.conf`:
+Jalankan build produksi, bukan `npm run dev`, untuk penggunaan karyawan. Proses Next hanya menerima koneksi lokal; client mengakses melalui Nginx pada IP server atau nama DNS lokal.
+
+Contoh konfigurasi Nginx untuk jaringan internal:
 
 ```nginx
 server {
   listen 80;
-  client_max_body_size 50M;
+  server_name _;
+  client_max_body_size 51m;
+
   location / {
     proxy_pass http://127.0.0.1:3000;
     proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
   }
 }
 ```
 
-Lalu:
+Di server, jalankan aplikasi Next pada loopback agar port `3000` tidak dibuka langsung ke jaringan:
 
 ```bash
-npx prisma db push
-npx prisma generate
+npm run db:generate
 npm run build
-npm start
+npm start -- --hostname 127.0.0.1
 ```
 
-Pindah server: salin source + `.env` baru + `public/uploads/` + jalankan `npx prisma db push` di database baru.
+Client yang berada pada Wi-Fi/LAN yang sama membuka `http://IP-SERVER/` atau hostname lokal. Pastikan firewall server mengizinkan port `80` dari subnet internal dan fitur client/AP isolation pada router tidak memblokir komunikasi antarperangkat. Jangan buka port `3000` atau PostgreSQL `5432` ke jaringan client.
+
+Untuk akses dari luar LAN, diperlukan domain/IP publik, DNS, aturan firewall dan port forwarding router, serta HTTPS dengan sertifikat yang dipercaya client. Jangan mengekspos layanan produksi melalui HTTP publik. Cookie sesi ditandai `Secure` saat request diteruskan sebagai HTTPS; pastikan Nginx mengirim `X-Forwarded-Proto`.
+
+Batasi `client_max_body_size` sedikit di atas batas aplikasi: berkas maksimal 50 MiB, body request maksimal 51 MiB. Simpan `.env`, database, dan `public/uploads/` pada penyimpanan persisten serta buat backup terjadwal. Sebelum upgrade skema database, backup dan uji perubahan pada salinan database; repo saat ini belum memiliki rangkaian migrasi awal yang lengkap untuk deployment migrasi otomatis.
+
+Pada server baru, siapkan PostgreSQL dan `.env` berisi `DATABASE_URL` serta `JWT_SECRET`; instal dependensi, generate Prisma Client, build, set `ADMIN_EMAIL`/`ADMIN_PASSWORD` lalu seed admin, dan jalankan aplikasi bersama Nginx. Salin `public/uploads/` jika memindahkan file yang sudah ada.
 
 ## Scripts
 

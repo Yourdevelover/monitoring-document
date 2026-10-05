@@ -2,22 +2,24 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-export function SearchInput({
-  initialQuery,
-  date,
-  action,
-}: {
+type SearchInputProps = {
   initialQuery: string | null;
   date: string | null;
   action: string | null;
-}) {
+};
+
+export function SearchInput(props: SearchInputProps) {
+  return <SearchInputControl key={props.initialQuery ?? ""} {...props} />;
+}
+
+function SearchInputControl({
+  initialQuery,
+  date,
+  action,
+}: SearchInputProps) {
   const router = useRouter();
   const [value, setValue] = useState(initialQuery ?? "");
   const first = useRef(true);
-
-  useEffect(() => {
-    setValue(initialQuery ?? "");
-  }, [initialQuery]);
 
   useEffect(() => {
     if (first.current) {

@@ -13,6 +13,11 @@ if (process.env.NODE_ENV === "production" && !configuredSecret) {
 
 const secret = new TextEncoder().encode(configuredSecret ?? "development-only-secret");
 
+export function isSecureRequest(request: Request) {
+  const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0].trim().toLowerCase();
+  return new URL(request.url).protocol === "https:" || forwardedProto === "https";
+}
+
 export async function createSessionToken(userId: number) {
   return new SignJWT({ userId })
     .setProtectedHeader({ alg: "HS256" })

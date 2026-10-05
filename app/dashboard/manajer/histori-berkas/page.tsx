@@ -94,7 +94,7 @@ export default async function ManagerHistoryPage({
                   <div key={file.id} className="grid gap-2 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                     <a href={file.filePath} target="_blank" rel="noopener noreferrer" className="min-w-0 hover:bg-slate-50">
                       <p className="truncate font-medium text-slate-900" title={file.fileName}>{file.fileName}</p>
-                      <p className="truncate text-sm text-slate-600">{file.user.name}</p>
+                      <p className="truncate text-xs text-slate-600">Pengirim: <span className="font-medium text-slate-800">{file.user.name}</span></p>
                       <p className="text-xs text-slate-500">Dikirim {file.submittedAt.toLocaleString("id-ID")}</p>
                     </a>
                     <a href={file.filePath} download={file.fileName} className="whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700">
@@ -117,15 +117,35 @@ export default async function ManagerHistoryPage({
                 groupedDates.set(dateKey, (groupedDates.get(dateKey) ?? 0) + 1);
               }
               const categoryDateEntries = [...groupedDates.entries()].sort(([first], [second]) => second.localeCompare(first));
+              const recentDateEntries = categoryDateEntries.slice(0, 6);
 
               return (
                 <section key={category.key} className="rounded-lg border border-slate-200 bg-white p-4">
                   <div className="mb-3 flex items-center justify-between border-b border-slate-200 pb-3">
                     <h2 className="text-sm font-semibold text-slate-800">{category.label}</h2>
+                    {categoryDateEntries.length > 0 && (
+                      <details className="group relative">
+                        <summary className="flex min-h-9 cursor-pointer list-none items-center rounded-md border border-slate-200 px-2.5 text-xs font-medium text-slate-700 hover:border-blue-300 hover:bg-blue-50 [&::-webkit-details-marker]:hidden">
+                          Pilih tanggal
+                        </summary>
+                        <div className="absolute right-0 top-full z-20 mt-1 max-h-64 w-64 max-w-[calc(100vw-3rem)] overflow-y-auto rounded-md border border-slate-200 bg-white p-1.5 shadow-lg">
+                          {categoryDateEntries.map(([dateKey, count]) => (
+                            <a
+                              key={dateKey}
+                              href={`/dashboard/manajer/histori-berkas?category=${category.key}&date=${dateKey}`}
+                              className="flex min-h-9 items-center justify-between gap-2 rounded px-2 py-1.5 text-xs hover:bg-blue-50"
+                            >
+                              <span className="truncate text-slate-700">{formatDate(dateKey)}</span>
+                              <span className="shrink-0 text-slate-500">{count} file</span>
+                            </a>
+                          ))}
+                        </div>
+                      </details>
+                    )}
                   </div>
-                  {categoryDateEntries.length > 0 ? (
+                  {recentDateEntries.length > 0 ? (
                     <div className="space-y-2">
-                      {categoryDateEntries.map(([dateKey, count]) => (
+                      {recentDateEntries.map(([dateKey, count]) => (
                         <a key={dateKey} href={`/dashboard/manajer/histori-berkas?category=${category.key}&date=${dateKey}`} className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 hover:border-blue-300 hover:bg-blue-50">
                           <span className="text-sm font-medium text-slate-800">{formatDate(dateKey)}</span>
                           <span className="text-xs text-slate-500">{count} file</span>
@@ -133,7 +153,10 @@ export default async function ManagerHistoryPage({
                       ))}
                     </div>
                   ) : (
-                    <p className="py-4 text-center text-xs text-slate-500">Belum ada tanggal upload.</p>
+                    <div className="py-4 text-center">
+                      <p className="text-xs text-slate-600">Belum ada berkas {category.label} yang dikirim.</p>
+                      <p className="mt-1 text-[11px] text-slate-500">Berkas masuk histori setelah karyawan menekan Submit.</p>
+                    </div>
                   )}
                 </section>
               );

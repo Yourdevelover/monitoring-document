@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { requireEmployee } from "@/lib/auth";
-import { SaveTargetNoteButton } from "./save-target-note-button";
+import { SaveTargetNoteButton } from "@/app/components/save-target-note-button";
 
 export default async function EmployeeTargetPage() {
   const employee = await requireEmployee();

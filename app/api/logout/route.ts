@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSessionUser } from "@/lib/auth";
+import { getSessionUser, isSecureRequest } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   response.cookies.set("monitoring_admin_session", "", {
     httpOnly: true,
     sameSite: "lax",
-    secure: false,
+    secure: isSecureRequest(request),
     path: "/",
     maxAge: 0,
   });

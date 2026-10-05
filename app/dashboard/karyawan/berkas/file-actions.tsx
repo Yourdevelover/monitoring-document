@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "@/app/components/toast";
 
 type FileActionsProps = {
@@ -18,6 +19,7 @@ export function FileActions({
   importantSaved,
   importantFileId,
 }: FileActionsProps) {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isAlreadySaved = isImportant || importantSaved;
 
@@ -38,7 +40,8 @@ export function FileActions({
         throw new Error(data?.error || "Gagal memproses berkas");
       }
 
-      window.location.href = "/dashboard/karyawan/berkas?toast=" + encodeURIComponent("Berkas diproses.");
+      toast("Berkas diproses.", "success");
+      router.push("/dashboard/karyawan/berkas");
     } catch (error) {
       console.error(error);
       toast(error instanceof Error ? error.message : "Terjadi kesalahan. Silakan coba lagi.", "error");

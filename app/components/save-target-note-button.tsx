@@ -19,25 +19,27 @@ export function SaveTargetNoteButton({
 
   async function save() {
     setError("");
-    const fmt = (n: number) =>
-      new Intl.NumberFormat("id-ID", { notation: "compact", maximumFractionDigits: 1 }).format(n);
-    const content = `Target ${name}: ${fmt(current)}/${fmt(target)} (${pct.toFixed(1)}%)`;
-    const res = await fetch("/api/notes", {
+    const formatValue = (value: number) =>
+      new Intl.NumberFormat("id-ID", { notation: "compact", maximumFractionDigits: 1 }).format(value);
+    const content = `Target ${name}: ${formatValue(current)}/${formatValue(target)} (${pct.toFixed(1)}%)`;
+    const response = await fetch("/api/notes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content }),
     });
-    if (res.ok) {
+
+    if (response.ok) {
       setSaved(true);
-      const note = await res.json();
+      const note = await response.json();
       window.dispatchEvent(new CustomEvent("note-saved", { detail: note }));
       toast("Catatan tersimpan.", "success");
-    } else {
-      const r = await res.json();
-      const msg = r.error ?? "Gagal menyimpan.";
-      setError(msg);
-      toast(msg, "error");
+      return;
     }
+
+    const result = await response.json();
+    const message = result.error ?? "Gagal menyimpan.";
+    setError(message);
+    toast(message, "error");
   }
 
   return (

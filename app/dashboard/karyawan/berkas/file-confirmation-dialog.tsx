@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "@/app/components/toast";
 
 type FileConfirmationDialogProps = {
@@ -22,6 +23,7 @@ export function FileConfirmationDialog({
   onClose,
   onSuccess,
 }: FileConfirmationDialogProps) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(isNewUpload); // Auto-open for new uploads
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -87,7 +89,7 @@ export function FileConfirmationDialog({
         }
 
         toast("Berkas terkirim.", "success");
-        window.location.href = "/dashboard/karyawan/berkas?toast=" + encodeURIComponent("Berkas terkirim.");
+        router.push("/dashboard/karyawan/berkas");
       }
     } catch (error) {
       console.error(error);

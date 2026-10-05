@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { enqueueFileTask } from "@/lib/upload-queue";
-import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
+import { exceedsUploadRequestLimit, MAX_UPLOAD_SIZE_BYTES } from "@/lib/upload-limits";
 
 const VALID_CATEGORIES = new Set(["DAILY", "CHAT", "PAYMENT"]);
 
@@ -13,6 +13,10 @@ export async function POST(request: Request) {
     const employee = await getSessionUser();
     if (!employee || employee.role !== "KARYAWAN") {
       return NextResponse.json({ success: false, error: "Sesi berakhir. Login ulang." }, { status: 401 });
+    }
+
+    if (exceedsUploadRequestLimit(request)) {
+      return NextResponse.json({ success: false, error: "Ukuran permintaan melebihi batas unggah." }, { status: 413 });
     }
 
     const teamId = employee.teamId;
@@ -29,7 +33,6 @@ export async function POST(request: Request) {
 
     const formData = await request.formData();
     const action = String(formData.get("action") ?? "upload");
-    const startOfToday = getStartOfCurrentJakartaDay();
 
     if (action === "delete") {
       const uploadId = Number(formData.get("uploadId") ?? 0);
@@ -360,6 +363,10 @@ export async function POST(request: Request) {
         },
         { status: 400 }
       );
+    }
+
+    if (file.size > MAX_UPLOAD_SIZE_BYTES) {
+      return NextResponse.json({ success: false, error: "Ukuran berkas maksimal 50 MiB." }, { status: 413 });
     }
 
     return await enqueueFileTask(async () => {

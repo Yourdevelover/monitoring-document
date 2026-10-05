@@ -4,6 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "./components/toast";
 
+function getInternalPath(path: string | null) {
+  const url = new URL(path ?? "/", window.location.origin);
+  return url.origin === window.location.origin ? `${url.pathname}${url.search}${url.hash}` : "/";
+}
+
 export function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -22,13 +27,12 @@ export function LoginForm() {
         redirect: "manual",
       });
       if (res.type === "opaqueredirect" || res.status === 0) {
-        router.refresh();
-        window.location.href = "/";
+        router.replace("/");
         return;
       }
       if (res.status >= 300 && res.status < 400) {
         const loc = res.headers.get("location") ?? "/";
-        window.location.href = loc;
+        router.replace(getInternalPath(loc));
         return;
       }
       const data = await res.json().catch(() => null);
@@ -40,7 +44,7 @@ export function LoginForm() {
         return;
       }
       toast("Login berhasil.", "success");
-      window.location.href = data?.redirect ?? "/";
+      router.replace(getInternalPath(data?.redirect ?? "/"));
     } catch {
       const msg = "Tidak dapat terhubung ke server.";
       setError(msg);
@@ -61,7 +65,6 @@ export function LoginForm() {
           name="email"
           type="email"
           required
-          defaultValue="admin@monitoring.local"
           className="w-full rounded-md border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
         />
       </div>
@@ -75,7 +78,6 @@ export function LoginForm() {
           name="password"
           type="password"
           required
-          defaultValue="admin"
           className="w-full rounded-md border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
         />
       </div>

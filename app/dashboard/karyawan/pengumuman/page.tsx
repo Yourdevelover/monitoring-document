@@ -36,6 +36,7 @@ export default async function EmployeeAnnouncementsPage({ searchParams }: { sear
         </header>
 
         <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
+          <p className="mb-4 text-xs text-[#6b7280]">Pengumuman otomatis hilang setelah 12 jam. Pengumuman yang disematkan tetap tampil sampai dihapus.</p>
           <div className="space-y-3">
             {announcements.length > 0 ? (
               announcements.map((item) => (

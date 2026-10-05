@@ -123,7 +123,7 @@ export default async function ManagerCategoryPage({ params, searchParams }: Cate
         {visibleUploads.length > 0 ? (
           <div className="max-h-[680px] divide-y divide-slate-200 overflow-x-auto overflow-y-auto border-y border-slate-200">
             {pagedUploads.map((upload) => (
-              <article key={upload.id} className="grid min-w-[620px] grid-cols-[36px_minmax(0,1fr)_max-content_auto] items-center gap-3 py-3">
+              <article key={upload.id} className="grid min-w-[620px] grid-cols-[36px_minmax(0,1fr)_max-content_auto] items-center gap-3 py-2.5">
                 <EmployeeProfileCard
                   employee={upload.user}
                   files={uploadsByEmployee.get(upload.userId)?.map((file) => ({
@@ -137,7 +137,10 @@ export default async function ManagerCategoryPage({ params, searchParams }: Cate
                     expiresAt: file.expiresAt,
                   }))}
                 />
-                <p className="min-w-0 truncate font-semibold text-slate-900" title={upload.fileName}>{upload.fileName}</p>
+                <div className="min-w-0">
+                  <p className="truncate text-[13px] font-semibold text-slate-900" title={upload.fileName}>{upload.fileName}</p>
+                  <p className="mt-0.5 truncate text-xs text-slate-600">Dikirim oleh <span className="font-medium text-slate-800">{upload.user.name}</span></p>
+                </div>
                 <p className="whitespace-nowrap text-xs text-slate-500">{formatDateTime(upload.submissionDate)}</p>
                 <div className="flex items-center gap-2">
                   <a

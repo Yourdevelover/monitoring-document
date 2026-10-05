@@ -64,13 +64,6 @@ export default async function EmployeeFilesPage() {
     }),
   ]);
 
-  // Exclude uploads that have been submitted today; keep only pending or older submissions
-  // pending uploads (not submitted today) – used to block new uploads for same day
-  const activeUploads = employeeUploads.filter(
-    (upload) =>
-      !upload.isImportant &&
-      (!upload.isSubmitted || (upload.submissionDate && upload.submissionDate < startOfToday))
-  );
   // group all uploads per category (multi-file for CHAT/PAYMENT, single for DAILY)
   const uploadsByCategory = new Map<string, typeof employeeUploads>();
   for (const upload of employeeUploads) {

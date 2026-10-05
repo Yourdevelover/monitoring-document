@@ -3,12 +3,17 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-export function AdminUsersToolbar({ searchQuery, statusFilter }: { searchQuery: string | null; statusFilter: string | null }) {
+type AdminUsersToolbarProps = { searchQuery: string | null; statusFilter: string | null };
+
+export function AdminUsersToolbar(props: AdminUsersToolbarProps) {
+  return <AdminUsersToolbarContent key={props.searchQuery ?? ''} {...props} />;
+}
+
+function AdminUsersToolbarContent({ searchQuery, statusFilter }: AdminUsersToolbarProps) {
   const router = useRouter();
   const sp = useSearchParams();
   const [q, setQ] = useState(searchQuery ?? '');
   const [open, setOpen] = useState(false);
-  useEffect(() => setQ(searchQuery ?? ''), [searchQuery]);
   useEffect(() => {
     if (q === (searchQuery ?? '')) return;
     const t = setTimeout(() => {
@@ -18,7 +23,7 @@ export function AdminUsersToolbar({ searchQuery, statusFilter }: { searchQuery: 
       router.push(`/dashboard/admin/users?${p.toString()}`);
     }, 300);
     return () => clearTimeout(t);
-  }, [q]);
+  }, [q, router, searchQuery, sp]);
   const onStatus = (v: string) => {
     const p = new URLSearchParams(sp.toString());
     if (v) p.set('status', v); else p.delete('status');

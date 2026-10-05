@@ -5,14 +5,14 @@ import { NextResponse, type NextRequest } from "next/server";
  * This makes file URLs work in production (next start) without
  * relying on public/ static serving, which only works in dev mode.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (!pathname.startsWith("/uploads/")) {
     return NextResponse.next();
   }
 
-  // Rewrite /uploads/... → /api/files/... so the route handler serves the file
+  // Rewrite /uploads/... → /api/files/uploads/... so the route handler serves the file
   const apiPath = pathname.replace("/uploads/", "/api/files/uploads/");
   const url = request.nextUrl.clone();
   url.pathname = apiPath;

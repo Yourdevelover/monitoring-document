@@ -56,32 +56,32 @@ export default async function ManagerEmployeesPage({
       <div className="mx-auto max-w-7xl space-y-4">
         <header className="flex flex-wrap items-end justify-between gap-4 rounded-lg border border-[#e5e7eb] bg-white p-4">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-[#6b7280]">
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-[#6b7280]">
               Kelola
             </p>
-            <h1 className="mt-2 text-base font-bold">Karyawan Tim</h1>
+            <h1 className="mt-1 text-sm font-bold">Karyawan Tim</h1>
           </div>
 
         </header>
 
-        <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e5e7eb] pb-3">
-            <h2 className="text-sm font-semibold">Daftar Karyawan</h2>
+        <section className="rounded-lg border border-[#e5e7eb] bg-white p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e5e7eb] pb-2.5">
+            <h2 className="text-xs font-semibold">Daftar Karyawan</h2>
             <div className="flex flex-wrap items-center gap-3">
               <EmployeeSearch initialValue={searchTerm} />
               <Link
                 href="/dashboard/manajer/karyawan/tambah"
-                className="bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700"
+                className="inline-flex min-h-10 items-center rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
               >
                 Tambah Karyawan
               </Link>
             </div>
           </div>
 
-          <div className="mt-4">
+          <div className="mt-3">
             {members.map((member) => (
-              <div key={member.id} className="relative flex cursor-pointer items-center justify-between gap-4 border-t border-[#e5e7eb] px-3 py-3 transition-colors hover:bg-[#f8f9fa] first:border-t-0 last:border-b">
-                <div className="flex min-w-0 flex-1 items-center gap-3 pl-12">
+              <div key={member.id} className="relative flex cursor-pointer items-center justify-between gap-3 border-t border-[#e5e7eb] px-2 py-2.5 transition-colors hover:bg-[#f8f9fa] first:border-t-0 last:border-b">
+                <div className="flex min-w-0 flex-1 items-center gap-2.5 pl-11">
                   <EmployeeProfileCard
                     employee={{
                       ...member,
@@ -100,14 +100,14 @@ export default async function ManagerEmployeesPage({
                     }))}
                   />
                   <div className="min-w-0">
-                    <p className="truncate font-medium text-[#111111]">{member.name}</p>
-                    <p className="truncate text-sm text-[#6b7280]">{member.email}</p>
+                    <p className="truncate text-[13px] font-medium text-[#111111]">{member.name}</p>
+                    <p className="truncate text-[11px] text-[#6b7280]">{member.email}</p>
                   </div>
                 </div>
 
                 <time
                   dateTime={member.createdAt.toISOString()}
-                  className="hidden w-24 shrink-0 text-right text-sm text-[#6b7280] sm:block"
+                  className="hidden w-24 shrink-0 text-right text-xs text-[#6b7280] sm:block"
                 >
                   {new Date(member.createdAt).toLocaleDateString("id-ID", {
                     day: "2-digit",
@@ -117,16 +117,16 @@ export default async function ManagerEmployeesPage({
                 </time>
 
                 <div className="flex shrink-0 items-center gap-2">
-                  <span className="hidden text-xs text-[#6b7280] sm:inline">Lihat info</span>
-                  <span className="text-xs text-[#6b7280]">→</span>
-                  <span className="bg-[#edf3ec] px-2 py-1 text-center text-xs font-medium text-[#346538]">
+                  <span className="hidden text-[10px] text-[#6b7280] sm:inline">Lihat info</span>
+                  <span className="text-[11px] text-[#6b7280]">→</span>
+                  <span className="bg-[#edf3ec] px-1.5 py-1 text-center text-[10px] font-medium text-[#346538]">
                     {member.isActive}
                   </span>
                 </div>
               </div>
             ))}
             {members.length === 0 && (
-              <p className="border-y border-dashed border-[#d1d5db] py-6 text-center text-sm text-[#6b7280]">
+              <p className="border-y border-dashed border-[#d1d5db] py-5 text-center text-xs text-[#6b7280]">
                 {searchTerm ? `Tidak ada karyawan yang cocok dengan "${searchTerm}".` : "Belum ada karyawan pada tim Anda."}
               </p>
             )}

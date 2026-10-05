@@ -4,8 +4,16 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = process.env.ADMIN_EMAIL ?? "admin@monitoring.local";
-  const password = process.env.ADMIN_PASSWORD ?? "admin";
+  const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const password = process.env.ADMIN_PASSWORD;
+
+  if (!email || !password) {
+    throw new Error("Set ADMIN_EMAIL and ADMIN_PASSWORD before seeding the admin account.");
+  }
+
+  if (password.length < 12) {
+    throw new Error("ADMIN_PASSWORD must contain at least 12 characters.");
+  }
 
   const existingUser = await prisma.user.findUnique({
     where: { email },

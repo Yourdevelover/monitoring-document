@@ -43,7 +43,7 @@ export function EmployeeSearch({ initialValue }: { initialValue: string }) {
         value={value}
         onChange={(event) => setValue(event.target.value)}
         placeholder="Cari nama atau email"
-        className="w-56 border border-[#e5e7eb] bg-white px-3 py-2 text-sm outline-none focus:border-[#2563eb]"
+        className="min-h-10 w-48 border border-[#e5e7eb] bg-white px-2.5 py-2 text-xs outline-none focus:border-[#2563eb]"
       />
     </div>
   );

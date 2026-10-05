@@ -47,7 +47,7 @@ export default async function ManagerAnnouncementsPage({ searchParams }: { searc
         <NewAnnouncementForm />
 
         <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
-          <p className="mb-4 text-xs text-[#6b7280]">Pengumuman otomatis hilang setelah 12 jam.</p>
+          <p className="mb-4 text-xs text-[#6b7280]">Pengumuman otomatis hilang setelah 12 jam. Pengumuman yang disematkan tetap tampil sampai dihapus.</p>
           <div className="space-y-1">
             {visibleAnnouncements.length > 0 ? visibleAnnouncements.map((item) => (
               <div key={item.id} className="rounded-lg border border-[#e5e7eb] p-3">

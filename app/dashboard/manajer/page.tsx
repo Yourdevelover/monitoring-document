@@ -12,6 +12,8 @@ export default async function ManagerDashboardPage({
   const params = await searchParams;
   const pageSize = 6;
   const requestedPage = Math.max(1, Number(params.page) || 1);
+  const activeSince = new Date();
+  activeSince.setHours(activeSince.getHours() - 12);
 
   const team = await prisma.team.findUnique({
     where: { managerId: manager.id },
@@ -25,7 +27,10 @@ export default async function ManagerDashboardPage({
         },
       },
       announcements: {
-        orderBy: { createdAt: "desc" },
+        where: {
+          OR: [{ isPinned: true }, { createdAt: { gte: activeSince } }],
+        },
+        orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
         take: 6,
       },
     },
@@ -45,8 +50,6 @@ export default async function ManagerDashboardPage({
   }
 
   const period = new Date().toISOString().slice(0, 7);
-  const activeSince = new Date();
-  activeSince.setHours(activeSince.getHours() - 12);
 
   const [members, teamTargets, pendingRequests, announcementCount, uploadCount] = await Promise.all([
     prisma.user.findMany({ where: { teamId: team.id, role: "KARYAWAN" }, orderBy: { createdAt: "desc" } }),
@@ -74,7 +77,7 @@ export default async function ManagerDashboardPage({
     return { id: m.id, name: m.name, email: m.email, isActive: m.isActive, pct, targetCount: a?.count ?? 0 };
   });
 
-  const top8 = [...memberRows].sort((a, b) => b.pct - a.pct).slice(0, 8);
+  const top10 = [...memberRows].sort((a, b) => b.pct - a.pct).slice(0, 10);
   const reachedList = memberRows.filter((m) => m.pct >= 100);
   const notReachedList = memberRows.filter((m) => m.targetCount > 0 && m.pct < 100);
   const noTargetList = memberRows.filter((m) => m.targetCount === 0);
@@ -137,21 +140,23 @@ export default async function ManagerDashboardPage({
 
         <section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="rounded-lg border border-[#e5e7eb] bg-white p-4">
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide">Top 8 Karyawan Terbaik</h2>
-            {top8.length ? (
-              <div className="space-y-2">
-                {top8.map((m, i) => (
-                  <div key={m.id} className="flex items-center gap-2">
-                    <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${i === 0 ? "bg-[#fbf3db] text-[#956400]" : i === 1 ? "bg-[#f1f3f5] text-[#6b7280]" : "bg-[#fdebec] text-[#9f2f2d]"}`}>{i + 1}</span>
-                    <p className="flex-1 truncate text-[12px] font-medium">{m.name}</p>
-                    <div className="h-3 w-24 flex-shrink-0 rounded bg-[#f1f3f5]">
-                      <div className={`h-full rounded ${m.pct >= 100 ? "bg-[#346538]" : "bg-[#956400]"}`} style={{ width: `${Math.min(100, m.pct)}%` }} />
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide">Top 10 Karyawan Terbaik</h2>
+            <div>
+              {top10.length ? (
+                <div className="space-y-2">
+                  {top10.map((m, i) => (
+                    <div key={m.id} className="flex items-center gap-2">
+                      <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${i === 0 ? "bg-[#fbf3db] text-[#956400]" : i === 1 ? "bg-[#f1f3f5] text-[#6b7280]" : "bg-[#fdebec] text-[#9f2f2d]"}`}>{i + 1}</span>
+                      <p className="flex-1 truncate text-[12px] font-medium">{m.name}</p>
+                      <div className="h-3 w-24 flex-shrink-0 rounded bg-[#f1f3f5]">
+                        <div className={`h-full rounded ${m.pct >= 100 ? "bg-[#346538]" : "bg-[#956400]"}`} style={{ width: `${Math.min(100, m.pct)}%` }} />
+                      </div>
+                      <p className={`w-10 text-right text-[11px] font-semibold ${m.pct >= 100 ? "text-[#346538]" : "text-[#956400]"}`}>{m.pct}%</p>
                     </div>
-                    <p className={`w-10 text-right text-[11px] font-semibold ${m.pct >= 100 ? "text-[#346538]" : "text-[#956400]"}`}>{m.pct}%</p>
-                  </div>
-                ))}
-              </div>
-            ) : <p className="py-4 text-center text-xs text-[#6b7280]">Belum ada data target.</p>}
+                  ))}
+                </div>
+              ) : <p className="py-4 text-center text-xs text-[#6b7280]">Belum ada data target.</p>}
+            </div>
           </div>
           <div className="rounded-lg border border-[#e5e7eb] bg-white p-4">
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide">Info Tim</h2>
@@ -167,34 +172,16 @@ export default async function ManagerDashboardPage({
 
         <section className="grid gap-4 lg:grid-cols-3">
           <div className="rounded-lg border border-[#e5e7eb] bg-white p-4">
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#346538]">✓ Capai 100%</h2>
-            {reachedList.length ? (
-              <ul className="space-y-1.5">
-                {reachedList.map((m) => (
-                  <li key={m.id} className="flex items-center justify-between text-[12px]"><span className="truncate font-medium">{m.name}</span><span className="font-semibold text-[#346538]">{m.pct}%</span></li>
-                ))}
-              </ul>
-            ) : <p className="py-3 text-center text-xs text-[#6b7280]">Belum ada.</p>}
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#346538]">✓ Capai 100% ({reachedList.length})</h2>
+            {reachedList.length ? <ul className="space-y-1.5">{reachedList.slice(0, 6).map((m) => <li key={m.id} className="flex items-center justify-between text-[12px]"><span className="truncate font-medium">{m.name}</span><span className="font-semibold text-[#346538]">{m.pct}%</span></li>)}</ul> : <p className="py-3 text-center text-xs text-[#6b7280]">Belum ada.</p>}
           </div>
           <div className="rounded-lg border border-[#e5e7eb] bg-white p-4">
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#956400]">Belum 100%</h2>
-            {notReachedList.length ? (
-              <ul className="space-y-1.5">
-                {notReachedList.map((m) => (
-                  <li key={m.id} className="flex items-center justify-between text-[12px]"><span className="truncate font-medium">{m.name}</span><span className="font-semibold text-[#956400]">{m.pct}%</span></li>
-                ))}
-              </ul>
-            ) : <p className="py-3 text-center text-xs text-[#6b7280]">Semua sudah 100%.</p>}
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#956400]">Belum 100% ({notReachedList.length})</h2>
+            {notReachedList.length ? <ul className="space-y-1.5">{notReachedList.slice(0, 6).map((m) => <li key={m.id} className="flex items-center justify-between text-[12px]"><span className="truncate font-medium">{m.name}</span><span className="font-semibold text-[#956400]">{m.pct}%</span></li>)}</ul> : <p className="py-3 text-center text-xs text-[#6b7280]">Semua sudah 100%.</p>}
           </div>
           <div className="rounded-lg border border-[#e5e7eb] bg-white p-4">
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#6b7280]">Belum Punya Target</h2>
-            {noTargetList.length ? (
-              <ul className="space-y-1.5">
-                {noTargetList.map((m) => (
-                  <li key={m.id} className="truncate text-[12px] font-medium">{m.name}</li>
-                ))}
-              </ul>
-            ) : <p className="py-3 text-center text-xs text-[#6b7280]">Semua punya target.</p>}
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#6b7280]">Belum Punya Target ({noTargetList.length})</h2>
+            {noTargetList.length ? <ul className="space-y-1.5">{noTargetList.slice(0, 6).map((m) => <li key={m.id} className="truncate text-[12px] font-medium">{m.name}</li>)}</ul> : <p className="py-3 text-center text-xs text-[#6b7280]">Semua punya target.</p>}
           </div>
         </section>
 
@@ -228,10 +215,7 @@ export default async function ManagerDashboardPage({
               </div>
               <div className="divide-y divide-[#f1f3f5]">
                 {team.uploads.length ? team.uploads.map((upload) => (
-                  <div key={upload.id} className="px-4 py-2.5">
-                    <p className="truncate text-[13px] font-medium">{upload.title}</p>
-                    <p className="mt-0.5 text-xs text-[#6b7280]">{upload.category} • {upload.user.name}</p>
-                  </div>
+                  <div key={upload.id} className="px-4 py-2.5"><p className="truncate text-[13px] font-medium">{upload.title}</p><p className="mt-0.5 text-xs text-[#6b7280]">{upload.category} • {upload.user.name}</p></div>
                 )) : <p className="px-4 py-6 text-center text-xs text-[#6b7280]">Belum ada file.</p>}
               </div>
             </div>

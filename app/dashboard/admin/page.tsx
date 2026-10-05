@@ -6,7 +6,7 @@ export default async function AdminDashboardPage() {
 
   const [users, teams, allTargets, recentUploads, uploadCount, pendingApprovals, recentActivities] = await Promise.all([
     prisma.user.findMany({ orderBy: { createdAt: "desc" }, select: { id: true, name: true, email: true, role: true, isActive: true, teamId: true, createdAt: true } }),
-    prisma.team.findMany({ orderBy: { createdAt: "desc" }, include: { members: true } }),
+    prisma.team.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.target.findMany({ select: { userId: true, currentValue: true, targetValue: true, name: true, period: true, user: { select: { name: true } } } }),
     prisma.upload.findMany({ orderBy: { createdAt: "desc" }, take: 8, include: { user: { select: { name: true } }, team: { select: { name: true } } } }),
     prisma.upload.count(),
@@ -31,17 +31,6 @@ export default async function AdminDashboardPage() {
     a.cur += t.currentValue; a.tgt += t.targetValue;
     targetAgg.set(t.userId, a);
   }
-  const topUsers = users
-    .filter((u) => u.role === "KARYAWAN")
-    .map((u) => {
-      const a = targetAgg.get(u.id);
-      const pct = a && a.tgt > 0 ? Math.round((a.cur / a.tgt) * 100) : 0;
-      return { name: u.name, count: pct };
-    })
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 5);
-  const maxUser = Math.max(1, ...topUsers.map((u) => u.count));
-
   const targetCount = allTargets.length;
   const targetReached = allTargets.filter((t) => t.targetValue > 0 && (t.currentValue / t.targetValue) * 100 >= 100).length;
   const targetAvg = allTargets.length ? Math.round(allTargets.reduce((s, t) => s + (t.targetValue > 0 ? (t.currentValue / t.targetValue) * 100 : 0), 0) / allTargets.length) : 0;
@@ -51,16 +40,18 @@ export default async function AdminDashboardPage() {
     .sort((a, b) => b.pct - a.pct);
 
   const teamAgg = new Map<number, { cur: number; tgt: number; count: number; teamName: string; managerName: string }>();
+  const usersById = new Map(users.map((user) => [user.id, user]));
+  const teamsById = new Map(teams.map((team) => [team.id, team]));
   for (const t of allTargets) {
-    const user = users.find((u) => u.id === t.userId);
+    const user = usersById.get(t.userId);
     const teamId = user?.teamId;
     if (!teamId) continue;
-    const team = teams.find((tm) => tm.id === teamId);
+    const team = teamsById.get(teamId);
     const a = teamAgg.get(teamId) ?? { cur: 0, tgt: 0, count: 0, teamName: team?.name ?? "?", managerName: "?" };
     a.cur += t.currentValue;
     a.tgt += t.targetValue;
     a.count++;
-    const manager = users.find((u) => u.id === team?.managerId);
+    const manager = team ? usersById.get(team.managerId) : undefined;
     if (manager) a.managerName = manager.name;
     teamAgg.set(teamId, a);
   }

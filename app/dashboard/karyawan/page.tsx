@@ -21,7 +21,7 @@ export default async function EmployeeDashboardPage() {
   const activeSince = new Date();
   activeSince.setHours(activeSince.getHours() - 12);
 
-  const [team, myUploads, importantFiles, totalMembers, announcementCount] = await Promise.all([
+  const [team, myUploads, importantFiles, announcementCount] = await Promise.all([
     prisma.team.findUnique({
       where: { id: employee.teamId },
       include: {
@@ -38,7 +38,6 @@ export default async function EmployeeDashboardPage() {
       orderBy: { createdAt: "desc" },
     }),
     prisma.importantFile.findMany({ where: { userId: employee.id } }),
-    prisma.user.count({ where: { teamId: employee.teamId, role: "KARYAWAN" } }),
     prisma.announcement.count({ where: { teamId: employee.teamId, OR: [{ isPinned: true }, { createdAt: { gte: activeSince } }] } }),
   ]);
 

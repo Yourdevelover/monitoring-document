@@ -29,13 +29,17 @@ export function Toaster() {
     };
     window.addEventListener("app-toast", handler);
     const q = new URLSearchParams(window.location.search).get("toast");
+    let initialToastTimer: number | undefined;
     if (q) {
-      push(decodeURIComponent(q), "success");
+      initialToastTimer = window.setTimeout(() => push(q, "success"), 0);
       const url = new URL(window.location.href);
       url.searchParams.delete("toast");
       window.history.replaceState(null, "", url.toString());
     }
-    return () => window.removeEventListener("app-toast", handler);
+    return () => {
+      if (initialToastTimer !== undefined) window.clearTimeout(initialToastTimer);
+      window.removeEventListener("app-toast", handler);
+    };
   }, [push]);
 
   if (!items.length) return null;

@@ -4,12 +4,17 @@ import { NextResponse } from "next/server";
 import { requireManager } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { enqueueFileTask } from "@/lib/upload-queue";
+import { exceedsUploadRequestLimit, MAX_UPLOAD_SIZE_BYTES } from "@/lib/upload-limits";
 
 const VALID_CATEGORIES = new Set(["DAILY", "CHAT", "PAYMENT"]);
 
 export async function POST(request: Request) {
   try {
     const manager = await requireManager();
+    if (exceedsUploadRequestLimit(request)) {
+      return NextResponse.json({ success: false, error: "Ukuran permintaan melebihi batas unggah." }, { status: 413 });
+    }
+
     const team = await prisma.team.findUnique({
       where: { managerId: manager.id },
     });
@@ -94,6 +99,10 @@ export async function POST(request: Request) {
         { success: false, error: "Kategori dan file wajib diisi." },
         { status: 400 }
       );
+    }
+
+    if (file.size > MAX_UPLOAD_SIZE_BYTES) {
+      return NextResponse.json({ success: false, error: "Ukuran berkas maksimal 50 MiB." }, { status: 413 });
     }
 
     return await enqueueFileTask(async () => {

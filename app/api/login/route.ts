@@ -1,6 +1,6 @@
 import { compare } from "bcryptjs";
 import { NextResponse } from "next/server";
-import { createSessionToken } from "@/lib/auth";
+import { createSessionToken, isSecureRequest } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 const SESSION_COOKIE = "monitoring_admin_session";
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     response.cookies.set(SESSION_COOKIE, token, {
       httpOnly: true,
       sameSite: "lax",
-      secure: false,
+      secure: isSecureRequest(request),
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
     });

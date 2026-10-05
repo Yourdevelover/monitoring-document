@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import { FileConfirmationDialog } from "./file-confirmation-dialog";
 import { toast } from "@/app/components/toast";
 
@@ -11,6 +12,7 @@ type UploadFormProps = {
 };
 
 export function UploadForm({ categoryKey, categoryLabel, isDisabled = false }: UploadFormProps) {
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showDialog, setShowDialog] = useState(false);
@@ -43,7 +45,7 @@ export function UploadForm({ categoryKey, categoryLabel, isDisabled = false }: U
   function handleUploadSuccess() {
     setShowDialog(false);
     setSelectedFile(null);
-    window.location.href = "/dashboard/karyawan/berkas";
+    router.refresh();
   }
 
   return (
