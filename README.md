@@ -144,19 +144,20 @@ monitoring-web/
 
 | Peran | Akses | Fitur utama |
 |-------|-------|-------------|
-| ADMIN | `/dashboard/admin` | Kelola admin, manajer, karyawan, tim, log aktivitas |
+| ADMIN | `/dashboard/admin` | Kelola admin, setujui pendaftaran manajer, kelola karyawan, tim, dan log aktivitas |
 | MANAGER | `/dashboard/manajer` | Kelola karyawan tim, upload berkas, pengumuman, setujui profil, pantau target |
 | KARYAWAN | `/dashboard/karyawan` | Upload/kirim berkas (DAILY/CHAT/PAYMENT), data penting, histori 12 jam, ajukan profil, target |
 
 **Alur berkas karyawan:** upload → submit (berlaku 12 jam) → histori → opsional simpan ke Data Penting (permanen).
 **Alur profil:** karyawan ajukan edit → `profileRequest` PENDING → manajer setujui/tolak → data user diperbarui.
+**Alur pendaftaran manajer:** daftar mandiri → akun menunggu persetujuan admin → admin menyetujui/menolak → akun dan tim aktif setelah disetujui.
 **Alur pengumuman:** manajer buat/pin/hapus → tampil di bar pengumuman tim (12 jam terakhir + pinned).
 
 ## Database (Prisma)
 
 Model utama di `prisma/schema.prisma`:
 
-- `User` — akun (role ADMIN/MANAGER/KARYAWAN, `teamId`, `isActive`)
+- `User` — akun (role ADMIN/MANAGER/KARYAWAN, `teamId`, `isActive`: ACTIVE/INACTIVE/PENDING/REJECTED)
 - `Team` — tim (`managerId` unik, relasi anggota)
 - `Upload` — berkas (`category` DAILY/CHAT/PAYMENT, `isSubmitted`, `expiresAt` +12 jam)
 - `UploadHistory` — riwayat kiriman per `sourceUploadId`
@@ -194,6 +195,7 @@ npm run db:seed
 | POST | `/api/manager/announcement/create\|delete\|pin` | Kelola pengumuman |
 | POST | `/api/manager/employee/create\|action` | Kelola karyawan |
 | POST | `/api/manager/register` | Registrasi manajer |
+| POST | `/api/admin/managers/action` | Setujui/tolak pendaftaran atau aktif/nonaktifkan manajer |
 | POST | `/api/admin/*` | Kelola admin, karyawan, manajer, aktivitas |
 
 Semua redirect API memakai `getBaseUrl(request)` dari `lib/redirect.ts` agar host benar saat di balik Nginx/proxy.
@@ -224,6 +226,8 @@ server {
 Lalu:
 
 ```bash
+npx prisma db push
+npx prisma generate
 npm run build
 npm start
 ```

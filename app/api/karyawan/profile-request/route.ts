@@ -1,3 +1,4 @@
+import { hash } from "bcryptjs";
 import { NextResponse } from "next/server";
 import { requireEmployee } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -10,6 +11,7 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const name = String(formData.get("name") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim().toLowerCase();
+    const phoneNumber = String(formData.get("phoneNumber") ?? "").trim();
     const password = String(formData.get("password") ?? "").trim();
 
     const profile = await prisma.user.findUnique({
@@ -65,8 +67,13 @@ export async function POST(request: Request) {
       newValuePayload.email = email;
     }
 
+    if (phoneNumber !== (profile.phoneNumber ?? "")) {
+      oldValuePayload.phoneNumber = profile.phoneNumber ?? "";
+      newValuePayload.phoneNumber = phoneNumber || null;
+    }
+
     if (password) {
-      newValuePayload.password = password;
+      newValuePayload.passwordHash = await hash(password, 10);
     }
 
     if (Object.keys(newValuePayload).length === 0) {

@@ -21,6 +21,14 @@ type ManagerSearchListProps = {
 
 function AdminManagerCard({ manager }: { manager: ManagerSearchListProps["managers"][number] }) {
   const [isOpen, setIsOpen] = useState(false);
+  const statusLabel = manager.isActive === "PENDING"
+    ? "Menunggu persetujuan"
+    : manager.isActive === "REJECTED"
+      ? "Ditolak"
+      : manager.isActive === "ACTIVE" ? "Aktif" : "Nonaktif";
+  const statusClass = manager.isActive === "PENDING"
+    ? "bg-amber-50 text-amber-800"
+    : manager.isActive === "ACTIVE" ? "bg-[#edf3ec] text-[#346538]" : "bg-[#fdebec] text-[#9f2f2d]";
 
   return (
     <>
@@ -32,6 +40,7 @@ function AdminManagerCard({ manager }: { manager: ManagerSearchListProps["manage
         <div className="min-w-0">
           <p className="truncate text-[13px] font-medium">{manager.name}</p>
           <p className="truncate text-xs text-[#6b7280]">{manager.email}</p>
+          <span className={`mt-1 inline-flex rounded px-1.5 py-0.5 text-[10px] font-medium ${statusClass}`}>{statusLabel}</span>
         </div>
         <p className="truncate text-xs text-[#6b7280]">Tim: {manager.managedTeam?.name ?? 'Belum memiliki tim'}</p>
         <span className="flex items-center gap-2 text-[11px] text-[#6b7280]">
@@ -47,7 +56,7 @@ function AdminManagerCard({ manager }: { manager: ManagerSearchListProps["manage
             <p className="mt-1 text-xs text-[#6b7280]">{manager.email}</p>
             <dl className="mt-4 divide-y divide-slate-100 text-xs">
               {[
-                ["Status", manager.isActive],
+                ["Status", statusLabel],
                 ["Nomor telepon", manager.phoneNumber ?? "-"],
                 ["Bergabung", new Date(manager.createdAt).toLocaleDateString("id-ID")],
                 ["Login terakhir", manager.latestLoginAt ? new Date(manager.latestLoginAt).toLocaleString("id-ID") : "Belum ada data"],

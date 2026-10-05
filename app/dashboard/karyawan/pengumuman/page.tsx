@@ -32,6 +32,7 @@ export default async function EmployeeAnnouncementsPage({ searchParams }: { sear
             Informasi
           </p>
           <h1 className="text-base font-bold">Pengumuman Tim</h1>
+          <p className="mt-1 text-sm text-[#6b7280]">Di bawah ini adalah pengumuman dan informasi dari atasan Anda.</p>
         </header>
 
         <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">

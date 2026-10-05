@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
+import { parseTargetNote } from "@/lib/notes";
 
 type Note = {
   id: number;
@@ -10,14 +11,6 @@ type Note = {
   createdAt: Date;
   updatedAt: Date;
 };
-
-function parseTargetNote(content: string): { name: string; pct: number } | null {
-  const m = content.trim().match(/^Target (.+): .+ \(([\d.,]+)%\)$/);
-  if (!m) return null;
-  const pct = Number(m[2].replace(",", "."));
-  if (Number.isNaN(pct)) return null;
-  return { name: m[1], pct: Math.max(0, Math.min(100, pct)) };
-}
 
 export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
   const [notes, setNotes] = useState(initialNotes);
@@ -96,6 +89,7 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
   }
 
   function editNote(note: Note) {
+    if (parseTargetNote(note.content)) return;
     setIsCreatingNew(false);
     setEditingId(note.id);
     setContent(note.content);
@@ -111,17 +105,20 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
 
   const card = (
     <>
-      <div className="flex items-start gap-2">
-        <button
-          type="button"
-          onClick={addNote}
-          aria-label="Tambah catatan"
-          title="Tambah catatan"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-300 bg-white text-lg font-medium text-slate-600 transition hover:border-slate-500 hover:bg-slate-50"
-        >
-          +
-        </button>
-        <div className="flex min-w-0 flex-1 items-start gap-2">
+      <div className="min-w-0">
+        <div className="mb-2 flex items-center justify-start gap-3">
+          <button
+            type="button"
+            onClick={addNote}
+            aria-label="Tambah catatan pribadi"
+            title="Tambah catatan pribadi"
+            className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-slate-600 hover:text-slate-900"
+          >
+            <span aria-hidden="true" className="text-base leading-none">+</span>
+            <span>Catatan pribadi</span>
+          </button>
+        </div>
+        <div className="flex min-w-0 items-start gap-2">
           {notes.length > 0 ? notes.slice(0, 4).map((note) => {
             const t = parseTargetNote(note.content);
             return (
@@ -185,7 +182,7 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
                     <div className="mt-3 flex items-center justify-between gap-3 border-t border-slate-100 pt-2">
                       <time className="text-xs text-slate-400">{new Date(note.updatedAt).toLocaleString("id-ID")}</time>
                       <div className="flex gap-2">
-                        <button type="button" onClick={() => editNote(note)} className="text-xs font-semibold text-blue-700 hover:underline">Edit</button>
+                        {!t && <button type="button" onClick={() => editNote(note)} className="text-xs font-semibold text-blue-700 hover:underline">Edit</button>}
                         <button type="button" onClick={() => deleteNote(note.id)} className="text-xs font-semibold text-red-700 hover:underline">Hapus</button>
                       </div>
                     </div>

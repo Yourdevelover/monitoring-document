@@ -49,11 +49,26 @@ export default async function AdminManagerDetailPage({ params }: ManagerDetailPr
       <div className="flex flex-wrap gap-2 border-b border-[#e5e7eb] pb-3">
         <a href={`/dashboard/admin/managers/${manager.id}/history`} className="btn">Lihat Histori Berkas</a>
         <a href={`/dashboard/admin/managers/${manager.id}/edit`} className="btn">Edit Manajer</a>
-        <form action="/api/admin/managers/action" method="POST">
-          <input type="hidden" name="userId" value={manager.id} />
-          <input type="hidden" name="action" value={manager.isActive === "ACTIVE" ? "deactivate" : "activate"} />
-          <button type="submit" className="btn">{manager.isActive === "ACTIVE" ? "Nonaktifkan" : "Aktifkan"}</button>
-        </form>
+        {manager.isActive === "PENDING" ? (
+          <>
+            <ConfirmActionForm action="/api/admin/managers/action" confirmMessage="Setujui pendaftaran manajer ini? Akun dan timnya akan diaktifkan.">
+              <input type="hidden" name="userId" value={manager.id} />
+              <input type="hidden" name="action" value="approve" />
+              <button type="submit" className="btn">Setujui Manajer</button>
+            </ConfirmActionForm>
+            <ConfirmActionForm action="/api/admin/managers/action" confirmMessage="Tolak pendaftaran manajer ini? Akunnya tidak akan dapat digunakan.">
+              <input type="hidden" name="userId" value={manager.id} />
+              <input type="hidden" name="action" value="reject" />
+              <button type="submit" className="btn btn-danger">Tolak</button>
+            </ConfirmActionForm>
+          </>
+        ) : (
+          <form action="/api/admin/managers/action" method="POST">
+            <input type="hidden" name="userId" value={manager.id} />
+            <input type="hidden" name="action" value={manager.isActive === "ACTIVE" ? "deactivate" : "activate"} />
+            <button type="submit" className="btn">{manager.isActive === "ACTIVE" ? "Nonaktifkan" : "Aktifkan"}</button>
+          </form>
+        )}
         <ConfirmActionForm
           action="/api/admin/managers/action"
           confirmMessage="Apakah Anda yakin ingin menghapus manajer ini? Data terkait manajer akan dihapus setelah akun tidak memiliki tim."

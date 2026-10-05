@@ -1,7 +1,4 @@
-﻿import { hash } from "bcryptjs";
-import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import { createSessionToken } from "@/lib/auth";
+﻿import Link from "next/link";
 import { Logo } from "@/app/components/logo";
 
 export default function ManagerRegistrationPage() {
@@ -17,6 +14,9 @@ export default function ManagerRegistrationPage() {
 
         <form action="/api/manager/register" method="POST" className="rounded-lg border border-[#e5e7eb] bg-white p-6">
           <div className="space-y-4">
+            <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
+              Setelah mendaftar, akun Anda perlu disetujui admin sebelum dapat digunakan.
+            </p>
             <div>
               <label htmlFor="name" className="mb-1.5 block text-sm font-medium">
                 Nama
@@ -66,9 +66,9 @@ export default function ManagerRegistrationPage() {
 
           <div className="mt-4 text-center text-sm text-[#6b7280]">
             Sudah punya akun{" "}
-            <a href="/" className="font-medium text-[#2563eb] hover:underline">
+            <Link href="/" className="font-medium text-[#2563eb] hover:underline">
               Masuk
-            </a>
+            </Link>
           </div>
         </form>
       </div>

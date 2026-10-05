@@ -1,10 +1,12 @@
 ﻿import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getSessionUser } from "@/lib/auth";
 import { Logo } from "@/app/components/logo";
 import { LoginForm } from "@/app/login-form";
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: { searchParams: Promise<{ registration?: string }> }) {
   const user = await getSessionUser();
+  const params = await searchParams;
 
   if (user?.role === "ADMIN") {
     redirect("/dashboard/admin");
@@ -25,13 +27,18 @@ export default async function HomePage() {
         </div>
 
         <section className="rounded-lg border border-[#e5e7eb] bg-white p-6">
+          {params.registration === "pending" && (
+            <p role="status" className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
+              Pendaftaran berhasil. Akun Anda menunggu persetujuan admin; Anda bisa masuk setelah disetujui.
+            </p>
+          )}
           <LoginForm />
 
           <div className="mt-4 text-center text-sm text-[#6b7280]">
             Daftar sebagai manajer{" "}
-            <a href="/daftar-manajer" className="font-medium text-[#2563eb] hover:underline">
+            <Link href="/daftar-manajer" className="font-medium text-[#2563eb] hover:underline">
               Daftar
-            </a>
+            </Link>
           </div>
         </section>
       </div>

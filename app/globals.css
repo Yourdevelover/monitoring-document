@@ -214,11 +214,11 @@ button:active { transform: scale(0.98); }
 .manager-content main header:has(.dashboard-notes-slot),
 .admin-content main header:has(.dashboard-notes-slot),
 .employee-content main header:has(.dashboard-notes-slot) {
-  --dashboard-notes-right: clamp(2rem, 14vw, 16rem);
+  --dashboard-notes-right: clamp(0rem, 2vw, 1rem);
   position: relative;
   display: block !important;
   min-height: 8rem;
-  padding: 1.25rem calc(17rem + var(--dashboard-notes-right)) 1.25rem 1.25rem !important;
+  padding: 1.25rem calc(24rem + var(--dashboard-notes-right)) 1.25rem 1.25rem !important;
 }
 .manager-content main header:has(.dashboard-notes-slot) > .dashboard-notes-slot,
 .admin-content main header:has(.dashboard-notes-slot) > .dashboard-notes-slot,

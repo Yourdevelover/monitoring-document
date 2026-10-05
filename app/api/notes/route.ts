@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { parseTargetNote } from "@/lib/notes";
 import { Prisma } from "@prisma/client";
 
 async function getUser() {
@@ -37,6 +38,14 @@ export async function PATCH(request: Request) {
   const noteId = Number(body.id);
   const content = String(body.content ?? "").trim();
   if (!noteId || !content) return NextResponse.json({ error: "Catatan tidak valid." }, { status: 400 });
+
+  const [existingNote] = await prisma.$queryRaw<Array<{ content: string }>>(
+    Prisma.sql`SELECT content FROM personal_notes WHERE id = ${noteId} AND "userId" = ${user.id}`
+  );
+  if (!existingNote) return NextResponse.json({ error: "Catatan tidak ditemukan." }, { status: 404 });
+  if (parseTargetNote(existingNote.content)) {
+    return NextResponse.json({ error: "Catatan target tidak dapat diedit." }, { status: 403 });
+  }
 
   const note = await prisma.$executeRaw(
     Prisma.sql`UPDATE personal_notes SET content = ${content}, "updatedAt" = NOW() WHERE id = ${noteId} AND "userId" = ${user.id}`

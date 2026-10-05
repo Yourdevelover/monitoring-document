@@ -92,7 +92,11 @@ export default async function ManagerProfileRequestsPage({
                   changeDetails.push(`Email: ${oldPayload.email ?? "-"} → ${newPayload.email}`);
                 }
 
-                if (newPayload.password) {
+                if (newPayload.phoneNumber !== undefined && oldPayload.phoneNumber !== newPayload.phoneNumber) {
+                  changeDetails.push(`Nomor telepon: ${oldPayload.phoneNumber || "-"} → ${newPayload.phoneNumber || "-"}`);
+                }
+
+                if (newPayload.passwordHash || newPayload.password) {
                   changeDetails.push("Password: akan diganti");
                 }
 

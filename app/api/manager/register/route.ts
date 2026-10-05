@@ -1,6 +1,5 @@
 import { hash } from "bcryptjs";
 import { NextResponse } from "next/server";
-import { createSessionToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getBaseUrl } from "@/lib/redirect";
 
@@ -37,46 +36,37 @@ export async function POST(request: Request) {
 
     const passwordHash = await hash(password, 10);
 
-    const manager = await prisma.user.create({
-      data: {
-        name,
-        email,
-        passwordHash,
-        role: "MANAGER",
-        isActive: "ACTIVE",
-      },
+    await prisma.$transaction(async (transaction) => {
+      const manager = await transaction.user.create({
+        data: {
+          name,
+          email,
+          passwordHash,
+          role: "MANAGER",
+          isActive: "PENDING",
+        },
+      });
+
+      const team = await transaction.team.create({
+        data: {
+          name: `Tim ${name}`,
+          managerId: manager.id,
+          isActive: false,
+        },
+      });
+
+      await transaction.activityLog.create({
+        data: {
+          actorId: manager.id,
+          action: "REGISTER_MANAGER_PENDING",
+          targetType: "TEAM",
+          targetId: team.id,
+          description: `Pendaftaran manajer ${manager.email} menunggu persetujuan admin.`,
+        },
+      });
     });
 
-    const team = await prisma.team.create({
-      data: {
-        name: `Tim ${name}`,
-        managerId: manager.id,
-        isActive: true,
-      },
-    });
-
-    await prisma.activityLog.create({
-      data: {
-        actorId: manager.id,
-        action: "REGISTER_MANAGER",
-        targetType: "TEAM",
-        targetId: team.id,
-        description: `Manager ${manager.email} berhasil mendaftar dan otomatis membuat tim ${team.name}.`,
-      },
-    });
-
-    const token = await createSessionToken(manager.id);
-    const response = NextResponse.redirect(new URL("/dashboard/manajer", getBaseUrl(request)));
-
-    response.cookies.set("monitoring_admin_session", token, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: false,
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7,
-    });
-
-    return response;
+    return NextResponse.redirect(new URL("/?registration=pending", getBaseUrl(request)));
   } catch (error) {
     console.error(error);
     return NextResponse.json(

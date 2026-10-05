@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireManager } from "@/lib/auth";
 import { hash } from "bcryptjs";
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
 
     for (const profileRequest of profileRequests) {
       if (action === "approve") {
-        const updateData: Record<string, string> = {};
+        const updateData: Prisma.UserUpdateInput = {};
 
         const payload =
           profileRequest.fieldName === "profile" && profileRequest.newValue
@@ -89,7 +90,13 @@ export async function POST(request: Request) {
           updateData.email = payload.email.trim().toLowerCase();
         }
 
-        if (typeof payload.password === "string" && payload.password.length >= 6) {
+        if (typeof payload.phoneNumber === "string" || payload.phoneNumber === null) {
+          updateData.phoneNumber = typeof payload.phoneNumber === "string" ? payload.phoneNumber.trim() || null : null;
+        }
+
+        if (typeof payload.passwordHash === "string" && payload.passwordHash) {
+          updateData.passwordHash = payload.passwordHash;
+        } else if (typeof payload.password === "string" && payload.password.length >= 6) {
           updateData.passwordHash = await hash(payload.password, 10);
         }
 
