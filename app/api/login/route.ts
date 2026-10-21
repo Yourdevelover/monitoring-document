@@ -62,15 +62,19 @@ export async function POST(request: Request) {
       maxAge: 60 * 60 * 24 * 7,
     });
 
-    await prisma.activityLog.create({
-      data: {
-        actorId: user.id,
-        action: "LOGIN",
-        targetType: "USER",
-        targetId: user.id,
-        description: `${user.name} berhasil login ke dashboard.`,
-      },
-    });
+    try {
+      await prisma.activityLog.create({
+        data: {
+          actorId: user.id,
+          action: "LOGIN",
+          targetType: "USER",
+          targetId: user.id,
+          description: `${user.name} berhasil login ke dashboard.`,
+        },
+      });
+    } catch (error) {
+      console.error("Failed to record login activity:", error);
+    }
 
     return response;
   } catch (error) {
