@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -5,13 +6,19 @@ import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 
 const SESSION_COOKIE = "monitoring_admin_session";
-const configuredSecret = process.env.JWT_SECRET;
 
-if (process.env.NODE_ENV === "production" && !configuredSecret) {
-  throw new Error("JWT_SECRET must be configured in production.");
+function getSessionSecret() {
+  const secretMaterial = process.env.JWT_SECRET ?? process.env.DATABASE_URL;
+
+  if (!secretMaterial) {
+    throw new Error("Set JWT_SECRET or DATABASE_URL to enable session authentication.");
+  }
+
+  return createHash("sha256")
+    .update("monitoring-web-session-v1:")
+    .update(secretMaterial)
+    .digest();
 }
-
-const secret = new TextEncoder().encode(configuredSecret ?? "development-only-secret");
 
 export function isSecureRequest(request: Request) {
   const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0].trim().toLowerCase();
@@ -23,7 +30,7 @@ export async function createSessionToken(userId: number) {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(secret);
+    .sign(getSessionSecret());
 }
 
 export const getSessionUser = cache(async function getSessionUser() {
@@ -35,7 +42,7 @@ export const getSessionUser = cache(async function getSessionUser() {
   }
 
   try {
-    const { payload } = await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, getSessionSecret());
     const userId = Number(payload.userId);
 
     if (!userId) {
