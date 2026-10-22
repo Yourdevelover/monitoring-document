@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { getBaseUrl } from "@/lib/redirect";
 
 export async function POST(request: Request) {
+  let failedAt = "membaca formulir";
+
   try {
     const formData = await request.formData();
     const name = String(formData.get("name") ?? "").trim();
@@ -20,6 +22,7 @@ export async function POST(request: Request) {
       );
     }
 
+    failedAt = "memeriksa email di database";
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
@@ -36,6 +39,7 @@ export async function POST(request: Request) {
 
     const passwordHash = await hash(password, 10);
 
+    failedAt = "menyimpan akun, tim, dan aktivitas ke database";
     await prisma.$transaction(async (transaction) => {
       const manager = await transaction.user.create({
         data: {
@@ -66,13 +70,18 @@ export async function POST(request: Request) {
       });
     });
 
+    failedAt = "membuat respons pendaftaran";
     return NextResponse.redirect(new URL("/?registration=pending", getBaseUrl(request)));
   } catch (error) {
-    console.error(error);
+    const errorCode =
+      typeof error === "object" && error !== null && "code" in error && typeof error.code === "string"
+        ? error.code
+        : "UNKNOWN";
+    console.error("Manager registration failed:", { failedAt, errorCode, error });
     return NextResponse.json(
       {
         success: false,
-        error: "Terjadi kesalahan server saat mendaftar manajer.",
+        error: `Pendaftaran gagal saat ${failedAt} (kode: ${errorCode}).`,
       },
       { status: 500 }
     );
