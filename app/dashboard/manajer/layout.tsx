@@ -61,10 +61,8 @@ export default async function ManagerLayout({
               )}
             </div>
           </div>
-          <div className="mx-auto flex w-full max-w-7xl justify-end px-4 pt-3">
-            <div className="w-full max-w-lg">
-              <NotesWidget initialNotes={[]} />
-            </div>
+          <div className="mx-auto w-full max-w-7xl px-4 pt-3">
+            <NotesWidget initialNotes={[]} />
           </div>
           {children}
         </div>
