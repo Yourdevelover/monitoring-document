@@ -11,6 +11,30 @@ class StorageConfigurationError extends Error {
   }
 }
 
+function isTransientStorageConnectionError(error: unknown) {
+  if (!(error instanceof Error)) return false;
+
+  const originalError = "originalError" in error ? error.originalError : undefined;
+  const cause = originalError instanceof Error ? originalError.cause : error.cause;
+  const code = cause && typeof cause === "object" && "code" in cause
+    ? String(cause.code)
+    : "";
+
+  return ["UND_ERR_CONNECT_TIMEOUT", "ECONNRESET", "ETIMEDOUT", "EAI_AGAIN"].includes(code) ||
+    (error.name === "StorageUnknownError" && /fetch failed|timeout|network/i.test(error.message));
+}
+
+async function retryTransientStorageRequest<T>(request: () => Promise<T>) {
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await request();
+    } catch (error) {
+      if (attempt >= 1 || !isTransientStorageConnectionError(error)) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 350));
+    }
+  }
+}
+
 export function getStorageFailureMessage(error: unknown) {
   if (!(error instanceof Error)) return null;
 
@@ -20,6 +44,10 @@ export function getStorageFailureMessage(error: unknown) {
 
   if (error.name === "StorageApiError" || error.name === "StorageError") {
     return `Supabase Storage menolak unggahan: ${error.message}`;
+  }
+
+  if (isTransientStorageConnectionError(error)) {
+    return "Koneksi ke Supabase Storage timeout. Silakan coba unggah lagi; jika terus terjadi, periksa koneksi internet atau status Supabase.";
   }
 
   if (error.name === "TypeError" && /fetch|network|failed/i.test(error.message)) {
@@ -65,7 +93,9 @@ export async function uploadStoredFile(filePath: string, data: Uint8Array, conte
 }
 
 export async function createSignedUpload(filePath: string) {
-  const { data, error } = await getStorageClient().createSignedUploadUrl(getObjectPath(filePath));
+  const bucket = getStorageClient();
+  const objectPath = getObjectPath(filePath);
+  const { data, error } = await retryTransientStorageRequest(() => bucket.createSignedUploadUrl(objectPath));
   if (error) throw error;
 
   return {
