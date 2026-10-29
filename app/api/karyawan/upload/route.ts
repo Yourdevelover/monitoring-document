@@ -1,10 +1,10 @@
-import { copyFile, mkdir, unlink, writeFile } from "fs/promises";
-import path from "path";
+import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { enqueueFileTask } from "@/lib/upload-queue";
 import { exceedsUploadRequestLimit, MAX_UPLOAD_SIZE_BYTES } from "@/lib/upload-limits";
+import { copyStoredFile, createSignedUpload, deleteStoredFile, verifyStoredFile } from "@/lib/storage";
 
 const VALID_CATEGORIES = new Set(["DAILY", "CHAT", "PAYMENT"]);
 
@@ -77,16 +77,10 @@ export async function POST(request: Request) {
           );
         }
 
-        const filePathOnDisk = path.join(
-          process.cwd(),
-          "public",
-          upload.filePath.replace(/^\/+/, "")
-        );
-
         try {
-          await unlink(filePathOnDisk);
+          await deleteStoredFile(upload.filePath);
         } catch {
-          // Ignore missing file on disk; the database record should still be deleted.
+          // Keep the database cleanup working if the stored object is already missing.
         }
 
         await prisma.$transaction([
@@ -113,11 +107,10 @@ export async function POST(request: Request) {
           return NextResponse.json({ success: false, error: "Data penting tidak ditemukan." }, { status: 404 });
         }
 
-        const importantPath = path.join(process.cwd(), "public", importantFile.filePath.replace(/^\/+/, ""));
         try {
-          await unlink(importantPath);
+          await deleteStoredFile(importantFile.filePath);
         } catch {
-          // The permanent copy may already be missing from disk.
+          // The permanent copy may already be missing from storage.
         }
 
         await prisma.$transaction([
@@ -249,28 +242,9 @@ export async function POST(request: Request) {
           });
         }
 
-        const sourcePath = path.join(
-          process.cwd(),
-          "public",
-          upload.filePath.replace(/^\/+/, "")
-        );
-        const importantFolder = path.join(
-          process.cwd(),
-          "public",
-          "uploads",
-          "teams",
-          String(upload.teamId),
-          "employees",
-          String(employee.id),
-          "important"
-        );
-        await mkdir(importantFolder, { recursive: true });
-
         const importantFileName = `${Date.now()}-${upload.fileName}`;
-        const importantPath = path.join(importantFolder, importantFileName);
         const importantPublicPath = `/uploads/teams/${upload.teamId}/employees/${employee.id}/important/${importantFileName}`;
-
-        await copyFile(sourcePath, importantPath);
+        await copyStoredFile(upload.filePath, importantPublicPath);
 
         await prisma.$transaction([
           prisma.importantFile.create({
@@ -328,16 +302,10 @@ export async function POST(request: Request) {
           );
         }
 
-        const filePathOnDisk = path.join(
-          process.cwd(),
-          "public",
-          upload.filePath.replace(/^\/+/, "")
-        );
-
         try {
-          await unlink(filePathOnDisk);
+          await deleteStoredFile(upload.filePath);
         } catch {
-          // Ignore missing file on disk
+          // Ignore missing objects; metadata still needs to be removed.
         }
 
         await prisma.upload.delete({
@@ -353,94 +321,76 @@ export async function POST(request: Request) {
 
     const category = String(formData.get("category") ?? "");
     const title = String(formData.get("title") ?? "").trim();
-    const file = formData.get("file");
-
-    if (!VALID_CATEGORIES.has(category) || !(file instanceof File) || file.size === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Kategori dan file wajib diisi.",
-        },
-        { status: 400 }
-      );
-    }
-
-    if (file.size > MAX_UPLOAD_SIZE_BYTES) {
-      return NextResponse.json({ success: false, error: "Ukuran berkas maksimal 50 MiB." }, { status: 413 });
-    }
-
-    return await enqueueFileTask(async () => {
-      const activeUpload = await prisma.upload.findFirst({
-        where: {
-          userId: employee.id,
-          category: category as "DAILY" | "CHAT" | "PAYMENT",
-          isImportant: false,
-          isSubmitted: false,
-        },
-      });
-
-      if (activeUpload) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: "Kategori ini masih memiliki berkas aktif.",
-          },
-          { status: 409 }
-        );
+    if (action === "prepare-upload") {
+      const fileName = String(formData.get("fileName") ?? "").replace(/[^a-zA-Z0-9._-]/g, "_");
+      const fileSize = Number(formData.get("fileSize") ?? 0);
+      if (!VALID_CATEGORIES.has(category) || !fileName || !Number.isSafeInteger(fileSize) || fileSize <= 0) {
+        return NextResponse.json({ success: false, error: "Kategori dan detail file wajib diisi." }, { status: 400 });
+      }
+      if (fileSize > MAX_UPLOAD_SIZE_BYTES) {
+        return NextResponse.json({ success: false, error: "Ukuran berkas maksimal 50 MiB." }, { status: 413 });
       }
 
-      const originalFileName = file.name || `upload-${Date.now()}`;
-      const safeFileName = originalFileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+      return await enqueueFileTask(async () => {
+        const activeUpload = await prisma.upload.findFirst({
+          where: { userId: employee.id, category: category as "DAILY" | "CHAT" | "PAYMENT", isImportant: false, isSubmitted: false },
+        });
+        if (activeUpload) {
+          return NextResponse.json({ success: false, error: "Kategori ini masih memiliki berkas aktif." }, { status: 409 });
+        }
 
-      const storageFolder = path.join(
-        process.cwd(),
-        "public",
-        "uploads",
-        "teams",
-        String(teamId),
-        "employees",
-        String(employee.id)
-      );
+        const objectPath = `uploads/teams/${teamId}/employees/${employee.id}/${randomUUID()}-${fileName}`;
+        const upload = await createSignedUpload(objectPath);
+        return NextResponse.json({ success: true, ...upload, fileName, fileSize, fileType: String(formData.get("fileType") ?? "application/octet-stream"), title });
+      }, `employee:${employee.id}`);
+    }
 
-      await mkdir(storageFolder, { recursive: true });
+    if (action === "complete-upload") {
+      const filePath = String(formData.get("filePath") ?? "");
+      const fileName = String(formData.get("fileName") ?? "").replace(/[^a-zA-Z0-9._-]/g, "_");
+      const fileSize = Number(formData.get("fileSize") ?? 0);
+      const fileType = String(formData.get("fileType") ?? "application/octet-stream");
+      const expectedPrefix = `uploads/teams/${teamId}/employees/${employee.id}/`;
+      if (!VALID_CATEGORIES.has(category) || !filePath.startsWith(expectedPrefix) || !fileName || !Number.isSafeInteger(fileSize) || fileSize <= 0 || fileSize > MAX_UPLOAD_SIZE_BYTES) {
+        return NextResponse.json({ success: false, error: "Data file tidak valid." }, { status: 400 });
+      }
 
-      const uniqueFileName = `${Date.now()}-${safeFileName}`;
-      const filePathOnDisk = path.join(storageFolder, uniqueFileName);
-      const publicFilePath = `/uploads/teams/${teamId}/employees/${employee.id}/${uniqueFileName}`;
+      return await enqueueFileTask(async () => {
+        const activeUpload = await prisma.upload.findFirst({
+          where: { userId: employee.id, category: category as "DAILY" | "CHAT" | "PAYMENT", isImportant: false, isSubmitted: false },
+        });
+        if (activeUpload) {
+          await deleteStoredFile(filePath).catch(() => undefined);
+          return NextResponse.json({ success: false, error: "Kategori ini masih memiliki berkas aktif." }, { status: 409 });
+        }
 
-      const buffer = Buffer.from(await file.arrayBuffer());
-      await writeFile(filePathOnDisk, buffer);
+        await verifyStoredFile(filePath, fileSize);
+        const publicFilePath = `/${filePath}`;
+        try {
+          const upload = await prisma.upload.create({
+            data: {
+              userId: employee.id,
+              teamId,
+              title: title || fileName,
+              fileName,
+              filePath: publicFilePath,
+              fileType,
+              category: category as "DAILY" | "CHAT" | "PAYMENT",
+              status: "COMPLETED",
+            },
+          });
+          await prisma.activityLog.create({
+            data: { actorId: employee.id, action: "UPLOAD_FILE", targetType: "UPLOAD", targetId: upload.id, description: `${employee.name} mengunggah berkas ${upload.fileName} (${upload.category}).` },
+          });
+          return NextResponse.json({ success: true, message: "Berkas berhasil diunggah", id: upload.id, redirect: "/dashboard/karyawan/berkas" });
+        } catch (error) {
+          await deleteStoredFile(filePath).catch(() => undefined);
+          throw error;
+        }
+      }, `employee:${employee.id}`);
+    }
 
-      const upload = await prisma.upload.create({
-        data: {
-          userId: employee.id,
-          teamId,
-          title: title || safeFileName,
-          fileName: safeFileName,
-          filePath: publicFilePath,
-          fileType: file.type || "application/octet-stream",
-          category: category as "DAILY" | "CHAT" | "PAYMENT",
-          status: "COMPLETED",
-        },
-      });
-
-      await prisma.activityLog.create({
-        data: {
-          actorId: employee.id,
-          action: "UPLOAD_FILE",
-          targetType: "UPLOAD",
-          targetId: upload.id,
-          description: `${employee.name} mengunggah berkas ${upload.fileName} (${upload.category}).`,
-        },
-      });
-
-      return NextResponse.json({
-        success: true,
-        message: "Berkas berhasil diunggah",
-        id: upload.id,
-        redirect: "/dashboard/karyawan/berkas",
-      });
-    }, `employee:${employee.id}`);
+    return NextResponse.json({ success: false, error: "Tahap upload file tidak valid." }, { status: 400 });
   } catch (error) {
     if (
       error instanceof Error &&

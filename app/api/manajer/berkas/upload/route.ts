@@ -1,10 +1,10 @@
-import { mkdir, unlink, writeFile } from "fs/promises";
-import path from "path";
+import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { requireManager } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { enqueueFileTask } from "@/lib/upload-queue";
 import { exceedsUploadRequestLimit, MAX_UPLOAD_SIZE_BYTES } from "@/lib/upload-limits";
+import { createSignedUpload, deleteStoredFile, verifyStoredFile } from "@/lib/storage";
 
 const VALID_CATEGORIES = new Set(["DAILY", "CHAT", "PAYMENT"]);
 
@@ -55,16 +55,10 @@ export async function POST(request: Request) {
           );
         }
 
-        const filePathOnDisk = path.join(
-          process.cwd(),
-          "public",
-          upload.filePath.replace(/^\/+/, "")
-        );
-
         try {
-          await unlink(filePathOnDisk);
+          await deleteStoredFile(upload.filePath);
         } catch {
-          // Ignore missing file on disk; the database record should still be deleted.
+          // Keep the database cleanup working if the stored object is already missing.
         }
 
         await prisma.$transaction([
@@ -92,72 +86,80 @@ export async function POST(request: Request) {
 
     const category = String(formData.get("category") ?? "");
     const title = String(formData.get("title") ?? "").trim();
-    const file = formData.get("file");
+    const fileName = String(formData.get("fileName") ?? "").replace(/[^a-zA-Z0-9._-]/g, "_");
+    const fileSize = Number(formData.get("fileSize") ?? 0);
+    const fileType = String(formData.get("fileType") ?? "application/octet-stream");
 
-    if (!VALID_CATEGORIES.has(category) || !(file instanceof File) || file.size === 0) {
+    if (!VALID_CATEGORIES.has(category)) {
       return NextResponse.json(
-        { success: false, error: "Kategori dan file wajib diisi." },
+        { success: false, error: "Kategori tidak valid." },
         { status: 400 }
       );
     }
 
-    if (file.size > MAX_UPLOAD_SIZE_BYTES) {
-      return NextResponse.json({ success: false, error: "Ukuran berkas maksimal 50 MiB." }, { status: 413 });
+    if (action === "prepare-upload") {
+      if (!fileName || !Number.isSafeInteger(fileSize) || fileSize <= 0) {
+        return NextResponse.json({ success: false, error: "Detail file wajib diisi." }, { status: 400 });
+      }
+      if (fileSize > MAX_UPLOAD_SIZE_BYTES) {
+        return NextResponse.json({ success: false, error: "Ukuran berkas maksimal 50 MiB." }, { status: 413 });
+      }
+
+      const objectPath = `uploads/teams/${team.id}/managers/${manager.id}/${randomUUID()}-${fileName}`;
+      const upload = await createSignedUpload(objectPath);
+      return NextResponse.json({ success: true, ...upload, fileName, fileSize, fileType, title });
     }
 
-    return await enqueueFileTask(async () => {
-      const originalFileName = file.name || `upload-${Date.now()}`;
-      const safeFileName = originalFileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+    if (action === "complete-upload") {
+      const filePath = String(formData.get("filePath") ?? "");
+      const expectedPrefix = `uploads/teams/${team.id}/managers/${manager.id}/`;
+      if (!filePath.startsWith(expectedPrefix) || !fileName || !Number.isSafeInteger(fileSize) || fileSize <= 0 || fileSize > MAX_UPLOAD_SIZE_BYTES) {
+        return NextResponse.json({ success: false, error: "Data file tidak valid." }, { status: 400 });
+      }
 
-      const storageFolder = path.join(
-        process.cwd(),
-        "public",
-        "uploads",
-        "teams",
-        String(team.id),
-        "managers",
-        String(manager.id)
-      );
-      await mkdir(storageFolder, { recursive: true });
+      await verifyStoredFile(filePath, fileSize);
+      const publicFilePath = `/${filePath}`;
+      try {
+        const upload = await prisma.upload.create({
+          data: {
+            userId: manager.id,
+            teamId: team.id,
+            title: title || fileName,
+            fileName,
+            filePath: publicFilePath,
+            fileType,
+            category: category as "DAILY" | "CHAT" | "PAYMENT",
+            status: "COMPLETED",
+            isSubmitted: true,
+            submissionDate: new Date(),
+          },
+        });
 
-      const uniqueFileName = `${Date.now()}-${safeFileName}`;
-      const filePathOnDisk = path.join(storageFolder, uniqueFileName);
-      const publicFilePath = `/uploads/teams/${team.id}/managers/${manager.id}/${uniqueFileName}`;
+        await prisma.activityLog.create({
+          data: {
+            actorId: manager.id,
+            action: "UPLOAD_FILE",
+            targetType: "UPLOAD",
+            targetId: upload.id,
+            description: `${manager.name} membagikan berkas ${upload.fileName} (${upload.category}) ke tim.`,
+          },
+        });
 
-      const buffer = Buffer.from(await file.arrayBuffer());
-      await writeFile(filePathOnDisk, buffer);
+        return NextResponse.json({ success: true, message: "Berkas berhasil dibagikan ke tim", id: upload.id });
+      } catch (error) {
+        await deleteStoredFile(filePath).catch(() => undefined);
+        throw error;
+      }
+    }
 
-      const upload = await prisma.upload.create({
-        data: {
-          userId: manager.id,
-          teamId: team.id,
-          title: title || safeFileName,
-          fileName: safeFileName,
-          filePath: publicFilePath,
-          fileType: file.type || "application/octet-stream",
-          category: category as "DAILY" | "CHAT" | "PAYMENT",
-          status: "COMPLETED",
-          isSubmitted: true,
-          submissionDate: new Date(),
-        },
-      });
+    if (action !== "upload") {
+      return NextResponse.json({ success: false, error: "Aksi upload tidak valid." }, { status: 400 });
+    }
 
-      await prisma.activityLog.create({
-        data: {
-          actorId: manager.id,
-          action: "UPLOAD_FILE",
-          targetType: "UPLOAD",
-          targetId: upload.id,
-          description: `${manager.name} membagikan berkas ${upload.fileName} (${upload.category}) ke tim.`,
-        },
-      });
-
-      return NextResponse.json({
-        success: true,
-        message: "Berkas berhasil dibagikan ke tim",
-        id: upload.id,
-      });
-    }, `manager:${manager.id}`);
+    if (fileSize > MAX_UPLOAD_SIZE_BYTES) {
+      return NextResponse.json({ success: false, error: "Ukuran berkas maksimal 50 MiB." }, { status: 413 });
+    }
+    return NextResponse.json({ success: false, error: "Tahap upload file tidak valid." }, { status: 400 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(

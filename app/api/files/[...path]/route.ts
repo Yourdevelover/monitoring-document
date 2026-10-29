@@ -1,31 +1,10 @@
-import { readFile, stat } from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
+import { createSignedDownloadUrl } from "@/lib/storage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const MIME_TYPES: Record<string, string> = {
-  ".pdf": "application/pdf",
-  ".doc": "application/msword",
-  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  ".xls": "application/vnd.ms-excel",
-  ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  ".csv": "text/csv",
-  ".txt": "text/plain",
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".png": "image/png",
-  ".gif": "image/gif",
-  ".webp": "image/webp",
-  ".zip": "application/zip",
-};
-
-function getMimeType(fileName: string): string {
-  const ext = path.extname(fileName).toLowerCase();
-  return MIME_TYPES[ext] ?? "application/octet-stream";
-}
 
 export async function GET(
   request: Request,
@@ -54,21 +33,7 @@ export async function GET(
     relativePath = relativePath.replace(/^uploads\//, "");
   }
 
-  const filePathOnDisk = path.join(process.cwd(), "public", "uploads", relativePath);
-
-  // Ensure resolved path is inside uploads directory
-  const uploadsRoot = path.join(process.cwd(), "public", "uploads");
-  const resolved = path.resolve(filePathOnDisk);
-  if (!resolved.startsWith(path.resolve(uploadsRoot))) {
-    return NextResponse.json({ error: "Invalid path" }, { status: 400 });
-  }
-
   try {
-    const fileStat = await stat(resolved);
-    if (!fileStat.isFile()) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
-    }
-
     // Team-based access check
     const teamMatch = relativePath.match(/^teams\/(\d+)\//);
     if (teamMatch) {
@@ -87,24 +52,15 @@ export async function GET(
       }
     }
 
-    const buffer = await readFile(resolved);
-    const fileName = path.basename(resolved);
-    const mimeType = getMimeType(fileName);
-
     const url = new URL(request.url);
-    const download = url.searchParams.get("download") === "true";
-
-    return new NextResponse(buffer, {
-      headers: {
-        "Content-Type": mimeType,
-        "Content-Length": String(buffer.length),
-        "Content-Disposition": download
-          ? `attachment; filename="${encodeURIComponent(fileName)}"`
-          : `inline; filename="${encodeURIComponent(fileName)}"`,
-        "Cache-Control": "private, max-age=3600",
-      },
-    });
-  } catch {
+    const fileName = path.basename(relativePath);
+    const signedUrl = await createSignedDownloadUrl(
+      `/uploads/${relativePath}`,
+      url.searchParams.get("download") === "true" ? fileName : ""
+    );
+    return NextResponse.redirect(signedUrl, { headers: { "Cache-Control": "private, no-store" } });
+  } catch (error) {
+    console.error("File access failed:", error);
     return NextResponse.json({ error: "File tidak ditemukan" }, { status: 404 });
   }
 }

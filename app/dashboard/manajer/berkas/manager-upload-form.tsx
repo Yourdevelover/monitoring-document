@@ -2,6 +2,7 @@
 
 import { FormEvent, useRef, useState } from "react";
 import { toast } from "@/app/components/toast";
+import { uploadFileToSignedUrl } from "@/lib/direct-upload";
 
 const CATEGORY_OPTIONS = [
   { key: "DAILY", label: "daily" },
@@ -30,21 +31,39 @@ export function ManagerUploadForm() {
     setIsSubmitting(true);
 
     try {
-      const formData = new FormData();
-      formData.append("category", category);
-      formData.append("title", CATEGORY_OPTIONS.find((c) => c.key === category)?.label ?? category);
-      formData.append("file", selectedFile);
+      const title = CATEGORY_OPTIONS.find((option) => option.key === category)?.label ?? category;
+      const prepareFormData = new FormData();
+      prepareFormData.append("action", "prepare-upload");
+      prepareFormData.append("category", category);
+      prepareFormData.append("title", title);
+      prepareFormData.append("fileName", selectedFile.name);
+      prepareFormData.append("fileSize", String(selectedFile.size));
+      prepareFormData.append("fileType", selectedFile.type || "application/octet-stream");
 
-      const response = await fetch("/api/manajer/berkas/upload", {
+      const prepareResponse = await fetch("/api/manajer/berkas/upload", {
         method: "POST",
-        body: formData,
+        body: prepareFormData,
       });
 
-      const data = await response.json();
+      const prepared = await prepareResponse.json();
 
-      if (!response.ok) {
-        throw new Error(data?.error || "Gagal mengunggah berkas");
+      if (!prepareResponse.ok) {
+        throw new Error(prepared?.error || "Gagal menyiapkan unggahan berkas");
       }
+
+      await uploadFileToSignedUrl(prepared.signedUrl, selectedFile);
+      const completeFormData = new FormData();
+      completeFormData.append("action", "complete-upload");
+      completeFormData.append("category", category);
+      completeFormData.append("title", title);
+      completeFormData.append("filePath", prepared.path);
+      completeFormData.append("fileName", prepared.fileName);
+      completeFormData.append("fileSize", String(selectedFile.size));
+      completeFormData.append("fileType", selectedFile.type || "application/octet-stream");
+
+      const response = await fetch("/api/manajer/berkas/upload", { method: "POST", body: completeFormData });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "Gagal menyimpan berkas");
 
       toast("Berkas berhasil dibagikan ke tim.", "success");
       setSelectedFile(null);

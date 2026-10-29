@@ -1,10 +1,9 @@
 import { ZipArchive } from "archiver";
-import { readFile } from "fs/promises";
-import path from "path";
 import { NextResponse } from "next/server";
 import { requireManager } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
+import { downloadStoredFile } from "@/lib/storage";
 
 export const runtime = "nodejs";
 
@@ -89,8 +88,7 @@ export async function GET(request: Request) {
 
   for (const upload of dateFilteredUploads) {
     try {
-      const filePath = path.join(process.cwd(), "public", upload.filePath.replace(/^\/+/, ""));
-      const fileBuffer = await readFile(filePath);
+      const fileBuffer = await downloadStoredFile(upload.filePath);
       archive.append(fileBuffer, {
         name: `${upload.user.name}-${upload.fileName}`.replace(/[^a-zA-Z0-9._-]/g, "_"),
       });

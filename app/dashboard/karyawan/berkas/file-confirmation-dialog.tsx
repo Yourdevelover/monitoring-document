@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/app/components/toast";
+import { uploadFileToSignedUrl } from "@/lib/direct-upload";
 
 type FileConfirmationDialogProps = {
   fileName: string;
@@ -33,22 +34,45 @@ export function FileConfirmationDialog({
       if (isNewUpload && newFile) {
         // Handle new file upload
         if (action === "submit") {
-          const uploadFormData = new FormData();
-          uploadFormData.append("category", categoryKey);
-          uploadFormData.append("title", fileName);
-          uploadFormData.append("file", newFile);
+          const prepareFormData = new FormData();
+          prepareFormData.append("action", "prepare-upload");
+          prepareFormData.append("category", categoryKey);
+          prepareFormData.append("title", fileName);
+          prepareFormData.append("fileName", newFile.name);
+          prepareFormData.append("fileSize", String(newFile.size));
+          prepareFormData.append("fileType", newFile.type || "application/octet-stream");
 
-          const uploadResponse = await fetch("/api/karyawan/upload", {
+          const prepareResponse = await fetch("/api/karyawan/upload", {
             method: "POST",
-            body: uploadFormData,
+            body: prepareFormData,
           });
 
-          if (!uploadResponse.ok) {
-            const data = await uploadResponse.json();
+          const prepared = await prepareResponse.json();
+          if (!prepareResponse.ok) {
+            const data = prepared;
             throw new Error(data?.error || "Gagal mengunggah berkas");
           }
 
+          await uploadFileToSignedUrl(prepared.signedUrl, newFile);
+          const completeFormData = new FormData();
+          completeFormData.append("action", "complete-upload");
+          completeFormData.append("category", categoryKey);
+          completeFormData.append("title", fileName);
+          completeFormData.append("filePath", prepared.path);
+          completeFormData.append("fileName", prepared.fileName);
+          completeFormData.append("fileSize", String(newFile.size));
+          completeFormData.append("fileType", newFile.type || "application/octet-stream");
+
+          const uploadResponse = await fetch("/api/karyawan/upload", {
+            method: "POST",
+            body: completeFormData,
+          });
+
           const uploadData = await uploadResponse.json();
+          if (!uploadResponse.ok) {
+            throw new Error(uploadData?.error || "Gagal menyimpan data berkas.");
+          }
+
           const submitFormData = new FormData();
           submitFormData.append("action", "submit");
           submitFormData.append("uploadId", String(uploadData.id));
@@ -59,7 +83,8 @@ export function FileConfirmationDialog({
           });
 
           if (!submitResponse.ok) {
-            throw new Error("Gagal mengirim berkas");
+            const result = await submitResponse.json().catch(() => null);
+            throw new Error(result?.error || "Gagal mengirim berkas");
           }
 
           if (onSuccess) {

@@ -35,6 +35,45 @@ export async function uploadStoredFile(filePath: string, data: Uint8Array, conte
   if (error) throw error;
 }
 
+export async function createSignedUpload(filePath: string) {
+  const { data, error } = await getStorageClient().createSignedUploadUrl(getObjectPath(filePath));
+  if (error) throw error;
+
+  const url = process.env.SUPABASE_URL;
+  if (!url) throw new Error("Supabase Storage is not configured.");
+  const signedUrl = data.signedUrl.startsWith("http")
+    ? data.signedUrl
+    : new URL(
+        data.signedUrl.startsWith("/storage/v1/")
+          ? data.signedUrl
+          : `/storage/v1/${data.signedUrl.replace(/^\/+/, "")}`,
+        url
+      ).toString();
+
+  return {
+    path: filePath,
+    token: data.token,
+    signedUrl,
+  };
+}
+
+export async function verifyStoredFile(filePath: string, expectedSize: number) {
+  const { data, error } = await getStorageClient().info(getObjectPath(filePath));
+  if (error) throw error;
+  if (data.size !== expectedSize) throw new Error("Ukuran berkas di storage tidak sesuai.");
+  return data;
+}
+
+export async function createSignedDownloadUrl(filePath: string, fileName: string) {
+  const { data, error } = await getStorageClient().createSignedUrl(
+    getObjectPath(filePath),
+    60,
+    fileName ? { download: fileName } : undefined
+  );
+  if (error) throw error;
+  return data.signedUrl;
+}
+
 export async function deleteStoredFile(filePath: string) {
   const { error } = await getStorageClient().remove([getObjectPath(filePath)]);
   if (error) throw error;
@@ -44,14 +83,8 @@ export async function copyStoredFile(sourcePath: string, destinationPath: string
   const bucket = getStorageClient();
   const source = getObjectPath(sourcePath);
   const destination = getObjectPath(destinationPath);
-  const { data, error } = await bucket.download(source);
+  const { error } = await bucket.copy(source, destination);
   if (error) throw error;
-
-  const { error: uploadError } = await bucket.upload(destination, new Uint8Array(await data.arrayBuffer()), {
-    contentType: data.type || "application/octet-stream",
-    upsert: false,
-  });
-  if (uploadError) throw uploadError;
 }
 
 export async function downloadStoredFile(filePath: string) {
