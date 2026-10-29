@@ -42,6 +42,37 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.navigation-progress-track {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 10000;
+  height: 3px;
+  overflow: hidden;
+  background: transparent;
+  pointer-events: none;
+}
+.navigation-progress-bar,
+.navigation-progress-indeterminate {
+  display: block;
+  height: 100%;
+  background: #e11d48;
+  box-shadow: 0 0 8px rgb(225 29 72 / 65%);
+  transition: width 180ms ease-out, opacity 180ms ease-out;
+}
+.navigation-progress-indeterminate {
+  width: 35%;
+  animation: navigation-progress-sweep 1.15s ease-in-out infinite;
+}
+@keyframes navigation-progress-sweep {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(320%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .navigation-progress-indeterminate { animation-duration: 2.5s; }
+  .navigation-progress-bar,
+  .navigation-progress-indeterminate { transition-duration: 0ms; }
+}
+
 h1, h2, h3 { letter-spacing: -0.02em; }
 
 /* Emoji picker */
