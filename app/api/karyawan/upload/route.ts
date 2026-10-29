@@ -99,7 +99,7 @@ export async function POST(request: Request) {
           success: true,
           message: "Berkas berhasil dihapus",
         });
-      });
+      }, `employee:${employee.id}`);
     }
 
     if (action === "delete-important") {
@@ -129,7 +129,7 @@ export async function POST(request: Request) {
         ]);
 
         return NextResponse.json({ success: true, message: "Data penting berhasil dihapus." });
-      });
+      }, `employee:${employee.id}`);
     }
 
     if (action === "submit") {
@@ -204,7 +204,7 @@ export async function POST(request: Request) {
           success: true,
           message: "Berkas berhasil dikirim",
         });
-      });
+      }, `employee:${employee.id}`);
     }
 
     if (action === "add-important") {
@@ -294,7 +294,7 @@ export async function POST(request: Request) {
           success: true,
           message: "Berkas berhasil disimpan ke Data Penting",
         });
-      });
+      }, `employee:${employee.id}`);
     }
 
     if (action === "replace") {
@@ -348,7 +348,7 @@ export async function POST(request: Request) {
           success: true,
           message: "Berkas berhasil dihapus",
         });
-      });
+      }, `employee:${employee.id}`);
     }
 
     const category = String(formData.get("category") ?? "");
@@ -440,7 +440,7 @@ export async function POST(request: Request) {
         id: upload.id,
         redirect: "/dashboard/karyawan/berkas",
       });
-    });
+    }, `employee:${employee.id}`);
   } catch (error) {
     if (
       error instanceof Error &&

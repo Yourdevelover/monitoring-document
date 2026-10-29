@@ -87,7 +87,7 @@ export async function POST(request: Request) {
           success: true,
           message: "Berkas berhasil dihapus",
         });
-      });
+      }, `manager:${manager.id}`);
     }
 
     const category = String(formData.get("category") ?? "");
@@ -157,7 +157,7 @@ export async function POST(request: Request) {
         message: "Berkas berhasil dibagikan ke tim",
         id: upload.id,
       });
-    });
+    }, `manager:${manager.id}`);
   } catch (error) {
     console.error(error);
     return NextResponse.json(

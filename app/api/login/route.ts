@@ -1,5 +1,5 @@
 import { compare } from "bcryptjs";
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { createSessionToken, isSecureRequest } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -62,7 +62,8 @@ export async function POST(request: Request) {
       maxAge: 60 * 60 * 24 * 7,
     });
 
-    try {
+    after(async () => {
+      try {
       await prisma.activityLog.create({
         data: {
           actorId: user.id,
@@ -72,9 +73,10 @@ export async function POST(request: Request) {
           description: `${user.name} berhasil login ke dashboard.`,
         },
       });
-    } catch (error) {
-      console.error("Failed to record login activity:", error);
-    }
+      } catch (error) {
+        console.error("Failed to record login activity:", error);
+      }
+    });
 
     return response;
   } catch (error) {

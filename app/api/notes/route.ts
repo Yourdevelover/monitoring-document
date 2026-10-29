@@ -8,6 +8,16 @@ async function getUser() {
   return getSessionUser();
 }
 
+export async function GET() {
+  const user = await getUser();
+  if (!user) return NextResponse.json({ error: "Sesi tidak valid." }, { status: 401 });
+
+  const notes = await prisma.$queryRaw<Array<{ id: number; content: string; createdAt: Date; updatedAt: Date }>>(
+    Prisma.sql`SELECT id, content, "createdAt", "updatedAt" FROM personal_notes WHERE "userId" = ${user.id} ORDER BY "updatedAt" DESC`
+  );
+  return NextResponse.json(notes);
+}
+
 export async function POST(request: Request) {
   try {
     const user = await getUser();

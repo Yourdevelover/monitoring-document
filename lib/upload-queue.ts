@@ -1,21 +1,23 @@
-let pendingFileTask: Promise<void> = Promise.resolve();
+const pendingFileTasks = new Map<string, Promise<void>>();
 
-export function enqueueFileTask<T>(task: () => Promise<T>): Promise<T> {
-  const previousTask = pendingFileTask;
+export async function enqueueFileTask<T>(task: () => Promise<T>, key = "global"): Promise<T> {
+  const previousTask = pendingFileTasks.get(key) ?? Promise.resolve();
 
   let releaseTask: () => void;
 
-  pendingFileTask = new Promise<void>((resolve) => {
+  const currentTask = new Promise<void>((resolve) => {
     releaseTask = resolve;
   });
+  pendingFileTasks.set(key, currentTask);
 
-  return previousTask
-    .catch(() => undefined)
-    .then(async () => {
-      try {
-        return await task();
-      } finally {
-        releaseTask();
-      }
-    });
+  await previousTask.catch(() => undefined);
+
+  try {
+    return await task();
+  } finally {
+    releaseTask!();
+    if (pendingFileTasks.get(key) === currentTask) {
+      pendingFileTasks.delete(key);
+    }
+  }
 }

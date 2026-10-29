@@ -14,6 +14,7 @@ type Note = {
 
 export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
   const [notes, setNotes] = useState(initialNotes);
+  const [isLoadingNotes, setIsLoadingNotes] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
@@ -22,6 +23,26 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
   const [content, setContent] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (isHiddenPath) return;
+
+    let cancelled = false;
+    fetch("/api/notes")
+      .then(async (response) => {
+        if (!response.ok) return;
+        const result = await response.json();
+        if (!cancelled) setNotes(result);
+      })
+      .catch((fetchError) => console.error("Failed to load notes:", fetchError))
+      .finally(() => {
+        if (!cancelled) setIsLoadingNotes(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isHiddenPath]);
 
   useEffect(() => {
     if (isHiddenPath) return;
@@ -143,7 +164,9 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
               <p className="mt-1 truncate text-[10px] text-slate-400">{new Date(note.updatedAt).toLocaleDateString("id-ID")}</p>
             </button>
             );
-          }) : (
+          }) : isLoadingNotes ? (
+            <div className="h-20 min-w-0 flex-1 animate-pulse rounded-lg border border-slate-200 bg-slate-100" aria-label="Memuat catatan" />
+          ) : (
             <div className="h-20 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white p-2">
               <p className="text-xs text-slate-500">Belum ada catatan.</p>
             </div>

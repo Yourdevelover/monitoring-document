@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "./components/toast";
 
@@ -11,19 +11,26 @@ function getInternalPath(path: string | null) {
 
 export function LoginForm() {
   const router = useRouter();
+  const submitting = useRef(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (submitting.current) return;
+    submitting.current = true;
     setError("");
     setLoading(true);
     const form = e.currentTarget;
     const formData = new FormData(form);
+    const body = new URLSearchParams({
+      email: String(formData.get("email") ?? ""),
+      password: String(formData.get("password") ?? ""),
+    });
     try {
       const res = await fetch("/api/login", {
         method: "POST",
-        body: formData,
+        body,
         redirect: "manual",
       });
       if (res.type === "opaqueredirect" || res.status === 0) {
@@ -36,7 +43,6 @@ export function LoginForm() {
         return;
       }
       const data = await res.json().catch(() => null);
-      console.log("Login response:", data);
       if (!res.ok) {
         const msg = data?.error ?? "Login gagal.";
         setError(msg);
@@ -50,6 +56,7 @@ export function LoginForm() {
       setError(msg);
       toast(msg, "error");
     } finally {
+      submitting.current = false;
       setLoading(false);
     }
   }
