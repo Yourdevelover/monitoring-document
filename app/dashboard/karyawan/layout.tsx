@@ -1,6 +1,7 @@
 ﻿import { requireEmployee } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { KaryawanSidebar } from "./karyawan-sidebar";
+import { NotesWidget } from "@/app/components/notes-widget";
 
 export default async function EmployeeLayout({
   children,
@@ -56,6 +57,13 @@ export default async function EmployeeLayout({
               )}
             </div>
           </div>
+          {!children ? null : (
+            <div className="mx-auto flex w-full max-w-7xl justify-end px-4 pt-3">
+              <div className="w-full max-w-lg">
+                <NotesWidget initialNotes={[]} />
+              </div>
+            </div>
+          )}
           {children}
         </div>
       </div>

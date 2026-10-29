@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { parseTargetNote } from "@/lib/notes";
 import { LoadingIndicator } from "@/app/components/loading-indicator";
@@ -18,7 +17,6 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
   const [isLoadingNotes, setIsLoadingNotes] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
-  const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
   const pathname = usePathname();
   const isHiddenPath = pathname.startsWith("/dashboard/admin") || pathname.endsWith("/profil");
   const [content, setContent] = useState("");
@@ -46,33 +44,6 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
       cancelled = true;
     };
   }, [isHiddenPath]);
-
-  useEffect(() => {
-    if (isHiddenPath) return;
-
-    const header = document.querySelector<HTMLElement>("main header");
-    if (!header) return;
-
-    header.classList.add("flex", "flex-wrap", "items-start", "justify-between", "gap-4");
-    const slot = document.createElement("div");
-    slot.className = "dashboard-notes-slot w-full shrink-0 sm:ml-auto sm:max-w-md lg:max-w-lg";
-    header.appendChild(slot);
-    const resizeObserver = new ResizeObserver(() => {
-      header.style.minHeight = `${Math.max(128, slot.offsetHeight + 40)}px`;
-    });
-    const frame = window.requestAnimationFrame(() => {
-      setHeaderSlot(slot);
-      resizeObserver.observe(slot);
-    });
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-      resizeObserver.disconnect();
-      slot.remove();
-      header.style.removeProperty("min-height");
-      header.classList.remove("flex", "flex-wrap", "items-start", "justify-between", "gap-4");
-    };
-  }, [isHiddenPath, pathname]);
 
   useEffect(() => {
     function onNoteSaved(event: Event) {
@@ -170,7 +141,7 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
                 setIsCreatingNew(false);
                 setIsOpen(true);
               }}
-              className="relative h-20 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white p-2 text-left transition hover:border-slate-400 hover:"
+              className="relative h-20 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white p-2 text-left transition hover:border-slate-400"
             >
               {t && (
                 <span className={`absolute -right-1.5 -top-2 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${t.pct >= 100 ? "bg-[#346538] text-white" : "bg-[#956400] text-white"}`}>{t.pct}%</span>
@@ -252,5 +223,5 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
 
   if (isHiddenPath) return null;
 
-  return headerSlot ? createPortal(card, headerSlot) : null;
+  return card;
 }

@@ -15,7 +15,7 @@ export function getStorageFailureMessage(error: unknown) {
   if (!(error instanceof Error)) return null;
 
   if (error instanceof StorageConfigurationError) {
-    return "Konfigurasi Supabase Storage belum lengkap di Vercel. Atur SUPABASE_URL dan SUPABASE_SERVICE_ROLE_KEY, lalu deploy ulang.";
+    return "Konfigurasi Supabase Storage belum lengkap. Atur SUPABASE_URL dan SUPABASE_SERVICE_ROLE_KEY di .env.local untuk lokal atau environment deployment, lalu pastikan bucket monitoring-files tersedia.";
   }
 
   if (error.name === "StorageApiError" || error.name === "StorageError") {

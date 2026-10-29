@@ -1,6 +1,7 @@
 ﻿import { requireManager } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ManagerSidebar } from "./manager-sidebar";
+import { NotesWidget } from "@/app/components/notes-widget";
 
 export default async function ManagerLayout({
   children,
@@ -58,6 +59,11 @@ export default async function ManagerLayout({
               ) : (
                 <p className="manager-announcement-empty">Belum ada pengumuman terbaru dari manajer.</p>
               )}
+            </div>
+          </div>
+          <div className="mx-auto flex w-full max-w-7xl justify-end px-4 pt-3">
+            <div className="w-full max-w-lg">
+              <NotesWidget initialNotes={[]} />
             </div>
           </div>
           {children}

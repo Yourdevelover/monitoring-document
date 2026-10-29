@@ -28,25 +28,32 @@ export function FileConfirmationDialog({
   const router = useRouter();
   const submitting = useRef(false);
   const [isOpen, setIsOpen] = useState(isNewUpload); // Auto-open for new uploads
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [uploadStage, setUploadStage] = useState("");
 
   async function handleSubmit(action: string) {
     if (submitting.current) return;
+    if (action === "submit" && isNewUpload && !newFile) {
+      toast("File tidak ditemukan. Silakan pilih ulang.", "error");
+      return;
+    }
+
     submitting.current = true;
-    setIsSubmitting(true);
+    setIsLoading(true);
     try {
       if (isNewUpload && newFile) {
         // Handle new file upload
         if (action === "submit") {
+          const file = newFile;
+          const filePath = `${Date.now()}-${file.name.trim().replace(/\s+/g, "_").replace(/[^a-zA-Z0-9._-]/g, "_")}`;
           setUploadStage("Menyiapkan unggahan...");
           const prepareFormData = new FormData();
           prepareFormData.append("action", "prepare-upload");
           prepareFormData.append("category", categoryKey);
           prepareFormData.append("title", fileName);
-          prepareFormData.append("fileName", newFile.name);
-          prepareFormData.append("fileSize", String(newFile.size));
-          prepareFormData.append("fileType", newFile.type || "application/octet-stream");
+          prepareFormData.append("fileName", filePath);
+          prepareFormData.append("fileSize", String(file.size));
+          prepareFormData.append("fileType", file.type || "application/octet-stream");
 
           const prepareResponse = await fetch("/api/karyawan/upload", {
             method: "POST",
@@ -60,7 +67,7 @@ export function FileConfirmationDialog({
           }
 
           setUploadStage("Mengirim file ke storage...");
-          await uploadFileToSignedUrl(prepared.signedUrl, newFile);
+          await uploadFileToSignedUrl(prepared.signedUrl, file);
           setUploadStage("Menyimpan data berkas...");
           const completeFormData = new FormData();
           completeFormData.append("action", "complete-upload");
@@ -68,8 +75,8 @@ export function FileConfirmationDialog({
           completeFormData.append("title", fileName);
           completeFormData.append("filePath", prepared.path);
           completeFormData.append("fileName", prepared.fileName);
-          completeFormData.append("fileSize", String(newFile.size));
-          completeFormData.append("fileType", newFile.type || "application/octet-stream");
+          completeFormData.append("fileSize", String(file.size));
+          completeFormData.append("fileType", file.type || "application/octet-stream");
 
           const uploadResponse = await fetch("/api/karyawan/upload", {
             method: "POST",
@@ -129,7 +136,7 @@ export function FileConfirmationDialog({
       toast(error instanceof Error ? error.message : "Terjadi kesalahan. Silakan coba lagi.", "error");
     } finally {
       submitting.current = false;
-      setIsSubmitting(false);
+      setIsLoading(false);
       setUploadStage("");
     }
   }
@@ -168,33 +175,42 @@ export function FileConfirmationDialog({
               <div className="space-y-3">
                 <button
                   onClick={() => handleSubmit("submit")}
-                  disabled={isSubmitting}
+                  disabled={isLoading}
                   className="inline-flex w-full items-center justify-center rounded-lg bg-[#346538] px-4 py-2 text-sm font-medium text-white hover:bg-[#2d5a30] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {isSubmitting ? "Mengirim..." : "Ya, Kirim File"}
+                  {isLoading ? <LoadingIndicator label="Mengirim..." /> : "Ya, Kirim File"}
                 </button>
                 <button
                   onClick={() => handleSubmit("delete")}
-                  disabled={isSubmitting}
+                  disabled={isLoading}
                   className="inline-flex w-full items-center justify-center rounded-lg border border-red-300 bg-[#fdebec] px-4 py-2 text-sm font-medium text-[#9f2f2d] hover:bg-[#fdebec] disabled:cursor-not-allowed disabled:bg-[#fdebec]"
                 >
                   Tidak, Hapus File
                 </button>
                 <button
                   onClick={() => handleSubmit("replace")}
-                  disabled={isSubmitting}
+                  disabled={isLoading}
                   className="inline-flex w-full items-center justify-center rounded-lg border border-[#e8d9a8] bg-[#fbf3db] px-4 py-2 text-sm font-medium text-[#956400] hover:bg-[#fbf3db] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Ganti File
                 </button>
                 <button
-                  onClick={() => !isSubmitting && setIsOpen(false)}
-                  disabled={isSubmitting}
+                  onClick={() => !isLoading && setIsOpen(false)}
+                  disabled={isLoading}
                   className="inline-flex w-full items-center justify-center rounded-lg border border-[#e5e7eb] bg-[#f8f9fa] px-4 py-2 text-sm font-medium text-[#111111] hover:bg-[#f8f9fa] disabled:cursor-not-allowed"
                 >
                   Batal
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+        {isLoading && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4 text-white backdrop-blur-sm" aria-live="assertive" aria-busy="true">
+            <div className="flex flex-col items-center gap-4 rounded-lg bg-black/25 px-8 py-6 text-center">
+              <span aria-hidden="true" className="size-12 animate-spin rounded-full border-4 border-white/30 border-t-white" />
+              <p className="text-sm font-medium">{uploadStage || "Memproses..."}</p>
+              <span className="sr-only">Mohon tunggu, jangan tutup halaman.</span>
             </div>
           </div>
         )}
@@ -217,31 +233,40 @@ export function FileConfirmationDialog({
             <p className="mb-6 text-sm text-[#6b7280]">
               Apakah data file ini sudah benar dan siap untuk dikirim?
             </p>
-            {isSubmitting && <LoadingIndicator label={uploadStage} className="mb-4 text-sm font-medium text-[#346538]" />}
+            {isLoading && <LoadingIndicator label={uploadStage} className="mb-4 text-sm font-medium text-[#346538]" />}
 
             <div className="space-y-3">
               <button
                 onClick={() => handleSubmit("submit")}
-                disabled={isSubmitting}
+                disabled={isLoading}
                 className="inline-flex w-full items-center justify-center rounded-lg bg-[#346538] px-4 py-2 text-sm font-medium text-white hover:bg-[#2d5a30] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSubmitting ? <LoadingIndicator label="Mengirim..." /> : "Ya, Kirim File"}
+                {isLoading ? <LoadingIndicator label="Mengirim..." /> : "Ya, Kirim File"}
               </button>
               <button
                 onClick={() => handleSubmit("replace")}
-                disabled={isSubmitting}
+                disabled={isLoading}
                 className="inline-flex w-full items-center justify-center rounded-lg border border-[#e8d9a8] bg-[#fbf3db] px-4 py-2 text-sm font-medium text-[#956400] hover:bg-[#fbf3db] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Ganti File
               </button>
               <button
-                onClick={() => !isSubmitting && handleClose()}
-                disabled={isSubmitting}
+                onClick={() => !isLoading && handleClose()}
+                disabled={isLoading}
                 className="inline-flex w-full items-center justify-center rounded-lg border border-[#e5e7eb] bg-[#f8f9fa] px-4 py-2 text-sm font-medium text-[#111111] hover:bg-[#f8f9fa] disabled:cursor-not-allowed"
               >
                 Batal
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {isLoading && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4 text-white backdrop-blur-sm" aria-live="assertive" aria-busy="true">
+          <div className="flex flex-col items-center gap-4 rounded-lg bg-black/25 px-8 py-6 text-center">
+            <span aria-hidden="true" className="size-12 animate-spin rounded-full border-4 border-white/30 border-t-white" />
+            <p className="text-sm font-medium">{uploadStage || "Memproses..."}</p>
+            <span className="sr-only">Mohon tunggu, jangan tutup halaman.</span>
           </div>
         </div>
       )}
