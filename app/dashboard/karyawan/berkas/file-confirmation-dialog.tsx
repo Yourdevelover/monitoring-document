@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/app/components/toast";
 import { uploadFileToSignedUrl } from "@/lib/direct-upload";
+import { LoadingIndicator } from "@/app/components/loading-indicator";
 
 type FileConfirmationDialogProps = {
   fileName: string;
@@ -216,7 +217,7 @@ export function FileConfirmationDialog({
             <p className="mb-6 text-sm text-[#6b7280]">
               Apakah data file ini sudah benar dan siap untuk dikirim?
             </p>
-            {isSubmitting && <p role="status" className="mb-4 text-sm font-medium text-[#346538]">{uploadStage}</p>}
+            {isSubmitting && <LoadingIndicator label={uploadStage} className="mb-4 text-sm font-medium text-[#346538]" />}
 
             <div className="space-y-3">
               <button
@@ -224,7 +225,7 @@ export function FileConfirmationDialog({
                 disabled={isSubmitting}
                 className="inline-flex w-full items-center justify-center rounded-lg bg-[#346538] px-4 py-2 text-sm font-medium text-white hover:bg-[#2d5a30] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSubmitting ? "Mengirim..." : "Ya, Kirim File"}
+                {isSubmitting ? <LoadingIndicator label="Mengirim..." /> : "Ya, Kirim File"}
               </button>
               <button
                 onClick={() => handleSubmit("replace")}

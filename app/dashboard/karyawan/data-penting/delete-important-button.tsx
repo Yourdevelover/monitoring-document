@@ -2,12 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { toast } from "@/app/components/toast";
+import { useState } from "react";
+import { LoadingIndicator } from "@/app/components/loading-indicator";
 
 export function DeleteImportantButton({ fileId }: { fileId: number }) {
   const router = useRouter();
+  const [isDeleting, setIsDeleting] = useState(false);
 
   async function handleDelete() {
+    if (isDeleting) return;
     if (!confirm("Hapus data penting ini?")) return;
+    setIsDeleting(true);
     try {
       const formData = new FormData();
       formData.append("action", "delete-important");
@@ -19,15 +24,18 @@ export function DeleteImportantButton({ fileId }: { fileId: number }) {
       router.push("/dashboard/karyawan/data-penting");
     } catch (err) {
       toast(err instanceof Error ? err.message : "Terjadi kesalahan.", "error");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
   return (
     <button
       onClick={handleDelete}
-      className="inline-flex items-center rounded-lg border border-red-300 bg-[#fdebec] px-4 py-2 text-sm font-medium text-[#9f2f2d] hover:bg-[#fdebec]"
+      disabled={isDeleting}
+      className="inline-flex items-center rounded-lg border border-red-300 bg-[#fdebec] px-4 py-2 text-sm font-medium text-[#9f2f2d] hover:bg-[#fdebec] disabled:cursor-not-allowed disabled:opacity-60"
     >
-      Hapus
+      {isDeleting ? <LoadingIndicator label="Menghapus..." /> : "Hapus"}
     </button>
   );
 }

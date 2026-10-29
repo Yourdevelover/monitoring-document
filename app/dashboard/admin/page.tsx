@@ -1,4 +1,5 @@
 ﻿import { prisma } from "@/lib/prisma";
+import { ApiForm } from "@/app/components/api-form";
 import { requireAdmin } from "@/lib/auth";
 import { getCurrentJakartaPeriod } from "@/lib/upload-time";
 
@@ -85,9 +86,9 @@ export default async function AdminDashboardPage() {
             <h1 className="mt-1 text-[15px] font-semibold tracking-tight">Dashboard Admin</h1>
             <p className="mt-0.5 text-xs text-[#6b7280]">{summary.totalUsers} pengguna • {summary.activeTeams} tim aktif • {summary.pendingApprovals} pending</p>
           </div>
-          <form action="/api/logout" method="POST">
+          <ApiForm action="/api/logout" successMessage="Berhasil keluar.">
             <button type="submit" className="rounded-md border border-[#e5e7eb] bg-white px-3 py-1.5 text-xs font-medium text-[#111111] hover:bg-[#f8f9fa]">Keluar</button>
-          </form>
+          </ApiForm>
         </header>
 
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

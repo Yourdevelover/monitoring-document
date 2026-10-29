@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireEmployee } from "@/lib/auth";
 import { SaveTargetNoteButton } from "@/app/components/save-target-note-button";
+import { ApiForm } from "@/app/components/api-form";
 
 export default async function EmployeeTargetPage() {
   const employee = await requireEmployee();
@@ -20,7 +21,7 @@ export default async function EmployeeTargetPage() {
 
         <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide">Tambah Target</h2>
-          <form action="/api/karyawan/target" method="POST" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <ApiForm action="/api/karyawan/target" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" successMessage="Target tersimpan.">
             <input type="hidden" name="period" value={period} />
             <input type="hidden" name="action" value="upsert" />
             <input type="hidden" name="formula" value="bagi" />
@@ -29,7 +30,7 @@ export default async function EmployeeTargetPage() {
             <label className="text-xs">Target (100%)<input name="targetValue" required type="number" step="any" placeholder="30000000" className="mt-1 w-full rounded-md border border-[#e5e7eb] px-3 py-2 text-sm" /></label>
             <label className="text-xs">Progres sekarang<input name="currentValue" type="number" step="any" defaultValue={0} placeholder="10000000" className="mt-1 w-full rounded-md border border-[#e5e7eb] px-3 py-2 text-sm" /></label>
             <div className="flex items-end sm:col-span-2 lg:col-span-3"><button type="submit" className="rounded-md bg-[#111111] px-4 py-2 text-sm font-medium text-white hover:bg-[#222]">Simpan</button></div>
-          </form>
+          </ApiForm>
         </section>
 
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -53,14 +54,14 @@ export default async function EmployeeTargetPage() {
                   <SaveTargetNoteButton name={t.name} current={t.currentValue} target={t.targetValue} pct={pct} />
                 </div>
                 <div className="mt-3 flex gap-2">
-                  <form action="/api/karyawan/target" method="POST" className="flex-1">
+                  <ApiForm action="/api/karyawan/target" className="flex-1" confirmMessage={`Hapus target ${t.name}?`} successMessage="Target dihapus.">
                     <input type="hidden" name="action" value="delete" />
                     <input type="hidden" name="id" value={String(t.id)} />
                     <button type="submit" className="w-full rounded-md border border-[#e5e7eb] px-3 py-1.5 text-xs font-medium hover:bg-[#f8f9fa]">Hapus</button>
-                  </form>
+                  </ApiForm>
                   <details className="flex-1">
                     <summary className="cursor-pointer rounded-md border border-[#e5e7eb] px-3 py-1.5 text-center text-xs font-medium hover:bg-[#f8f9fa]">Update Progres</summary>
-                    <form action="/api/karyawan/target" method="POST" className="mt-2 space-y-2">
+                    <ApiForm action="/api/karyawan/target" className="mt-2 space-y-2" successMessage="Progres tersimpan.">
                       <input type="hidden" name="action" value="update" />
                       <input type="hidden" name="id" value={String(t.id)} />
                       <input type="hidden" name="name" value={t.name} />
@@ -69,7 +70,7 @@ export default async function EmployeeTargetPage() {
                       <input type="hidden" name="threshold" value={String(t.threshold)} />
                       <input name="currentValue" type="number" step="any" defaultValue={String(t.currentValue)} required className="w-full rounded-md border border-[#e5e7eb] px-2 py-1.5 text-xs" placeholder="Progres baru" />
                       <button type="submit" className="w-full rounded-md bg-[#111111] px-3 py-1.5 text-xs font-medium text-white">Simpan Progres</button>
-                    </form>
+                    </ApiForm>
                   </details>
                 </div>
               </div>

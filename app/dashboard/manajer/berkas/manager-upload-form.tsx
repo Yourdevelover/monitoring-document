@@ -3,6 +3,7 @@
 import { FormEvent, useRef, useState } from "react";
 import { toast } from "@/app/components/toast";
 import { uploadFileToSignedUrl } from "@/lib/direct-upload";
+import { LoadingIndicator } from "@/app/components/loading-indicator";
 
 const CATEGORY_OPTIONS = [
   { key: "DAILY", label: "daily" },
@@ -137,14 +138,14 @@ export function ManagerUploadForm() {
 
       {error && <p className="rounded-md bg-[#fdebec] px-3 py-1.5 text-[12px] font-medium text-[#9f2f2d]">{error}</p>}
       {success && <p className="rounded-md bg-[#edf3ec] px-3 py-1.5 text-[12px] font-medium text-[#346538]">{success}</p>}
-      {isSubmitting && <p role="status" className="text-center text-xs font-medium text-[#346538]">{uploadStage} Jangan tutup halaman ini.</p>}
+      {isSubmitting && <LoadingIndicator label={`${uploadStage} Jangan tutup halaman ini.`} className="flex justify-center text-xs font-medium text-[#346538]" />}
 
       <button
         type="submit"
         disabled={isSubmitting || !selectedFile}
         className="inline-flex w-full items-center justify-center rounded-lg bg-[#111111] px-4 py-2 text-[13px] font-medium text-white transition hover:bg-[#333333] disabled:cursor-not-allowed disabled:bg-[#9ca3af]"
       >
-        {isSubmitting ? "Mengunggah..." : "Bagikan ke Tim"}
+        {isSubmitting ? <LoadingIndicator label="Mengunggah..." /> : "Bagikan ke Tim"}
       </button>
     </form>
   );

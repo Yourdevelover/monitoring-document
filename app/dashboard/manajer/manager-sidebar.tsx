@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Logo } from "@/app/components/logo";
 import { getNavIcon, IconLogout } from "@/app/components/sidebar-icons";
+import { ApiForm } from "@/app/components/api-form";
 
 type ManagerSidebarProps = {
   navItems: Array<{ href: string; label: string }>;
@@ -78,7 +79,7 @@ export function ManagerSidebar({ navItems }: ManagerSidebarProps) {
       )}
 
       {isOpen ? (
-        <form action="/api/logout" method="POST" className="px-2 pt-2">
+        <ApiForm action="/api/logout" className="px-2 pt-2" successMessage="Berhasil keluar.">
           <button
             type="submit"
             className="flex w-full items-center justify-between rounded-md border border-[#27272a] bg-[#1f1f23] px-3 py-2.5 text-sm font-medium text-[#d4d4d8] transition hover:border-[#3f3f46] hover:bg-[#27272a] hover:text-[#fafafa] active:scale-[0.98]"
@@ -86,9 +87,9 @@ export function ManagerSidebar({ navItems }: ManagerSidebarProps) {
             <span>Keluar</span>
             <IconLogout className="h-4 w-4 shrink-0" />
           </button>
-        </form>
+        </ApiForm>
       ) : (
-        <form action="/api/logout" method="POST" className="flex justify-center px-2 pt-2">
+        <ApiForm action="/api/logout" className="flex justify-center px-2 pt-2" successMessage="Berhasil keluar.">
           <button
             type="submit"
             title="Keluar"
@@ -96,7 +97,7 @@ export function ManagerSidebar({ navItems }: ManagerSidebarProps) {
           >
             <IconLogout className="h-4 w-4" />
           </button>
-        </form>
+        </ApiForm>
       )}
     </aside>
   );

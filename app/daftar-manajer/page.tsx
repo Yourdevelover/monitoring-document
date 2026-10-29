@@ -1,5 +1,6 @@
 ﻿import Link from "next/link";
 import { Logo } from "@/app/components/logo";
+import { ApiForm } from "@/app/components/api-form";
 
 export default function ManagerRegistrationPage() {
   return (
@@ -12,7 +13,7 @@ export default function ManagerRegistrationPage() {
           </p>
         </div>
 
-        <form action="/api/manager/register" method="POST" className="rounded-lg border border-[#e5e7eb] bg-white p-6">
+        <ApiForm action="/api/manager/register" className="rounded-lg border border-[#e5e7eb] bg-white p-6" successMessage="Pendaftaran berhasil dikirim.">
           <div className="space-y-4">
             <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
               Setelah mendaftar, akun Anda perlu disetujui admin sebelum dapat digunakan.
@@ -70,7 +71,7 @@ export default function ManagerRegistrationPage() {
               Masuk
             </Link>
           </div>
-        </form>
+        </ApiForm>
       </div>
     </main>
   );

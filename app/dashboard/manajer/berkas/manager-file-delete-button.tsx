@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState } from "react";
+import { LoadingIndicator } from "@/app/components/loading-indicator";
 
 type ManagerFileDeleteButtonProps = {
   uploadId: number;
@@ -45,7 +46,7 @@ export function ManagerFileDeleteButton({ uploadId }: ManagerFileDeleteButtonPro
       disabled={isDeleting}
       className="whitespace-nowrap rounded-lg border border-red-300 bg-[#fdebec] px-3 py-1.5 text-xs font-medium text-[#9f2f2d] hover:bg-[#fdebec] disabled:cursor-not-allowed disabled:bg-[#fdebec]"
     >
-      {isDeleting ? "Menghapus..." : "Hapus"}
+      {isDeleting ? <LoadingIndicator label="Menghapus..." /> : "Hapus"}
     </button>
   );
 }

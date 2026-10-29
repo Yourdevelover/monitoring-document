@@ -37,7 +37,11 @@ function getStorageClient() {
     throw new StorageConfigurationError();
   }
 
-  storageClient ??= createClient(url, serviceRoleKey, {
+  const projectUrl = new URL(url);
+  projectUrl.pathname = projectUrl.pathname.replace(/\/storage\/v1\/?$/, "").replace(/\/$/, "");
+  projectUrl.search = "";
+  projectUrl.hash = "";
+  storageClient ??= createClient(projectUrl.toString().replace(/\/$/, ""), serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
@@ -64,21 +68,10 @@ export async function createSignedUpload(filePath: string) {
   const { data, error } = await getStorageClient().createSignedUploadUrl(getObjectPath(filePath));
   if (error) throw error;
 
-  const url = process.env.SUPABASE_URL;
-  if (!url) throw new Error("Supabase Storage is not configured.");
-  const signedUrl = data.signedUrl.startsWith("http")
-    ? data.signedUrl
-    : new URL(
-        data.signedUrl.startsWith("/storage/v1/")
-          ? data.signedUrl
-          : `/storage/v1/${data.signedUrl.replace(/^\/+/, "")}`,
-        url
-      ).toString();
-
   return {
     path: filePath,
     token: data.token,
-    signedUrl,
+    signedUrl: data.signedUrl,
   };
 }
 

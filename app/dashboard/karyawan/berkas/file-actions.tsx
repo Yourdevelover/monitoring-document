@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/app/components/toast";
+import { LoadingIndicator } from "@/app/components/loading-indicator";
 
 type FileActionsProps = {
   uploadId: number;
@@ -21,10 +22,13 @@ export function FileActions({
 }: FileActionsProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeAction, setActiveAction] = useState("");
   const isAlreadySaved = isImportant || importantSaved;
 
   async function handleAction(action: string, actionUploadId = uploadId) {
+    if (isSubmitting) return;
     setIsSubmitting(true);
+    setActiveAction(action);
     try {
       const formData = new FormData();
       formData.append("action", action);
@@ -47,6 +51,7 @@ export function FileActions({
       toast(error instanceof Error ? error.message : "Terjadi kesalahan. Silakan coba lagi.", "error");
     } finally {
       setIsSubmitting(false);
+      setActiveAction("");
     }
   }
 
@@ -59,7 +64,7 @@ export function FileActions({
             disabled={isSubmitting || isAlreadySaved}
             className="inline-flex items-center rounded-lg border border-[#e8d9a8] bg-[#fbf3db] px-3 py-1.5 text-xs font-medium text-[#956400] hover:bg-[#fbf3db] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isAlreadySaved ? "✓ Data Penting" : "Simpan"}
+            {isSubmitting && activeAction === "add-important" ? <LoadingIndicator label="Menyimpan..." /> : isAlreadySaved ? "✓ Data Penting" : "Simpan"}
           </button>
           {isAlreadySaved ? (
             <button
@@ -67,7 +72,7 @@ export function FileActions({
               disabled={isSubmitting || !importantFileId}
               className="inline-flex items-center rounded-lg border border-red-300 bg-[#fdebec] px-3 py-1.5 text-xs font-medium text-[#9f2f2d] hover:bg-[#fdebec] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Hapus
+              {isSubmitting && activeAction === "delete-important" ? <LoadingIndicator label="Menghapus..." /> : "Hapus"}
             </button>
           ) : (
             <button
@@ -75,7 +80,7 @@ export function FileActions({
               disabled={isSubmitting}
               className="inline-flex items-center rounded-lg border border-red-300 bg-[#fdebec] px-3 py-1.5 text-xs font-medium text-[#9f2f2d] hover:bg-[#fdebec] disabled:cursor-not-allowed"
             >
-              Hapus
+              {isSubmitting && activeAction === "delete" ? <LoadingIndicator label="Menghapus..." /> : "Hapus"}
             </button>
           )}
         </>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { parseTargetNote } from "@/lib/notes";
+import { LoadingIndicator } from "@/app/components/loading-indicator";
 
 type Note = {
   id: number;
@@ -23,6 +24,8 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
   const [content, setContent] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [deletingNoteId, setDeletingNoteId] = useState<number | null>(null);
 
   useEffect(() => {
     if (isHiddenPath) return;
@@ -81,32 +84,49 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
   }, []);
 
   async function saveNote() {
+    if (isSaving) return;
     setError("");
-    const method = editingId ? "PATCH" : "POST";
-    const response = await fetch("/api/notes", {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: editingId, content }),
-    });
-    const result = await response.json();
-    if (!response.ok) {
-      setError(result.error ?? "Catatan gagal disimpan.");
-      return;
+    setIsSaving(true);
+    try {
+      const method = editingId ? "PATCH" : "POST";
+      const response = await fetch("/api/notes", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: editingId, content }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        setError(result.error ?? "Catatan gagal disimpan.");
+        return;
+      }
+      if (editingId) {
+        setNotes((current) => current.map((note) => note.id === editingId ? { ...note, content, updatedAt: new Date() } : note));
+      } else {
+        setNotes((current) => [result, ...current]);
+      }
+      setContent("");
+      setEditingId(null);
+      setIsCreatingNew(false);
+      setIsOpen(false);
+    } catch {
+      setError("Tidak dapat terhubung ke server.");
+    } finally {
+      setIsSaving(false);
     }
-    if (editingId) {
-      setNotes((current) => current.map((note) => note.id === editingId ? { ...note, content, updatedAt: new Date() } : note));
-    } else {
-      setNotes((current) => [result, ...current]);
-    }
-    setContent("");
-    setEditingId(null);
-    setIsCreatingNew(false);
-    setIsOpen(false);
   }
 
   async function deleteNote(id: number) {
-    const response = await fetch("/api/notes", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
-    if (response.ok) setNotes((current) => current.filter((note) => note.id !== id));
+    if (deletingNoteId !== null) return;
+    setDeletingNoteId(id);
+    try {
+      const response = await fetch("/api/notes", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+      if (response.ok) setNotes((current) => current.filter((note) => note.id !== id));
+      else setError("Catatan gagal dihapus.");
+    } catch {
+      setError("Tidak dapat terhubung ke server.");
+    } finally {
+      setDeletingNoteId(null);
+    }
   }
 
   function editNote(note: Note) {
@@ -206,7 +226,7 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
                       <time className="text-xs text-slate-400">{new Date(note.updatedAt).toLocaleString("id-ID")}</time>
                       <div className="flex gap-2">
                         {!t && <button type="button" onClick={() => editNote(note)} className="text-xs font-semibold text-blue-700 hover:underline">Edit</button>}
-                        <button type="button" onClick={() => deleteNote(note.id)} className="text-xs font-semibold text-red-700 hover:underline">Hapus</button>
+                        <button type="button" onClick={() => deleteNote(note.id)} disabled={deletingNoteId !== null} className="text-xs font-semibold text-red-700 hover:underline disabled:opacity-60">{deletingNoteId === note.id ? <LoadingIndicator label="Menghapus..." /> : "Hapus"}</button>
                       </div>
                     </div>
                   </article>
@@ -221,7 +241,7 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
               {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
               <div className="mt-3 flex justify-end gap-2">
                 {editingId && <button type="button" onClick={() => { setEditingId(null); setContent(""); }} className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700">Batal</button>}
-                <button type="button" onClick={saveNote} className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-700">{editingId ? "Simpan Perubahan" : "Tambah Catatan"}</button>
+                <button type="button" onClick={saveNote} disabled={isSaving} className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60">{isSaving ? <LoadingIndicator label="Menyimpan..." /> : editingId ? "Simpan Perubahan" : "Tambah Catatan"}</button>
               </div>
             </div>
           </div>

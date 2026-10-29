@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "./components/toast";
+import { LoadingIndicator } from "./components/loading-indicator";
 
 function getInternalPath(path: string | null) {
   const url = new URL(path ?? "/", window.location.origin);
@@ -102,9 +103,9 @@ export function LoginForm() {
         disabled={loading}
         className="w-full rounded-md bg-[#111111] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#333333] active:scale-[0.98] disabled:opacity-60"
       >
-        {loading ? "Memproses..." : "Masuk"}
+        {loading ? <LoadingIndicator label="Memproses..." /> : "Masuk"}
       </button>
-      {loading && <p role="status" className="text-center text-xs text-[#6b7280]">Sedang menghubungkan ke server. Jangan klik lagi.</p>}
+      {loading && <LoadingIndicator label="Sedang menghubungkan ke server. Jangan klik lagi." className="flex justify-center text-xs text-[#6b7280]" />}
     </form>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import { toast } from "./toast";
+import { LoadingIndicator } from "./loading-indicator";
 
 type ApiFormProps = {
   action: string;
@@ -76,7 +77,7 @@ export function ApiForm({
       <fieldset disabled={isSubmitting} className="contents">
         {children}
       </fieldset>
-      {isSubmitting && <p role="status" className="mt-2 text-xs text-[#6b7280]">Menyimpan, mohon tunggu...</p>}
+      {isSubmitting && <LoadingIndicator label="Menyimpan, mohon tunggu..." className="mt-2 text-xs text-[#6b7280]" />}
     </form>
   );
 }

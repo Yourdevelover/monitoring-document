@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ApiForm } from "@/app/components/api-form";
 
 type EditProfileRequestDialogProps = {
   name: string;
@@ -48,7 +49,7 @@ export function EditProfileRequestDialog({ name, email, phoneNumber }: EditProfi
               </button>
             </div>
 
-            <form action="/api/karyawan/profile-request" method="POST" className="grid gap-4 sm:grid-cols-2">
+            <ApiForm action="/api/karyawan/profile-request" className="grid gap-4 sm:grid-cols-2" successMessage="Permintaan perubahan profil terkirim.">
               <div>
                 <label htmlFor="employee-profile-name" className="mb-1 block text-sm font-medium text-[#374151]">
                   Nama
@@ -117,7 +118,7 @@ export function EditProfileRequestDialog({ name, email, phoneNumber }: EditProfi
                   Ajukan Perubahan
                 </button>
               </div>
-            </form>
+            </ApiForm>
           </section>
         </div>
       )}
