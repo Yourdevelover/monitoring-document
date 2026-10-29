@@ -5,6 +5,31 @@ import { prisma } from "@/lib/prisma";
 
 const SESSION_COOKIE = "monitoring_admin_session";
 
+function getLoginFailure(error: unknown) {
+  if (!(error instanceof Error)) return "Login gagal karena kesalahan server. Periksa log deployment.";
+
+  const errorCode = "code" in error ? String(error.code) : "";
+  const message = error.message.toLowerCase();
+
+  if (error.name === "PrismaClientInitializationError" || errorCode === "P1001") {
+    return "Database tidak dapat dihubungi. Periksa DATABASE_URL di Vercel dan pastikan menggunakan alamat database online, bukan localhost.";
+  }
+  if (errorCode === "P1000") {
+    return "Kredensial database ditolak. Periksa username/password pada DATABASE_URL di Vercel.";
+  }
+  if (errorCode === "P1003" || errorCode === "P2021" || errorCode === "P2022") {
+    return "Database belum siap atau skema belum diperbarui. Jalankan migrasi database production.";
+  }
+  if (message.includes("set jwt_secret or database_url") || message.includes("enable session authentication")) {
+    return "Konfigurasi sesi belum lengkap. Atur JWT_SECRET di Vercel lalu deploy ulang.";
+  }
+  if (message.includes("invalid salt") || message.includes("invalid hash") || message.includes("illegal arguments")) {
+    return "Format password akun tidak valid. Admin perlu mengatur ulang password akun tersebut.";
+  }
+
+  return "Login gagal karena kesalahan server. Periksa Vercel Runtime Logs untuk detailnya.";
+}
+
 export async function POST(request: Request) {
   try {
     let email = "";
@@ -80,9 +105,13 @@ export async function POST(request: Request) {
 
     return response;
   } catch (error) {
-    console.error(error);
+    console.error("Login endpoint failed:", {
+      name: error instanceof Error ? error.name : "UnknownError",
+      code: error && typeof error === "object" && "code" in error ? error.code : undefined,
+      message: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.json(
-      { success: false, error: "Terjadi kesalahan server saat login." },
+      { success: false, error: getLoginFailure(error) },
       { status: 500 }
     );
   }
