@@ -1,4 +1,5 @@
 ﻿import { BulkEmployeeForm } from "./bulk-employee-form";
+import { ApiForm } from "@/app/components/api-form";
 
 export default function CreateEmployeePage() {
   return (
@@ -7,7 +8,7 @@ export default function CreateEmployeePage() {
         <h1 className="text-base font-semibold">Tambah Karyawan</h1>
         <p className="mt-2 text-[#6b7280]">Tambahkan satu karyawan atau beberapa karyawan sekaligus.</p>
 
-        <form id="single-employee-form" action="/api/manager/employee/create" method="POST" className="mt-6 space-y-4">
+        <ApiForm id="single-employee-form" action="/api/manager/employee/create" className="mt-6 space-y-4" successMessage="Karyawan berhasil ditambahkan.">
           <div>
             <label htmlFor="name" className="mb-1 block text-sm font-medium">
               Nama
@@ -47,7 +48,7 @@ export default function CreateEmployeePage() {
             />
           </div>
 
-        </form>
+        </ApiForm>
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <button

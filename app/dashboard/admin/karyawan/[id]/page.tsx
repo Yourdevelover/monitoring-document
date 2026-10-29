@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { ConfirmActionForm } from "@/app/components/confirm-action-form";
+import { ApiForm } from "@/app/components/api-form";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
 
 type AdminEmployeeDetailProps = {
@@ -57,13 +58,13 @@ export default async function AdminEmployeeDetailPage({ params }: AdminEmployeeD
         <Link href={`/dashboard/admin/karyawan/${employee.id}/edit`} className="btn">
           Edit Karyawan
         </Link>
-        <form action="/api/admin/karyawan/action" method="POST">
+        <ApiForm action="/api/admin/karyawan/action" successMessage="Status karyawan diperbarui.">
           <input type="hidden" name="userId" value={employee.id} />
           <input type="hidden" name="action" value={employee.isActive === "ACTIVE" ? "deactivate" : "activate"} />
           <button type="submit" className="btn">
             {employee.isActive === "ACTIVE" ? "Nonaktifkan" : "Aktifkan"}
           </button>
-        </form>
+        </ApiForm>
         <ConfirmActionForm
           action="/api/admin/karyawan/action"
           confirmMessage="Apakah Anda yakin ingin menghapus karyawan ini? Semua data terkait karyawan akan ikut terhapus."

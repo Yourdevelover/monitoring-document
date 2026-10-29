@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ApiForm } from "@/app/components/api-form";
 
 export function PersonalTargetDialog({ period }: { period: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -42,7 +43,7 @@ export function PersonalTargetDialog({ period }: { period: string }) {
               </button>
             </div>
 
-            <form action="/api/manajer/target" method="POST" className="grid grid-cols-2 gap-3">
+            <ApiForm action="/api/manajer/target" className="grid grid-cols-2 gap-3" successMessage="Target pribadi tersimpan.">
               <input type="hidden" name="period" value={period} />
               <label className="col-span-2 text-xs font-medium text-[#374151]">
                 Nama Target
@@ -92,7 +93,7 @@ export function PersonalTargetDialog({ period }: { period: string }) {
                   Simpan Target
                 </button>
               </div>
-            </form>
+            </ApiForm>
           </section>
         </div>
       )}

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { ApiForm } from "@/app/components/api-form";
 
 export default async function EditAdminPage({
   params,
@@ -26,7 +27,7 @@ export default async function EditAdminPage({
           <h1 className="text-[13px] font-semibold tracking-tight">Edit Admin</h1>
         </div>
 
-        <form action="/api/admin/update" method="POST" className="grid gap-4 md:grid-cols-2">
+        <ApiForm action="/api/admin/update" className="grid gap-4 md:grid-cols-2" successMessage="Data admin berhasil diperbarui.">
           <input type="hidden" name="userId" value={user.id} />
 
           <div>
@@ -84,7 +85,7 @@ export default async function EditAdminPage({
               Simpan Perubahan
             </button>
           </div>
-        </form>
+        </ApiForm>
       </section>
     </main>
   );

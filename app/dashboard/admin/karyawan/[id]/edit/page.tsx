@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
+import { ApiForm } from "@/app/components/api-form";
 
 type EditEmployeePageProps = {
   params: Promise<{ id: string }>;
@@ -28,7 +29,7 @@ export default async function EditEmployeePage({ params }: EditEmployeePageProps
           </div>
         </div>
 
-        <form action="/api/admin/update" method="POST" className="grid gap-4 md:grid-cols-2">
+        <ApiForm action="/api/admin/update" className="grid gap-4 md:grid-cols-2" successMessage="Data karyawan berhasil diperbarui.">
           <input type="hidden" name="userId" value={employee.id} />
 
           <div>
@@ -99,7 +100,7 @@ export default async function EditEmployeePage({ params }: EditEmployeePageProps
               Simpan Perubahan
             </button>
           </div>
-        </form>
+        </ApiForm>
 
         <div className="mt-6 flex justify-end">
           <BackToPreviousButton />

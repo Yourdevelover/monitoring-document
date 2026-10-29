@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState } from "react";
+import { ApiForm } from "@/app/components/api-form";
 
 type EditProfileCardProps = {
   name: string;
@@ -35,7 +36,7 @@ export function EditProfileCard({ name, email, phoneNumber }: EditProfileCardPro
                 Tutup
               </button>
             </div>
-            <form action="/api/profile" method="POST" className="grid gap-3">
+            <ApiForm action="/api/profile" className="grid gap-3" successMessage="Profil berhasil diperbarui.">
               <input name="name" defaultValue={name} placeholder="Nama" required className="border border-[#e5e7eb] px-3 py-2" />
               <input name="email" type="email" defaultValue={email} placeholder="Email" required className="border border-[#e5e7eb] px-3 py-2" />
               <input name="phoneNumber" type="tel" defaultValue={phoneNumber} placeholder="Nomor telepon (opsional)" className="border border-[#e5e7eb] px-3 py-2" />
@@ -43,7 +44,7 @@ export function EditProfileCard({ name, email, phoneNumber }: EditProfileCardPro
               <button type="submit" className="w-fit bg-[#111111] px-4 py-2 text-sm font-medium text-white">
                 Simpan Perubahan
               </button>
-            </form>
+            </ApiForm>
           </section>
         </div>
       )}

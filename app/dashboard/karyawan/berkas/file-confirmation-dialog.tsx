@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/app/components/toast";
 import { uploadFileToSignedUrl } from "@/lib/direct-upload";
@@ -25,15 +25,20 @@ export function FileConfirmationDialog({
   onSuccess,
 }: FileConfirmationDialogProps) {
   const router = useRouter();
+  const submitting = useRef(false);
   const [isOpen, setIsOpen] = useState(isNewUpload); // Auto-open for new uploads
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadStage, setUploadStage] = useState("");
 
   async function handleSubmit(action: string) {
+    if (submitting.current) return;
+    submitting.current = true;
     setIsSubmitting(true);
     try {
       if (isNewUpload && newFile) {
         // Handle new file upload
         if (action === "submit") {
+          setUploadStage("Menyiapkan unggahan...");
           const prepareFormData = new FormData();
           prepareFormData.append("action", "prepare-upload");
           prepareFormData.append("category", categoryKey);
@@ -53,7 +58,9 @@ export function FileConfirmationDialog({
             throw new Error(data?.error || "Gagal mengunggah berkas");
           }
 
+          setUploadStage("Mengirim file ke storage...");
           await uploadFileToSignedUrl(prepared.signedUrl, newFile);
+          setUploadStage("Menyimpan data berkas...");
           const completeFormData = new FormData();
           completeFormData.append("action", "complete-upload");
           completeFormData.append("category", categoryKey);
@@ -120,7 +127,9 @@ export function FileConfirmationDialog({
       console.error(error);
       toast(error instanceof Error ? error.message : "Terjadi kesalahan. Silakan coba lagi.", "error");
     } finally {
+      submitting.current = false;
       setIsSubmitting(false);
+      setUploadStage("");
     }
   }
 
@@ -207,6 +216,7 @@ export function FileConfirmationDialog({
             <p className="mb-6 text-sm text-[#6b7280]">
               Apakah data file ini sudah benar dan siap untuk dikirim?
             </p>
+            {isSubmitting && <p role="status" className="mb-4 text-sm font-medium text-[#346538]">{uploadStage}</p>}
 
             <div className="space-y-3">
               <button

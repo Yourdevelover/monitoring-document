@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { ApiForm } from "@/app/components/api-form";
 
 export function DeleteSelectedButton({ selectedDate }: { selectedDate: string }) {
   const [confirm, setConfirm] = useState(false);
@@ -33,12 +34,12 @@ export function DeleteSelectedButton({ selectedDate }: { selectedDate: string })
               >
                 Batal
               </button>
-              <form action="/api/admin/activities/delete" method="POST">
+              <ApiForm action="/api/admin/activities/delete" successMessage="Log aktivitas berhasil dihapus.">
                 <input type="hidden" name="date" value={selectedDate} />
                 <button type="submit" className="inline-flex h-[30px] items-center rounded-md bg-[#dc2626] px-3 text-xs font-medium text-white hover:bg-[#b91c1c]">
                   Hapus
                 </button>
-              </form>
+              </ApiForm>
             </div>
           </div>
         </div>

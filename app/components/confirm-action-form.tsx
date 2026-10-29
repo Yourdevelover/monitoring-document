@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode } from "react";
+import { ApiForm } from "./api-form";
 
 type ConfirmActionFormProps = {
   action: string;
@@ -16,18 +17,12 @@ export function ConfirmActionForm({
   children,
 }: ConfirmActionFormProps) {
   return (
-    <form
+    <ApiForm
       action={action}
       method={method}
-      onSubmit={(event) => {
-        const confirmed = window.confirm(confirmMessage);
-
-        if (!confirmed) {
-          event.preventDefault();
-        }
-      }}
+      confirmMessage={confirmMessage}
     >
       {children}
-    </form>
+    </ApiForm>
   );
 }

@@ -1,36 +1,35 @@
 ﻿import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { getCurrentJakartaPeriod } from "@/lib/upload-time";
 
 export default async function AdminDashboardPage() {
   await requireAdmin();
+  const currentPeriod = getCurrentJakartaPeriod();
 
   const [users, teams, allTargets, recentUploads, uploadCount, pendingApprovals, recentActivities] = await Promise.all([
     prisma.user.findMany({ orderBy: { createdAt: "desc" }, select: { id: true, name: true, email: true, role: true, isActive: true, teamId: true, createdAt: true } }),
     prisma.team.findMany({ orderBy: { createdAt: "desc" } }),
-    prisma.target.findMany({ select: { userId: true, currentValue: true, targetValue: true, name: true, period: true, user: { select: { name: true } } } }),
-    prisma.upload.findMany({ orderBy: { createdAt: "desc" }, take: 8, include: { user: { select: { name: true } }, team: { select: { name: true } } } }),
-    prisma.upload.count(),
+    prisma.target.findMany({ where: { period: currentPeriod, targetValue: { gt: 0 }, user: { role: "KARYAWAN", isActive: "ACTIVE" } }, select: { userId: true, currentValue: true, targetValue: true, name: true, period: true, user: { select: { name: true } } } }),
+    prisma.upload.findMany({ where: { status: "COMPLETED" }, orderBy: { createdAt: "desc" }, take: 8, include: { user: { select: { name: true } }, team: { select: { name: true } } } }),
+    prisma.upload.count({ where: { status: "COMPLETED" } }),
     prisma.profileRequest.count({ where: { status: "PENDING" } }),
     prisma.activityLog.findMany({ orderBy: { createdAt: "desc" }, take: 8, include: { actor: true } }),
   ]);
 
+  const activeManagerIds = new Set(users.filter((user) => user.role === "MANAGER" && user.isActive === "ACTIVE").map((user) => user.id));
   const summary = {
     totalUsers: users.length,
-    totalAdmins: users.filter((item) => item.role === "ADMIN").length,
-    totalManagers: users.filter((item) => item.role === "MANAGER").length,
-    totalEmployees: users.filter((item) => item.role === "KARYAWAN").length,
-    activeTeams: teams.filter((team) => team.isActive).length,
+    totalAdmins: users.filter((item) => item.role === "ADMIN" && item.isActive === "ACTIVE").length,
+    totalManagers: users.filter((item) => item.role === "MANAGER" && item.isActive === "ACTIVE").length,
+    totalEmployees: users.filter((item) => item.role === "KARYAWAN" && item.isActive === "ACTIVE").length,
+    activeTeams: teams.filter((team) => team.isActive && activeManagerIds.has(team.managerId)).length,
     pendingApprovals,
     totalUploads: uploadCount,
     inactiveUsers: users.filter((item) => item.isActive === "INACTIVE").length,
+    pendingUsers: users.filter((item) => item.isActive === "PENDING").length,
+    rejectedUsers: users.filter((item) => item.isActive === "REJECTED").length,
   };
 
-  const targetAgg = new Map<number, { cur: number; tgt: number }>();
-  for (const t of allTargets) {
-    const a = targetAgg.get(t.userId) ?? { cur: 0, tgt: 0 };
-    a.cur += t.currentValue; a.tgt += t.targetValue;
-    targetAgg.set(t.userId, a);
-  }
   const targetCount = allTargets.length;
   const targetReached = allTargets.filter((t) => t.targetValue > 0 && (t.currentValue / t.targetValue) * 100 >= 100).length;
   const targetAvg = allTargets.length ? Math.round(allTargets.reduce((s, t) => s + (t.targetValue > 0 ? (t.currentValue / t.targetValue) * 100 : 0), 0) / allTargets.length) : 0;
@@ -45,8 +44,9 @@ export default async function AdminDashboardPage() {
   for (const t of allTargets) {
     const user = usersById.get(t.userId);
     const teamId = user?.teamId;
-    if (!teamId) continue;
+    if (!teamId || user?.isActive !== "ACTIVE") continue;
     const team = teamsById.get(teamId);
+    if (!team?.isActive) continue;
     const a = teamAgg.get(teamId) ?? { cur: 0, tgt: 0, count: 0, teamName: team?.name ?? "?", managerName: "?" };
     a.cur += t.currentValue;
     a.tgt += t.targetValue;
@@ -65,12 +65,14 @@ export default async function AdminDashboardPage() {
 
   const statCards = [
     { label: "Total Pengguna", value: summary.totalUsers, accent: "bg-[#e1f3fe] text-[#1f6c9f]" },
-    { label: "Admin", value: summary.totalAdmins, accent: "bg-[#fdebec] text-[#9f2f2d]" },
-    { label: "Manajer", value: summary.totalManagers, accent: "bg-[#fbf3db] text-[#956400]" },
-    { label: "Karyawan", value: summary.totalEmployees, accent: "bg-[#edf3ec] text-[#346538]" },
+    { label: "Admin Aktif", value: summary.totalAdmins, accent: "bg-[#fdebec] text-[#9f2f2d]" },
+    { label: "Manajer Aktif", value: summary.totalManagers, accent: "bg-[#fbf3db] text-[#956400]" },
+    { label: "Karyawan Aktif", value: summary.totalEmployees, accent: "bg-[#edf3ec] text-[#346538]" },
     { label: "Tim Aktif", value: summary.activeTeams, accent: "bg-[#edf3ec] text-[#346538]" },
     { label: "Total File", value: summary.totalUploads, accent: "bg-[#e1f3fe] text-[#1f6c9f]" },
     { label: "Persetujuan Tertunda", value: summary.pendingApprovals, accent: "bg-[#fbf3db] text-[#956400]" },
+    { label: "Akun Menunggu", value: summary.pendingUsers, accent: "bg-[#e1f3fe] text-[#1f6c9f]" },
+    { label: "Akun Ditolak", value: summary.rejectedUsers, accent: "bg-[#fdebec] text-[#9f2f2d]" },
     { label: "Akun Tidak Aktif", value: summary.inactiveUsers, accent: "bg-[#fdebec] text-[#9f2f2d]" },
   ];
 
@@ -104,8 +106,8 @@ export default async function AdminDashboardPage() {
           {[
             { label: "Target Aktif", value: targetCount, accent: "bg-[#e1f3fe] text-[#1f6c9f]" },
             { label: "Tercapai (100%)", value: targetReached, accent: "bg-[#edf3ec] text-[#346538]" },
-            { label: "Rata-rata", value: `${targetAvg}%`, accent: "bg-[#fbf3db] text-[#956400]" },
-            { label: "Total Karyawan", value: summary.totalEmployees, accent: "bg-[#f1f3f5] text-[#111111]" },
+            { label: "Rata-rata progres", value: `${targetAvg}%`, accent: "bg-[#fbf3db] text-[#956400]" },
+            { label: "Karyawan Aktif", value: summary.totalEmployees, accent: "bg-[#f1f3f5] text-[#111111]" },
           ].map((card) => (
             <div key={card.label} className="flex items-center justify-between rounded-lg border border-[#e5e7eb] bg-white px-3.5 py-3">
               <div>
@@ -177,7 +179,7 @@ export default async function AdminDashboardPage() {
               <div className="space-y-2 p-3">
                 <div className="flex items-center gap-2 rounded-md bg-[#edf3ec] px-3 py-2 text-xs font-medium text-[#346538]"><span className="h-1.5 w-1.5 rounded-full bg-[#346538]" />Database terhubung</div>
                 <div className="flex items-center gap-2 rounded-md bg-[#e1f3fe] px-3 py-2 text-xs font-medium text-[#1f6c9f]"><span className="h-1.5 w-1.5 rounded-full bg-[#1f6c9f]" />Login admin aktif</div>
-                <div className="flex items-center gap-2 rounded-md bg-[#fbf3db] px-3 py-2 text-xs font-medium text-[#956400]"><span className="h-1.5 w-1.5 rounded-full bg-[#956400]" />Seed admin tersedia</div>
+                <div className="flex items-center gap-2 rounded-md bg-[#fbf3db] px-3 py-2 text-xs font-medium text-[#956400]"><span className="h-1.5 w-1.5 rounded-full bg-[#956400]" />Sesi administrator valid</div>
               </div>
             </div>
             <div className="rounded-lg border border-[#e5e7eb] bg-white p-4">
@@ -212,14 +214,14 @@ export default async function AdminDashboardPage() {
 
         <section className="rounded-lg border border-[#e5e7eb] bg-white">
           <div className="flex items-center justify-between border-b border-[#e5e7eb] px-4 py-3">
-            <h2 className="text-xs font-semibold uppercase tracking-wide">Daftar User</h2>
-            <span className="text-[11px] text-[#6b7280]">{users.length} akun</span>
+            <h2 className="text-xs font-semibold uppercase tracking-wide">Akun Terbaru</h2>
+            <span className="text-[11px] text-[#6b7280]">{Math.min(users.length, 10)} dari {users.length} akun</span>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full text-left">
               <thead><tr className="border-b border-[#e5e7eb] bg-[#f8f9fa] text-[11px] font-semibold uppercase tracking-wide text-[#6b7280]"><th className="px-4 py-2">Nama</th><th className="px-4 py-2">Email</th><th className="px-4 py-2">Role</th><th className="px-4 py-2">Status</th></tr></thead>
               <tbody className="divide-y divide-[#f1f3f5] text-[13px]">
-                {users.map((item) => (
+                {users.slice(0, 10).map((item) => (
                   <tr key={item.id} className="hover:bg-[#f8f9fa]">
                     <td className="px-4 py-2.5 font-medium">{item.name}</td>
                     <td className="px-4 py-2.5 text-[#6b7280]">{item.email}</td>

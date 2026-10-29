@@ -11,6 +11,10 @@ export function getJakartaDateKey(date: Date) {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
+export function getCurrentJakartaPeriod(now = new Date()) {
+  return getJakartaDateKey(now).slice(0, 7);
+}
+
 export function getStartOfCurrentJakartaDay(now = new Date()) {
   return new Date(`${getJakartaDateKey(now)}T00:00:00+07:00`);
 }

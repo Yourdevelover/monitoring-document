@@ -1,5 +1,7 @@
 ﻿"use client";
 
+import { ApiForm } from "@/app/components/api-form";
+
 type PinAnnouncementFormProps = {
   announcementId: number;
   isPinned: boolean;
@@ -7,7 +9,7 @@ type PinAnnouncementFormProps = {
 
 export function PinAnnouncementForm({ announcementId, isPinned }: PinAnnouncementFormProps) {
   return (
-    <form action="/api/manager/announcement/pin" method="POST">
+    <ApiForm action="/api/manager/announcement/pin" successMessage="Status sematan pengumuman diperbarui.">
       <input type="hidden" name="announcementId" value={announcementId} />
       <button
         type="submit"
@@ -17,6 +19,6 @@ export function PinAnnouncementForm({ announcementId, isPinned }: PinAnnouncemen
       >
         {isPinned ? "Lepas Sematan" : "Sematkan"}
       </button>
-    </form>
+    </ApiForm>
   );
 }

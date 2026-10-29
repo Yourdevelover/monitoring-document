@@ -1,21 +1,17 @@
 ﻿"use client";
 
+import { ApiForm } from "@/app/components/api-form";
+
 type DeleteAnnouncementFormProps = {
   announcementId: number;
 };
 
 export function DeleteAnnouncementForm({ announcementId }: DeleteAnnouncementFormProps) {
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    if (!window.confirm("Hapus pengumuman ini?")) {
-      event.preventDefault();
-    }
-  }
-
   return (
-    <form
+    <ApiForm
       action="/api/manager/announcement/delete"
-      method="POST"
-      onSubmit={handleSubmit}
+      confirmMessage="Hapus pengumuman ini?"
+      successMessage="Pengumuman berhasil dihapus."
     >
       <input type="hidden" name="announcementId" value={announcementId} />
       <button
@@ -24,6 +20,6 @@ export function DeleteAnnouncementForm({ announcementId }: DeleteAnnouncementFor
       >
         Hapus
       </button>
-    </form>
+    </ApiForm>
   );
 }

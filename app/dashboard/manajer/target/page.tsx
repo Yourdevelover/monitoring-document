@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { requireManager } from "@/lib/auth";
 import { SaveTargetNoteButton } from "@/app/components/save-target-note-button";
 import { PersonalTargetDialog } from "./personal-target-dialog";
+import { ApiForm } from "@/app/components/api-form";
+import { getCurrentJakartaPeriod } from "@/lib/upload-time";
 
 export default async function ManagerTargetPage() {
   const manager = await requireManager();
@@ -9,7 +11,7 @@ export default async function ManagerTargetPage() {
     where: { managerId: manager.id },
     include: { members: { where: { role: "KARYAWAN" }, select: { id: true, name: true } } },
   });
-  const period = new Date().toISOString().slice(0, 7);
+  const period = getCurrentJakartaPeriod();
   const [targets, personalTargets] = await Promise.all([
     prisma.target.findMany({
       where: { period, user: { teamId: team?.id, role: "KARYAWAN" } },
@@ -58,18 +60,18 @@ export default async function ManagerTargetPage() {
                 <div className="mt-2 h-2 rounded bg-[#f1f3f5]"><div className={`h-full rounded ${reached ? "bg-[#346538]" : "bg-[#956400]"}`} style={{ width: `${Math.min(100, Math.max(0, pct))}%` }} /></div>
                 <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                   <SaveTargetNoteButton name={target.name} current={target.currentValue} target={target.targetValue} pct={pct} />
-                  <form action="/api/manajer/target" method="POST" className="flex items-center gap-1.5">
+                  <ApiForm action="/api/manajer/target" className="flex items-center gap-1.5" successMessage="Progres target diperbarui.">
                     <input type="hidden" name="action" value="update" />
                     <input type="hidden" name="id" value={target.id} />
                     <label className="sr-only" htmlFor={`manager-target-progress-${target.id}`}>Progres target {target.name}</label>
                     <input id={`manager-target-progress-${target.id}`} name="currentValue" type="number" min="0" step="any" defaultValue={String(target.currentValue)} className="w-24 rounded border border-[#d1d5db] bg-white px-2 py-1 text-xs" />
                     <button type="submit" className="rounded bg-white px-2 py-1 text-xs font-medium text-[#374151] ring-1 ring-[#d1d5db] hover:bg-[#f1f3f5]">Update</button>
-                  </form>
-                  <form action="/api/manajer/target" method="POST">
+                  </ApiForm>
+                  <ApiForm action="/api/manajer/target" confirmMessage={`Hapus target ${target.name}?`} successMessage="Target pribadi dihapus.">
                     <input type="hidden" name="action" value="delete" />
                     <input type="hidden" name="id" value={target.id} />
                     <button type="submit" className="text-xs font-medium text-[#9f2f2d] hover:underline">Hapus</button>
-                  </form>
+                  </ApiForm>
                 </div>
               </article>
             );

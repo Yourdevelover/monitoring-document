@@ -62,7 +62,7 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4" aria-busy={loading}>
       <div>
         <label htmlFor="email" className="mb-1.5 block text-sm font-medium">
           Email
@@ -72,6 +72,8 @@ export function LoginForm() {
           name="email"
           type="email"
           required
+          autoComplete="username"
+          disabled={loading}
           className="w-full rounded-md border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
         />
       </div>
@@ -85,6 +87,8 @@ export function LoginForm() {
           name="password"
           type="password"
           required
+          autoComplete="current-password"
+          disabled={loading}
           className="w-full rounded-md border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
         />
       </div>
@@ -100,6 +104,7 @@ export function LoginForm() {
       >
         {loading ? "Memproses..." : "Masuk"}
       </button>
+      {loading && <p role="status" className="text-center text-xs text-[#6b7280]">Sedang menghubungkan ke server. Jangan klik lagi.</p>}
     </form>
   );
 }

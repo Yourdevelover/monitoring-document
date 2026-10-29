@@ -74,10 +74,10 @@ export function UploadForm({ categoryKey, categoryLabel, isDisabled = false }: U
 
         <button
           type="submit"
-          disabled={isDisabled || !selectedFile}
+          disabled={isDisabled || showDialog || !selectedFile}
           className="inline-flex w-full items-center justify-center rounded-md bg-[#111111] px-3 py-1.5 text-xs font-medium text-white transition hover:bg-[#333333] disabled:cursor-not-allowed disabled:bg-[#9ca3af]"
         >
-          Submit
+          {showDialog ? "Konfirmasi terbuka" : "Submit"}
         </button>
       </form>
 

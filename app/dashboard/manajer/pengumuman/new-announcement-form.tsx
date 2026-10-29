@@ -2,6 +2,7 @@
 
 import { useRef, useState, type CSSProperties } from "react";
 import EmojiPicker from "emoji-picker-react";
+import { ApiForm } from "@/app/components/api-form";
 
 export function NewAnnouncementForm() {
   const [isOpen, setIsOpen] = useState(false);
@@ -43,7 +44,7 @@ export function NewAnnouncementForm() {
                 X
               </button>
             </div>
-            <form action="/api/manager/announcement/create" method="POST" className="mt-4 space-y-4">
+            <ApiForm action="/api/manager/announcement/create" className="mt-4 space-y-4" successMessage="Pengumuman berhasil dikirim.">
               <input
                 name="title"
                 maxLength={150}
@@ -113,7 +114,7 @@ export function NewAnnouncementForm() {
                   Batal
                 </button>
               </div>
-            </form>
+            </ApiForm>
           </div>
         </div>
       )}

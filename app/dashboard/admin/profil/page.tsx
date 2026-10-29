@@ -1,4 +1,5 @@
 import { requireAdmin } from "@/lib/auth";
+import { ApiForm } from "@/app/components/api-form";
 
 export default async function AdminProfilePage() {
   const admin = await requireAdmin();
@@ -20,13 +21,13 @@ export default async function AdminProfilePage() {
         </section>
         <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
           <h2 className="mb-3 text-[13px] font-semibold">Ubah Profil</h2>
-          <form action="/api/profile" method="POST" className="grid gap-3">
+          <ApiForm action="/api/profile" className="grid gap-3" successMessage="Profil berhasil diperbarui.">
             <input name="name" defaultValue={admin.name} placeholder="Nama" required className="rounded-md border border-[#e5e7eb] bg-white px-3 py-2 text-[13px] outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20" />
             <input name="email" type="email" defaultValue={admin.email} placeholder="Email" required className="rounded-md border border-[#e5e7eb] bg-white px-3 py-2 text-[13px] outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20" />
             <input name="phoneNumber" type="tel" defaultValue={admin.phoneNumber ?? ""} placeholder="Nomor telepon" className="rounded-md border border-[#e5e7eb] bg-white px-3 py-2 text-[13px] outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20" />
             <input name="password" type="password" placeholder="Password baru, kosongkan jika tidak berubah" minLength={6} className="rounded-md border border-[#e5e7eb] bg-white px-3 py-2 text-[13px] outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20" />
             <button type="submit" className="w-fit rounded-md bg-[#111111] px-4 py-2 text-xs font-medium text-white hover:bg-[#1c1c1c]">Simpan Perubahan</button>
-          </form>
+          </ApiForm>
         </section>
       </div>
     </main>

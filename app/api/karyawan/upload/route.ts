@@ -4,7 +4,7 @@ import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { enqueueFileTask } from "@/lib/upload-queue";
 import { exceedsUploadRequestLimit, MAX_UPLOAD_SIZE_BYTES } from "@/lib/upload-limits";
-import { copyStoredFile, createSignedUpload, deleteStoredFile, verifyStoredFile } from "@/lib/storage";
+import { copyStoredFile, createSignedUpload, deleteStoredFile, getStorageFailureMessage, verifyStoredFile } from "@/lib/storage";
 
 const VALID_CATEGORIES = new Set(["DAILY", "CHAT", "PAYMENT"]);
 
@@ -400,13 +400,13 @@ export async function POST(request: Request) {
       throw error;
     }
     console.error(error);
+    const storageError = getStorageFailureMessage(error);
     return NextResponse.json(
       {
         success: false,
-        error:
-          process.env.NODE_ENV === "development" && error instanceof Error
-            ? error.message
-            : "Terjadi kesalahan server saat mengunggah berkas.",
+        error: storageError ?? (process.env.NODE_ENV === "development" && error instanceof Error
+          ? error.message
+          : "Terjadi kesalahan server saat mengunggah berkas."),
       },
       { status: 500 }
     );

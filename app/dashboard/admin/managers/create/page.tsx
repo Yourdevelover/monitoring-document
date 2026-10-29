@@ -1,5 +1,6 @@
 ﻿import { requireAdmin } from "@/lib/auth";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
+import { ApiForm } from "@/app/components/api-form";
 
 export default async function CreateManagerPage() {
   await requireAdmin();
@@ -12,13 +13,13 @@ export default async function CreateManagerPage() {
         <p className="mt-1 text-xs text-[#6b7280]">Buat akun manajer baru.</p>
       </header>
       <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
-      <form action="/api/admin/managers/create" method="POST" className="grid max-w-2xl gap-3">
+      <ApiForm action="/api/admin/managers/create" className="grid max-w-2xl gap-3" successMessage="Manajer berhasil dibuat.">
         <input name="name" placeholder="Nama manajer" required className="border border-[#e5e7eb] px-3 py-2" />
         <input name="email" type="email" placeholder="Email" required className="border border-[#e5e7eb] px-3 py-2" />
         <input name="phoneNumber" type="tel" placeholder="Nomor telepon (opsional)" className="border border-[#e5e7eb] px-3 py-2" />
         <input name="password" type="password" placeholder="Password" required minLength={6} className="border border-[#e5e7eb] px-3 py-2" />
         <button type="submit" className="btn btn-primary w-fit">Simpan Manajer</button>
-      </form>
+      </ApiForm>
       </section>
 
       <div className="flex justify-end">

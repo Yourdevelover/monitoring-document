@@ -1,5 +1,7 @@
 ﻿"use client";
 
+import { ApiForm } from "@/app/components/api-form";
+
 export function BulkEmployeeForm() {
   return (
     <details className="relative">
@@ -27,7 +29,7 @@ export function BulkEmployeeForm() {
             ×
           </button>
         </div>
-        <form action="/api/manager/employee/create" method="POST" className="mt-5 space-y-4">
+        <ApiForm action="/api/manager/employee/create" className="mt-5 space-y-4" successMessage="Karyawan berhasil ditambahkan.">
           <textarea
             name="employees"
             required
@@ -41,7 +43,7 @@ export function BulkEmployeeForm() {
           >
             Simpan Semua Karyawan
           </button>
-        </form>
+        </ApiForm>
       </div>
     </details>
   );

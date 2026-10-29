@@ -1,5 +1,6 @@
 ﻿import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
+import { ApiForm } from "@/app/components/api-form";
 
 export default async function CreateAdminPage() {
   await requireAdmin();
@@ -12,7 +13,7 @@ export default async function CreateAdminPage() {
           <h1 className="mt-1 text-[13px] font-semibold tracking-tight">Tambah Admin Baru</h1>
         </div>
 
-        <form action="/api/admin/create" method="POST" className="grid gap-4 md:grid-cols-2">
+        <ApiForm action="/api/admin/create" className="grid gap-4 md:grid-cols-2" successMessage="Admin berhasil dibuat.">
           <div>
             <label htmlFor="name" className="mb-1 block text-xs font-medium text-[#111111]">
               Nama Admin
@@ -67,7 +68,7 @@ export default async function CreateAdminPage() {
               Simpan Admin
             </button>
           </div>
-        </form>
+        </ApiForm>
       </section>
     </main>
   );

@@ -14,12 +14,15 @@ export function ManagerUploadForm() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadStage, setUploadStage] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [category, setCategory] = useState<string>("DAILY");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const submitting = useRef(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submitting.current) return;
 
     if (!selectedFile) {
       setError("Silakan pilih file terlebih dahulu.");
@@ -28,9 +31,11 @@ export function ManagerUploadForm() {
 
     setError(null);
     setSuccess(null);
+    submitting.current = true;
     setIsSubmitting(true);
 
     try {
+      setUploadStage("Menyiapkan unggahan...");
       const title = CATEGORY_OPTIONS.find((option) => option.key === category)?.label ?? category;
       const prepareFormData = new FormData();
       prepareFormData.append("action", "prepare-upload");
@@ -51,7 +56,9 @@ export function ManagerUploadForm() {
         throw new Error(prepared?.error || "Gagal menyiapkan unggahan berkas");
       }
 
+      setUploadStage("Mengirim file ke storage...");
       await uploadFileToSignedUrl(prepared.signedUrl, selectedFile);
+      setUploadStage("Menyimpan data berkas...");
       const completeFormData = new FormData();
       completeFormData.append("action", "complete-upload");
       completeFormData.append("category", category);
@@ -77,7 +84,9 @@ export function ManagerUploadForm() {
       setError(msg);
       toast(msg, "error");
     } finally {
+      submitting.current = false;
       setIsSubmitting(false);
+      setUploadStage("");
     }
   }
 
@@ -96,6 +105,7 @@ export function ManagerUploadForm() {
           Kategori
           <select
             value={category}
+            disabled={isSubmitting}
             onChange={(event) => setCategory(event.target.value)}
             className="mt-1 block w-full rounded-lg border border-[#e5e7eb] bg-white px-3 py-2 text-[13px] text-[#111111]"
           >
@@ -113,6 +123,7 @@ export function ManagerUploadForm() {
             ref={fileInputRef}
             type="file"
             name="file"
+            disabled={isSubmitting}
             onChange={handleFileChange}
             className="mt-1 block w-full rounded-lg border border-[#e5e7eb] bg-white px-3 py-1.5 text-[13px] text-[#111111] file:mr-2 file:rounded file:border-0 file:bg-[#111111] file:px-2 file:py-1 file:text-[11px] file:font-medium file:text-white"
             required
@@ -126,6 +137,7 @@ export function ManagerUploadForm() {
 
       {error && <p className="rounded-md bg-[#fdebec] px-3 py-1.5 text-[12px] font-medium text-[#9f2f2d]">{error}</p>}
       {success && <p className="rounded-md bg-[#edf3ec] px-3 py-1.5 text-[12px] font-medium text-[#346538]">{success}</p>}
+      {isSubmitting && <p role="status" className="text-center text-xs font-medium text-[#346538]">{uploadStage} Jangan tutup halaman ini.</p>}
 
       <button
         type="submit"

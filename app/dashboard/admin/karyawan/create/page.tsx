@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
+import { ApiForm } from "@/app/components/api-form";
 
 export default async function CreateEmployeePage() {
   await requireAdmin();
@@ -19,7 +20,7 @@ export default async function CreateEmployeePage() {
       </header>
 
       <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
-      <form action="/api/admin/karyawan/create" method="POST" className="grid max-w-2xl gap-3">
+      <ApiForm action="/api/admin/karyawan/create" className="grid max-w-2xl gap-3" successMessage="Karyawan berhasil dibuat.">
         <input name="name" placeholder="Nama karyawan" required className="border border-[#e5e7eb] px-3 py-2 text-sm" />
         <input name="email" type="email" placeholder="Email" required className="border border-[#e5e7eb] px-3 py-2 text-sm" />
         <input name="phoneNumber" type="tel" placeholder="Nomor telepon" className="border border-[#e5e7eb] px-3 py-2 text-sm" />
@@ -36,7 +37,7 @@ export default async function CreateEmployeePage() {
           </select>
         </label>
         <button type="submit" className="btn btn-primary w-fit">Simpan Karyawan</button>
-      </form>
+      </ApiForm>
       </section>
 
       <div className="flex justify-end">

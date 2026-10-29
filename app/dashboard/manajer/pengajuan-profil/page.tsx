@@ -1,6 +1,7 @@
 ﻿import { prisma } from "@/lib/prisma";
 import { requireManager } from "@/lib/auth";
 import { PaginationControls } from "@/app/components/pagination-controls";
+import { ApiForm } from "@/app/components/api-form";
 
 function parseProfilePayload(value: string | null | undefined) {
   if (!value) {
@@ -65,7 +66,7 @@ export default async function ManagerProfileRequestsPage({
             </div>
 
             {requests.length > 0 ? (
-              <form action="/api/manajer/profile-request" method="POST">
+              <ApiForm action="/api/manajer/profile-request" successMessage="Semua permintaan profil diproses.">
                 <input type="hidden" name="action" value="approve" />
                 <button
                   type="submit"
@@ -73,7 +74,7 @@ export default async function ManagerProfileRequestsPage({
                 >
                   Setujui Semua
                 </button>
-              </form>
+              </ApiForm>
             ) : null}
           </div>
 
@@ -119,7 +120,7 @@ export default async function ManagerProfileRequestsPage({
 
                       {request.status === "PENDING" ? (
                         <div className="flex gap-2">
-                          <form action="/api/manajer/profile-request" method="POST">
+                          <ApiForm action="/api/manajer/profile-request" successMessage="Permintaan profil disetujui.">
                             <input type="hidden" name="requestId" value={request.id} />
                             <input type="hidden" name="action" value="approve" />
                             <button
@@ -128,9 +129,9 @@ export default async function ManagerProfileRequestsPage({
                             >
                               Setujui
                             </button>
-                          </form>
+                          </ApiForm>
 
-                          <form action="/api/manajer/profile-request" method="POST">
+                          <ApiForm action="/api/manajer/profile-request" successMessage="Permintaan profil ditolak.">
                             <input type="hidden" name="requestId" value={request.id} />
                             <input type="hidden" name="action" value="reject" />
                             <button
@@ -139,7 +140,7 @@ export default async function ManagerProfileRequestsPage({
                             >
                               Tolak
                             </button>
-                          </form>
+                          </ApiForm>
                         </div>
                       ) : (
                         <span className="rounded-full bg-[#f8f9fa] px-3 py-1 text-xs font-medium text-[#6b7280]">

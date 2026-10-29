@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { ConfirmActionForm } from "@/app/components/confirm-action-form";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
+import { ApiForm } from "@/app/components/api-form";
 
 type ManagerDetailProps = {
   params: Promise<{ id: string }>;
@@ -63,11 +64,11 @@ export default async function AdminManagerDetailPage({ params }: ManagerDetailPr
             </ConfirmActionForm>
           </>
         ) : (
-          <form action="/api/admin/managers/action" method="POST">
+          <ApiForm action="/api/admin/managers/action" successMessage="Status manajer diperbarui.">
             <input type="hidden" name="userId" value={manager.id} />
             <input type="hidden" name="action" value={manager.isActive === "ACTIVE" ? "deactivate" : "activate"} />
             <button type="submit" className="btn">{manager.isActive === "ACTIVE" ? "Nonaktifkan" : "Aktifkan"}</button>
-          </form>
+          </ApiForm>
         )}
         <ConfirmActionForm
           action="/api/admin/managers/action"
