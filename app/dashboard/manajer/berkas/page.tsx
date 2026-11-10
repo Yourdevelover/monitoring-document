@@ -1,9 +1,9 @@
-﻿import { prisma } from "@/lib/prisma";
-import { requireManager } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { requireLeader } from "@/lib/auth";
 import Link from "next/link";
 import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
-import { ManagerUploadForm } from "./manager-upload-form";
-import { ManagerFileDeleteButton } from "./manager-file-delete-button";
+import { LeaderUploadForm } from "./leader-upload-form";
+import { LeaderFileDeleteButton } from "./leader-file-delete-button";
 
 const CATEGORIES = [
   { key: "DAILY", label: "daily" },
@@ -11,13 +11,13 @@ const CATEGORIES = [
   { key: "PAYMENT", label: "payment" },
 ] as const;
 
-export default async function ManagerFilesPage() {
-  const manager = await requireManager();
+export default async function LeaderFilesPage() {
+  const leader = await requireLeader();
   const now = new Date();
   const startOfToday = getStartOfCurrentJakartaDay(now);
 
   const team = await prisma.team.findUnique({
-    where: { managerId: manager.id },
+    where: { leaderId: leader.id },
     include: {
       uploads: {
         where: {
@@ -31,8 +31,8 @@ export default async function ManagerFilesPage() {
     },
   });
 
-  const uploads = (team?.uploads ?? []).filter((upload) => upload.user.role !== "MANAGER");
-  const managerUploads = (team?.uploads ?? []).filter((upload) => upload.user.role === "MANAGER");
+  const uploads = (team?.uploads ?? []).filter((upload) => upload.user.role !== "LEADER");
+  const leaderUploads = (team?.uploads ?? []).filter((upload) => upload.user.role === "LEADER");
   const formatDateTime = (date: Date) =>
     new Intl.DateTimeFormat("id-ID", {
       day: "2-digit",
@@ -54,7 +54,7 @@ export default async function ManagerFilesPage() {
           </div>
           <div className="flex items-center gap-2 text-xs">
             <span className="rounded-md bg-[#e1f3fe] px-2.5 py-1.5 font-medium text-[#1f6c9f]">{uploads.length} file</span>
-            <span className="rounded-md bg-[#fbf3db] px-2.5 py-1.5 font-medium text-[#956400]">{managerUploads.length} milik saya</span>
+            <span className="rounded-md bg-[#fbf3db] px-2.5 py-1.5 font-medium text-[#956400]">{leaderUploads.length} milik saya</span>
           </div>
         </header>
 
@@ -65,7 +65,7 @@ export default async function ManagerFilesPage() {
               return (
                 <Link
                   key={category.key}
-                  href={`/dashboard/manajer/berkas/${category.key.toLowerCase()}`}
+                  href={`/dashboard/leader/berkas/${category.key.toLowerCase()}`}
                   className="flex items-center justify-between rounded-lg border border-[#e5e7eb] bg-white px-4 py-3 transition hover:border-[#2563eb]"
                 >
                   <div>
@@ -85,7 +85,7 @@ export default async function ManagerFilesPage() {
               <h2 className="text-xs font-semibold uppercase tracking-wide">Unggah Berkas untuk Tim</h2>
               <p className="mt-1 text-xs text-[#6b7280]">Bagikan file ke seluruh anggota tim.</p>
               <div className="mt-3">
-                <ManagerUploadForm />
+                <LeaderUploadForm />
               </div>
             </div>
           </div>
@@ -116,14 +116,14 @@ export default async function ManagerFilesPage() {
               )}
             </div>
 
-            {managerUploads.length > 0 && (
+            {leaderUploads.length > 0 && (
               <div className="rounded-lg border border-[#e5e7eb] bg-white">
                 <div className="flex items-center justify-between border-b border-[#e5e7eb] px-4 py-3">
                   <h2 className="text-xs font-semibold uppercase tracking-wide">Berkas Saya</h2>
-                  <span className="text-[11px] text-[#6b7280]">{managerUploads.length} file</span>
+                  <span className="text-[11px] text-[#6b7280]">{leaderUploads.length} file</span>
                 </div>
                 <div className="divide-y divide-[#f1f3f5]">
-                  {managerUploads.map((upload) => (
+                  {leaderUploads.map((upload) => (
                     <div key={upload.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
                       <div className="min-w-0">
                         <p className="truncate text-[13px] font-medium">{upload.fileName}</p>
@@ -131,7 +131,7 @@ export default async function ManagerFilesPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <a href={upload.filePath} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-[#e5e7eb] px-2.5 py-1.5 text-[11px] font-medium text-[#111111] hover:bg-[#f8f9fa]">Lihat</a>
-                        <ManagerFileDeleteButton uploadId={upload.id} />
+                        <LeaderFileDeleteButton uploadId={upload.id} />
                       </div>
                     </div>
                   ))}
@@ -143,7 +143,7 @@ export default async function ManagerFilesPage() {
 
         <section className="flex items-center justify-between border-t border-[#e5e7eb] pt-3">
           <p className="text-[11px] text-[#6b7280]">Unduh seluruh file melalui halaman kategori masing-masing.</p>
-          <Link href="/dashboard/manajer/histori-berkas" className="text-xs font-semibold text-[#2563eb] hover:text-[#1d4ed8]">Lihat histori berkas →</Link>
+          <Link href="/dashboard/leader/histori-berkas" className="text-xs font-semibold text-[#2563eb] hover:text-[#1d4ed8]">Lihat histori berkas →</Link>
         </section>
       </div>
     </main>

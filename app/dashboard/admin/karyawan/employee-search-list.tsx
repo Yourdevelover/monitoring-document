@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
@@ -8,13 +8,15 @@ type EmployeeSearchListProps = {
     id: number;
     name: string;
     email: string;
+    nik: string | null;
     phoneNumber: string | null;
     isActive: string;
     createdAt: Date;
     latestLoginAt: Date | null;
     team?: {
       name: string;
-      manager?: { id: number; name: string } | null;
+      department: string;
+      leader?: { id: number; name: string } | null;
       members: Array<{ id: number }>;
     } | null;
   }>;
@@ -34,8 +36,8 @@ function AdminEmployeeCard({ employee }: { employee: EmployeeSearchListProps["em
           <p className="truncate text-[13px] font-medium">{employee.name}</p>
           <p className="truncate text-xs text-[#6b7280]">{employee.email}</p>
         </div>
-        <p className="truncate text-xs text-[#6b7280]">Tim: {employee.team?.name ?? 'Belum memiliki tim'}</p>
-        <p className="truncate text-xs text-[#6b7280]">Manajer: {employee.team?.manager?.name ?? 'Belum ditugaskan'}</p>
+        <p className="truncate text-xs text-[#6b7280]">{employee.team ? `${employee.team.department} · ${employee.team.name}` : "Belum memiliki tim"}</p>
+        <p className="truncate text-xs text-[#6b7280]">Leader: {employee.team?.leader?.name ?? 'Belum ditugaskan'}</p>
         <span className="flex items-center gap-2 text-[11px] text-[#6b7280]">
           <span>{employee.team?.members.length ?? 0} anggota</span>
           <span className="hidden sm:inline">Lihat info</span> →
@@ -50,10 +52,12 @@ function AdminEmployeeCard({ employee }: { employee: EmployeeSearchListProps["em
             <dl className="mt-4 divide-y divide-slate-100 text-xs">
               {[
                 ["Status", employee.isActive],
+                ["NIK", employee.nik ?? "Belum diisi"],
                 ["Nomor telepon", employee.phoneNumber ?? "-"],
                 ["Bergabung", new Date(employee.createdAt).toLocaleDateString("id-ID")],
                 ["Login terakhir", employee.latestLoginAt ? new Date(employee.latestLoginAt).toLocaleString("id-ID") : "Belum ada data"],
                 ["Tim", employee.team?.name ?? "Belum memiliki tim"],
+                ["Departemen", employee.team?.department ?? "Belum ditentukan"],
               ].map(([label, value]) => (
                 <div key={label} className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3 py-3">
                   <dt className="text-[#6b7280]">{label}</dt>
@@ -61,8 +65,8 @@ function AdminEmployeeCard({ employee }: { employee: EmployeeSearchListProps["em
                 </div>
               ))}
               <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3 py-3">
-                <dt className="text-[#6b7280]">Manajer</dt>
-                <dd className="min-w-0 break-words text-right font-medium">{employee.team?.manager ? <a href={`/dashboard/admin/managers/${employee.team.manager.id}`} className="text-[#1f6c9f] hover:underline">{employee.team.manager.name}</a> : "Belum ditugaskan"}</dd>
+                <dt className="text-[#6b7280]">Leader</dt>
+                <dd className="min-w-0 break-words text-right font-medium">{employee.team?.leader ? <a href={`/dashboard/admin/leaders/${employee.team.leader.id}`} className="text-[#1f6c9f] hover:underline">{employee.team.leader.name}</a> : "Belum ditugaskan"}</dd>
               </div>
             </dl>
             <a href={`/dashboard/admin/karyawan/${employee.id}`} className="mt-4 block w-full rounded-md border border-[#e1f3fe] px-3 py-2 text-center text-xs font-medium text-[#1f6c9f] hover:bg-[#e1f3fe]">Lihat info lebih lanjut</a>
@@ -91,7 +95,8 @@ export function EmployeeSearchList({ employees }: EmployeeSearchListProps) {
         employee.name,
         employee.email,
         employee.team?.name ?? '',
-        employee.team?.manager?.name ?? '',
+        employee.team?.department ?? '',
+        employee.team?.leader?.name ?? '',
       ]
         .join(' ')
         .toLowerCase();

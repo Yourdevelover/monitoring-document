@@ -1,6 +1,6 @@
 # Monitoring — Sistem Berkas Tim
 
-Aplikasi monitoring berkas tim berbasis web dengan 3 peran: **Admin**, **Manajer**, dan **Karyawan**. Manajer membagikan berkas ke tim, karyawan mengunggah dan mengirim berkas harian (daily/chat/payment), menyimpan data penting, mengajukan perubahan profil, dan memantau target. Semua file disajikan lewat API dengan kontrol akses per tim.
+Aplikasi monitoring berkas tim berbasis web dengan 3 peran: **Admin**, **Leader**, dan **Karyawan**. Leader membagikan berkas ke tim, karyawan mengunggah dan mengirim berkas harian (daily/chat/payment), menyimpan data prioritas, mengajukan perubahan profil, dan memantau target. Semua file disajikan lewat API dengan kontrol akses per tim.
 
 ## Tech Stack
 
@@ -60,7 +60,7 @@ monitoring-web/
 │   ├── layout.tsx                  # Root layout + Toaster global
 │   ├── login-form.tsx              # Form login (client)
 │   ├── globals.css
-│   ├── daftar-manajer/page.tsx     # Registrasi manajer publik
+│   ├── daftar-leader/page.tsx     # Registrasi leader publik
 │   ├── components/                 # Komponen bersama
 │   │   ├── toast.tsx               # Sistem toast (?toast= query)
 │   │   ├── pagination-controls.tsx
@@ -82,51 +82,50 @@ monitoring-web/
 │   │   │   ├── activities/delete/route.ts
 │   │   │   ├── karyawan/action/route.ts  # Aktif/nonaktif/hapus karyawan
 │   │   │   ├── karyawan/create/route.ts
-│   │   │   ├── managers/action/route.ts
-│   │   │   ├── managers/create/route.ts
-│   │   │   └── managers/update/route.ts
+│   │   │   ├── leaders/action/route.ts
+│   │   │   ├── leaders/create/route.ts
+│   │   │   └── leaders/update/route.ts
 │   │   ├── karyawan/
-│   │   │   ├── upload/route.ts         # Upload/submit/hapus, data penting
+│   │   │   ├── upload/route.ts         # Upload/submit/hapus, data prioritas
 │   │   │   ├── target/route.ts         # CRUD target karyawan
 │   │   │   ├── profile-request/route.ts # Ajukan perubahan profil
 │   │   │   └── cleanup-expired/route.ts # Bersihkan file kadaluarsa
-│   │   ├── manager/
-│   │   │   ├── register/route.ts
-│   │   │   ├── employee/action/route.ts # Kelola karyawan oleh manajer
-│   │   │   ├── employee/create/route.ts
-│   │   │   └── announcement/create|delete|pin/route.ts
-│   │   └── manajer/
-│   │       ├── berkas/upload/route.ts   # Upload berkas oleh manajer
-│   │       ├── berkas/download/route.ts # Unduh ZIP berkas tim
-│   │       └── profile-request/route.ts # Setujui/tolak pengajuan profil
+│   │   └── leader/
+│   │       ├── register/route.ts
+│   │       ├── employee/action|create/route.ts # Kelola karyawan oleh leader
+│   │       ├── announcement/create|delete|pin/route.ts
+│   │       ├── berkas/upload|download/route.ts
+│   │       ├── profile-request/route.ts         # Setujui/tolak pengajuan profil
+│   │       └── target/route.ts
 │   ├── dashboard/
 │   │   ├── admin/                  # Kelola user, tim, aktivitas
 │   │   │   ├── page.tsx            # Ringkasan admin
 │   │   │   ├── activities/         # Log aktivitas + hapus per tanggal
 │   │   │   ├── karyawan/           # Daftar, detail, tambah karyawan
-│   │   │   ├── managers/           # Daftar, detail, tambah manajer
+│   │   │   ├── leaders/           # Daftar, detail, tambah leader
 │   │   │   ├── users/              # Kelola admin
+│   │   │   ├── organization/       # Kelola departemen
 │   │   │   └── profil/
 │   │   ├── karyawan/               # Area karyawan
 │   │   │   ├── page.tsx            # Dashboard karyawan
 │   │   │   ├── berkas/             # Upload, kirim, simpan penting
-│   │   │   ├── data-penting/       # Penyimpanan permanen
+│   │   │   ├── data-prioritas/       # Penyimpanan permanen
 │   │   │   ├── histori-berkas/     # Riwayat kiriman 12 jam
 │   │   │   ├── pengajuan-profil/   # Status pengajuan profil
-│   │   │   ├── pengumuman/         # Pengumuman tim
+│   │   │   ├── announcement/         # Announcement tim
 │   │   │   ├── target/             # Target & progres
 │   │   │   └── profil/             # Profil + ajukan edit
-│   │   └── manajer/                # Area manajer
-│   │       ├── page.tsx            # Dashboard manajer
+│   │   └── leader/                # Area leader
+│   │       ├── page.tsx            # Dashboard leader
 │   │       ├── berkas/             # Berkas tim + upload + unduh ZIP
 │   │       ├── histori-berkas/
 │   │       ├── karyawan/           # Kelola karyawan tim
 │   │       ├── pengajuan-profil/   # Persetujuan profil
-│   │       ├── pengumuman/         # Kelola pengumuman
+│   │       ├── announcement/         # Kelola announcement
 │   │       ├── target/             # Pantau target tim
 │   │       └── profil/
 ├── lib/
-│   ├── auth.ts          # getSessionUser, requireAdmin/Manager/Employee, JWT
+│   ├── auth.ts          # getSessionUser, requireAdmin/Leader/Employee, JWT
 │   ├── prisma.ts        # Singleton PrismaClient
 │   ├── redirect.ts      # getBaseUrl() — redirect aman di balik proxy
 │   ├── upload-queue.ts  # Antrean serial operasi file
@@ -138,32 +137,36 @@ monitoring-web/
 │   └── seed-qa.mjs      # Seed data QA
 └── public/
     ├── logo/
-    └── uploads/teams/{teamId}/{employees|managers}/{userId}/
+    └── uploads/teams/{teamId}/{employees|leaders}/{userId}/
 ```
 
 ## Peran & Alur
 
 | Peran | Akses | Fitur utama |
 |-------|-------|-------------|
-| ADMIN | `/dashboard/admin` | Kelola admin, setujui pendaftaran manajer, kelola karyawan, tim, dan log aktivitas |
-| MANAGER | `/dashboard/manajer` | Kelola karyawan tim, upload berkas, pengumuman, setujui profil, pantau target |
-| KARYAWAN | `/dashboard/karyawan` | Upload/kirim berkas (DAILY/CHAT/PAYMENT), data penting, histori 12 jam, ajukan profil, target |
+| ADMIN | `/dashboard/admin` | Kelola admin, setujui pendaftaran leader, kelola karyawan, tim, dan log aktivitas |
+| LEADER | `/dashboard/leader` | Kelola karyawan tim, upload berkas, announcement, setujui profil, pantau target |
+| KARYAWAN | `/dashboard/karyawan` | Upload/kirim berkas (DAILY/CHAT/PAYMENT), data prioritas, histori 12 jam, ajukan profil, target |
 
-**Alur berkas karyawan:** upload → submit (berlaku 12 jam) → histori → opsional simpan ke Data Penting (permanen).
-**Alur profil:** karyawan ajukan edit → `profileRequest` PENDING → manajer setujui/tolak → data user diperbarui.
-**Alur pendaftaran manajer:** daftar mandiri → akun menunggu persetujuan admin → admin menyetujui/menolak → akun dan tim aktif setelah disetujui.
-**Alur pengumuman:** manajer buat/pin/hapus → tampil di bar pengumuman tim (12 jam terakhir + pinned).
+**Departemen:** admin mengelola departemen di `/dashboard/admin/organization`. Departemen awal adalah **Collection/Penagihan** dan **Backoffice/Pendukung**. Departemen ditetapkan pada tim, sehingga Leader dan seluruh karyawan dalam tim tersebut berada pada departemen yang sama. Tim lama dipindahkan ke Collection/Penagihan saat migrasi.
+
+
+**Alur berkas karyawan:** upload → submit (berlaku 12 jam) → histori → opsional simpan ke Data Prioritas (permanen).
+**Alur profil:** karyawan ajukan edit → `profileRequest` PENDING → leader setujui/tolak → data user diperbarui.
+**Alur pendaftaran leader:** daftar mandiri → akun menunggu persetujuan admin → admin menyetujui/menolak → akun dan tim aktif setelah disetujui.
+**Alur announcement:** leader buat/pin/hapus → tampil di bar announcement tim (12 jam terakhir + pinned).
 
 ## Database (Prisma)
 
 Model utama di `prisma/schema.prisma`:
 
-- `User` — akun (role ADMIN/MANAGER/KARYAWAN, `teamId`, `isActive`: ACTIVE/INACTIVE/PENDING/REJECTED)
-- `Team` — tim (`managerId` unik, relasi anggota)
+- `User` — akun (role ADMIN/LEADER/KARYAWAN, `teamId`, `isActive`: ACTIVE/INACTIVE/PENDING/REJECTED)
+- `Team` — tim (`leaderId` unik, relasi anggota)
+- `Department` — departemen yang mengelompokkan tim
 - `Upload` — berkas (`category` DAILY/CHAT/PAYMENT, `isSubmitted`, `expiresAt` +12 jam)
 - `UploadHistory` — riwayat kiriman per `sourceUploadId`
-- `ImportantFile` — salinan permanen data penting
-- `Announcement` — pengumuman tim (`isPinned`)
+- `ImportantFile` — salinan permanen data prioritas (label UI: Data Prioritas)
+- `Announcement` — announcement tim (`isPinned`)
 - `ProfileRequest` — pengajuan profil (PENDING/APPROVED/REJECTED)
 - `ActivityLog` — log aksi (login, upload, CRUD)
 - `Message`, `PersonalNote`, `Target` — pesan, catatan, target kerja
@@ -186,24 +189,24 @@ npm run db:seed
 | POST | `/api/profile` | Update profil langsung |
 | GET/POST | `/api/notes` | Catatan pribadi |
 | GET | `/api/files/[...path]` | Sajikan file (cek tim) |
-| POST | `/api/karyawan/upload` | `upload/submit/delete/add-important/delete-important` |
+| POST | `/api/karyawan/upload` | `upload/submit/delete/add-priority/delete-priority` |
 | POST | `/api/karyawan/target` | Buat/update/hapus target |
 | POST | `/api/karyawan/profile-request` | Buat pengajuan profil |
 | POST | `/api/karyawan/cleanup-expired` | Hapus file kadaluarsa |
-| POST | `/api/manajer/berkas/upload` | Upload berkas manajer |
-| GET | `/api/manajer/berkas/download` | Unduh ZIP berkas tim |
-| POST | `/api/manajer/profile-request` | `approve/reject` pengajuan |
-| POST | `/api/manager/announcement/create\|delete\|pin` | Kelola pengumuman |
-| POST | `/api/manager/employee/create\|action` | Kelola karyawan |
-| POST | `/api/manager/register` | Registrasi manajer |
-| POST | `/api/admin/managers/action` | Setujui/tolak pendaftaran atau aktif/nonaktifkan manajer |
-| POST | `/api/admin/*` | Kelola admin, karyawan, manajer, aktivitas |
+| POST | `/api/leader/berkas/upload` | Upload berkas leader |
+| GET | `/api/leader/berkas/download` | Unduh ZIP berkas tim |
+| POST | `/api/leader/profile-request` | `approve/reject` pengajuan |
+| POST | `/api/leader/announcement/create\|delete\|pin` | Kelola announcement |
+| POST | `/api/leader/employee/create\|action` | Kelola karyawan |
+| POST | `/api/leader/register` | Registrasi leader |
+| POST | `/api/admin/leaders/action` | Setujui/tolak pendaftaran atau aktif/nonaktifkan leader |
+| POST | `/api/admin/*` | Kelola admin, karyawan, leader, aktivitas |
 
 Semua redirect API memakai `getBaseUrl(request)` dari `lib/redirect.ts` agar host benar saat di balik Nginx/proxy.
 
 ## File Access Proxy
 
-- File tersimpan di `public/uploads/teams/{teamId}/{employees|managers}/{userId}/[{important/}]{timestamp}-{namaAman}`.
+- File tersimpan di `public/uploads/teams/{teamId}/{employees|leaders}/{userId}/[{important/}]{timestamp}-{namaAman}`.
 - `proxy.ts` me-rewrite `/uploads/*` → `/api/files/uploads/*` agar file tetap bisa diakses pada `next start` (produksi) dengan pengecekan akses tim.
 - Operasi file diserialkan via `enqueueFileTask()` (`lib/upload-queue.ts`) untuk mencegah race condition.
 - Batas waktu memakai zona `Asia/Jakarta` (`lib/upload-time.ts`).

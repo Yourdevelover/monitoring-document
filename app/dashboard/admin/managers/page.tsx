@@ -1,13 +1,14 @@
-﻿import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
-import { ManagerSearchList } from "./manager-search-list";
+import { UserManagementTabs } from "../user-management-tabs";
+import { LeaderSearchList } from "./leader-search-list";
 
-export default async function AdminManagersPage() {
+export default async function AdminLeadersPage() {
   await requireAdmin();
-  const managers = await prisma.user.findMany({
-    where: { role: "MANAGER" },
+  const leaders = await prisma.user.findMany({
+    where: { role: "LEADER" },
     include: {
-      managedTeam: {
+      ledTeam: {
         include: { members: true },
       },
       activityLogs: {
@@ -21,33 +22,29 @@ export default async function AdminManagersPage() {
 
   return (
     <main className="space-y-4">
-      <header className="rounded-lg border border-[#e5e7eb] bg-white px-4 py-3">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">Manajemen akun</p>
-        <h1 className="mt-1 text-[13px] font-semibold tracking-tight">Kelola Manajer</h1>
-        <p className="mt-1 text-xs text-[#6b7280]">Daftar manajer dan informasi tim yang dikelola.</p>
-      </header>
+      <UserManagementTabs activeRole="leaders" />
 
       <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
-      {managers.length > 0 ? (
-        <ManagerSearchList
-          managers={managers.map((manager) => ({
-            id: manager.id,
-            name: manager.name,
-            email: manager.email,
-            phoneNumber: manager.phoneNumber,
-            isActive: manager.isActive,
-            createdAt: manager.createdAt,
-            latestLoginAt: manager.activityLogs[0]?.createdAt ?? null,
-            managedTeam: manager.managedTeam
+      {leaders.length > 0 ? (
+        <LeaderSearchList
+          leaders={leaders.map((leader) => ({
+            id: leader.id,
+            name: leader.name,
+            email: leader.email,
+            phoneNumber: leader.phoneNumber,
+            isActive: leader.isActive,
+            createdAt: leader.createdAt,
+            latestLoginAt: leader.activityLogs[0]?.createdAt ?? null,
+            ledTeam: leader.ledTeam
               ? {
-                  name: manager.managedTeam.name,
-                  members: manager.managedTeam.members,
+                  name: leader.ledTeam.name,
+                  members: leader.ledTeam.members,
                 }
               : null,
           }))}
         />
       ) : (
-        <p className="py-8 text-center text-sm text-[#6b7280]">Belum ada akun manajer.</p>
+        <p className="py-8 text-center text-sm text-[#6b7280]">Belum ada akun leader.</p>
       )}
       </section>
     </main>

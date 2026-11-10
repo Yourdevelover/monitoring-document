@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -119,7 +119,7 @@ export function EmployeeProfileCard({ employee, files = [], mode = "avatar" }: E
                       <span key={category}>
                         {file?.isSubmitted ? (
                           <Link
-                            href={`/dashboard/manajer/berkas/${category.toLowerCase()}/${file.id}`}
+                            href={`/dashboard/leader/berkas/${category.toLowerCase()}/${file.id}`}
                             className="text-[#1f6c9f] hover:text-[#1d4ed8] hover:underline"
                           >
                             ✓ {category.replace("DAILY", "daily").replace("CHAT", "chat").replace("PAYMENT", "payment")}
@@ -134,7 +134,7 @@ export function EmployeeProfileCard({ employee, files = [], mode = "avatar" }: E
               </div>
             </dl>
                     <Link
-              href={`/dashboard/manajer/karyawan/${employee.id}`}
+              href={`/dashboard/leader/karyawan/${employee.id}`}
               className="mt-4 block w-full rounded-lg border border-[#e1f3fe] px-3 py-2 text-center text-sm font-medium text-[#1f6c9f] hover:bg-[#e1f3fe]"
             >
               Lihat info lebih lanjut

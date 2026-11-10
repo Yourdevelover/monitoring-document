@@ -13,7 +13,7 @@ async function main() {
     create: {
       name: "QA User",
       email,
-      role: "MANAGER",
+      role: "LEADER",
       isActive: "ACTIVE",
       passwordHash: hash,
     },

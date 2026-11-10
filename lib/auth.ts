@@ -73,10 +73,10 @@ export async function requireAdmin() {
   return user;
 }
 
-export async function requireManager() {
+export async function requireLeader() {
   const user = await getSessionUser();
 
-  if (!user || user.role !== "MANAGER") {
+  if (!user || user.role !== "LEADER") {
     redirect("/");
   }
 

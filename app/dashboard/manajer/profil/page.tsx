@@ -1,12 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { EditProfileCard } from "./edit-profile-card";
-import { requireManager } from "@/lib/auth";
+import { requireLeader } from "@/lib/auth";
 
-export default async function ManagerProfilePage() {
-  const manager = await requireManager();
+export default async function LeaderProfilePage() {
+  const leader = await requireLeader();
 
   const profile = await prisma.user.findUnique({
-    where: { id: manager.id },
+    where: { id: leader.id },
   });
 
   return (
@@ -14,7 +14,7 @@ export default async function ManagerProfilePage() {
       <div className="mx-auto max-w-3xl rounded-lg bg-white p-4">
         <header className="border-b border-[#e5e7eb] pb-4">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#6b7280]">Profil</p>
-          <h1 className="mt-1 text-base font-bold">Profil Manajer</h1>
+          <h1 className="mt-1 text-base font-bold">Profil Leader</h1>
           <p className="mt-1 text-sm text-[#6b7280]">Kelola informasi akun dan data kontak Anda.</p>
         </header>
 

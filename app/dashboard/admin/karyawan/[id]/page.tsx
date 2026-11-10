@@ -19,7 +19,8 @@ export default async function AdminEmployeeDetailPage({ params }: AdminEmployeeD
     include: {
       team: {
         include: {
-          manager: true,
+          leader: true,
+          department: true,
           members: { orderBy: { createdAt: "desc" } },
           uploads: { orderBy: { createdAt: "desc" }, take: 10 },
         },
@@ -79,6 +80,7 @@ export default async function AdminEmployeeDetailPage({ params }: AdminEmployeeD
       <section className="grid gap-3 rounded-lg border border-[#e5e7eb] bg-white p-4 sm:grid-cols-2">
         <div><p className="text-[11px] text-[#6b7280]">Nama</p><p className="mt-0.5 text-[13px] font-semibold">{employee.name}</p></div>
         <div><p className="text-[11px] text-[#6b7280]">Email</p><p className="mt-0.5 text-[13px] font-semibold">{employee.email}</p></div>
+        <div><p className="text-[11px] text-[#6b7280]">NIK</p><p className="mt-0.5 text-[13px] font-semibold">{employee.nik ?? "Belum diisi"}</p></div>
         <div><p className="text-[11px] text-[#6b7280]">Nomor Telepon</p><p className="mt-0.5 text-[13px] font-semibold">{employee.phoneNumber ?? "Belum diisi"}</p></div>
         <div><p className="text-[11px] text-[#6b7280]">Status</p><p className="mt-0.5 text-[13px] font-semibold">{employee.isActive}</p></div>
         <div><p className="text-[11px] text-[#6b7280]">Role</p><p className="mt-0.5 text-[13px] font-semibold">{employee.role}</p></div>
@@ -105,19 +107,19 @@ export default async function AdminEmployeeDetailPage({ params }: AdminEmployeeD
 
       <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
         <div className="mb-3">
-          <h2 className="text-[11px] font-semibold uppercase tracking-wide">Informasi Manajer</h2>
+          <h2 className="text-[11px] font-semibold uppercase tracking-wide">Informasi Leader</h2>
         </div>
 
-        {employee.team?.manager ? (
+        {employee.team?.leader ? (
           <Link
-            href={`/dashboard/admin/managers/${employee.team.manager.id}`}
+            href={`/dashboard/admin/leaders/${employee.team.leader.id}`}
             className="block rounded-md border border-[#e5e7eb] bg-[#f8f9fa] p-4 transition hover:bg-[#f8f9fa]"
           >
-            <p className="text-[13px] font-semibold text-[#111111]">{employee.team.manager.name}</p>
-            <p className="mt-1 text-xs text-[#6b7280]">{employee.team.manager.email}</p>
+            <p className="text-[13px] font-semibold text-[#111111]">{employee.team.leader.name}</p>
+            <p className="mt-1 text-xs text-[#6b7280]">{employee.team.leader.email}</p>
           </Link>
         ) : (
-          <p className="text-[13px] text-[#6b7280]">Karyawan belum memiliki manajer.</p>
+          <p className="text-[13px] text-[#6b7280]">Karyawan belum memiliki leader.</p>
         )}
       </section>
 
@@ -130,6 +132,7 @@ export default async function AdminEmployeeDetailPage({ params }: AdminEmployeeD
         {employee.team ? (
           <>
             <p className="mb-3 text-[13px] text-[#111111]">Nama tim: <strong>{employee.team.name}</strong></p>
+            <p className="mb-3 text-[13px] text-[#111111]">Departemen: <strong>{employee.team.department.name}</strong></p>
             <div className="divide-y divide-slate-200 border-y border-[#e5e7eb]">
               {employee.team.members.map((member) => (
                 <div key={member.id} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 py-2 text-[13px]">

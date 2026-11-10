@@ -1,4 +1,4 @@
-﻿import { requireAdmin } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { AdminSidebar } from "./admin-sidebar";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -6,9 +6,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const navItems = [
     { href: "/dashboard/admin", label: "Dashboard" },
-    { href: "/dashboard/admin/users", label: "Kelola Admin" },
-    { href: "/dashboard/admin/managers", label: "Kelola Manajer" },
-    { href: "/dashboard/admin/karyawan", label: "Kelola Karyawan" },
+    { href: "/dashboard/admin/users", label: "Kelola Pengguna" },
+    { href: "/dashboard/admin/organization", label: "Kelola Organisasi" },
     { href: "/dashboard/admin/activities", label: "Aktivitas" },
     { href: "/dashboard/admin/profil", label: "Profil" },
   ];

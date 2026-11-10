@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireManager } from "@/lib/auth";
+import { requireLeader } from "@/lib/auth";
 import { hash } from "bcryptjs";
 import { getBaseUrl } from "@/lib/redirect";
 
 export async function POST(request: Request) {
   try {
-    const manager = await requireManager();
+    const leader = await requireLeader();
 
     const formData = await request.formData();
     const requestId = Number(formData.get("requestId") ?? 0);
@@ -24,14 +24,14 @@ export async function POST(request: Request) {
     }
 
     const team = await prisma.team.findUnique({
-      where: { managerId: manager.id },
+      where: { leaderId: leader.id },
     });
 
     if (!team) {
       return NextResponse.json(
         {
           success: false,
-          error: "Tim manajer tidak ditemukan.",
+          error: "Tim leader tidak ditemukan.",
         },
         { status: 404 }
       );
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
         });
 
     if (profileRequests.length === 0) {
-      return NextResponse.redirect(new URL("/dashboard/manajer/pengajuan-profil?toast=" + encodeURIComponent("Tidak ada permintaan yang perlu diproses."), getBaseUrl(request)));
+      return NextResponse.redirect(new URL("/dashboard/leader/pengajuan-profil?toast=" + encodeURIComponent("Tidak ada permintaan yang perlu diproses."), getBaseUrl(request)));
     }
 
     const processedRequestIds = [] as number[];
@@ -121,7 +121,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.redirect(new URL("/dashboard/manajer/pengajuan-profil?toast=" + encodeURIComponent(action === "approve" ? "Permintaan profil disetujui." : "Permintaan profil ditolak."), getBaseUrl(request)));
+    return NextResponse.redirect(new URL("/dashboard/leader/pengajuan-profil?toast=" + encodeURIComponent(action === "approve" ? "Permintaan profil disetujui." : "Permintaan profil ditolak."), getBaseUrl(request)));
   } catch (error) {
     console.error(error);
     return NextResponse.json(

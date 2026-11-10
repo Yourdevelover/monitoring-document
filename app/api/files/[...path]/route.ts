@@ -47,7 +47,7 @@ export async function GET(
     return NextResponse.json({ error: "Invalid path" }, { status: 400 });
   }
 
-  // Expected: teams/{teamId}/employees/{id}/file or teams/{teamId}/managers/{id}/file or teams/{teamId}/employees/{id}/important/file
+  // Expected: teams/{teamId}/employees/{id}/file or teams/{teamId}/leaders/{id}/file or teams/{teamId}/employees/{id}/important/file
   // Also handle uploads prefix if frontend sends it
   let relativePath = joinedPath;
   if (relativePath.startsWith("uploads/")) {
@@ -75,10 +75,10 @@ export async function GET(
       const fileTeamId = Number(teamMatch[1]);
       if (user.role !== "ADMIN") {
         let userTeamId: number | null = user.teamId ?? null;
-        // Manager's team is via managedTeam, not teamId
-        if (user.role === "MANAGER" && !userTeamId) {
+        // Leader's team is via ledTeam, not teamId
+        if (user.role === "LEADER" && !userTeamId) {
           const { prisma } = await import("@/lib/prisma");
-          const team = await prisma.team.findUnique({ where: { managerId: user.id } });
+          const team = await prisma.team.findUnique({ where: { leaderId: user.id } });
           userTeamId = team?.id ?? null;
         }
         if (userTeamId !== fileTeamId) {

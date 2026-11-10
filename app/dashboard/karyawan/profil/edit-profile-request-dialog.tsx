@@ -6,9 +6,10 @@ type EditProfileRequestDialogProps = {
   name: string;
   email: string;
   phoneNumber: string | null;
+  nik: string | null;
 };
 
-export function EditProfileRequestDialog({ name, email, phoneNumber }: EditProfileRequestDialogProps) {
+export function EditProfileRequestDialog({ name, email, phoneNumber, nik }: EditProfileRequestDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -36,7 +37,7 @@ export function EditProfileRequestDialog({ name, email, phoneNumber }: EditProfi
             <div className="mb-5 flex items-center justify-between gap-4 border-b border-[#e5e7eb] pb-3">
               <div>
                 <h2 id="edit-employee-profile-title" className="text-base font-semibold">Edit Profil</h2>
-                <p className="mt-1 text-sm text-[#6b7280]">Perubahan akan dikirim ke manajer untuk disetujui.</p>
+                <p className="mt-1 text-sm text-[#6b7280]">Perubahan akan dikirim ke leader untuk disetujui.</p>
               </div>
               <button
                 type="button"
@@ -58,6 +59,22 @@ export function EditProfileRequestDialog({ name, email, phoneNumber }: EditProfi
                   name="name"
                   type="text"
                   defaultValue={name}
+                  className="w-full rounded-lg border border-[#d1d5db] bg-white px-3 py-2.5 text-sm text-[#374151] outline-none transition focus:border-[#2563eb]"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="employee-profile-nik" className="mb-1 block text-sm font-medium text-[#374151]">
+                  NIK
+                </label>
+                <input
+                  id="employee-profile-nik"
+                  name="nik"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={32}
+                  defaultValue={nik ?? ""}
+                  placeholder="Masukkan NIK"
                   className="w-full rounded-lg border border-[#d1d5db] bg-white px-3 py-2.5 text-sm text-[#374151] outline-none transition focus:border-[#2563eb]"
                 />
               </div>

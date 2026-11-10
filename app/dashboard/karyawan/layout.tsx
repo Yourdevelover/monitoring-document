@@ -1,5 +1,6 @@
-﻿import { requireEmployee } from "@/lib/auth";
+import { requireEmployee } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { NotificationButton } from "@/app/components/notification-button";
 import { KaryawanSidebar } from "./karyawan-sidebar";
 
 export default async function EmployeeLayout({
@@ -23,8 +24,7 @@ export default async function EmployeeLayout({
   const navItems = [
     { href: "/dashboard/karyawan", label: "Dashboard" },
     { href: "/dashboard/karyawan/berkas", label: "Berkas" },
-    { href: "/dashboard/karyawan/data-penting", label: "Data Penting" },
-    { href: "/dashboard/karyawan/pengumuman", label: "Pengumuman" },
+    { href: "/dashboard/karyawan/data-prioritas", label: "Data Prioritas" },
     { href: "/dashboard/karyawan/target", label: "Target" },
     { href: "/dashboard/karyawan/profil", label: "Profil" },
   ];
@@ -35,15 +35,15 @@ export default async function EmployeeLayout({
         <KaryawanSidebar navItems={navItems} />
 
         <div className="employee-content min-w-0 flex-1">
-          <div className="manager-announcement-bar" role="status" aria-live="polite">
-            <span className="manager-announcement-label">Pengumuman Tim</span>
-            <div className="manager-announcement-viewport">
+          <div className="leader-announcement-bar" role="status" aria-live="polite">
+            <NotificationButton href="/dashboard/karyawan/announcement" count={announcements.length} />
+            <div className="leader-announcement-viewport">
               {announcements.length > 0 ? (
-                <p className="manager-announcement-single">
+                <p className="leader-announcement-single">
                   {announcements.map((announcement, index) => (
                     <span key={announcement.id}>
                       {index > 0 && "  •  "}
-                      <span className={announcement.isPinned ? "manager-announcement-important" : undefined}>
+                      <span className={announcement.isPinned ? "leader-announcement-important" : undefined}>
                         {announcement.title
                           ? `${announcement.title} - ${announcement.content}`
                           : announcement.content}
@@ -52,7 +52,7 @@ export default async function EmployeeLayout({
                   ))}
                 </p>
               ) : (
-                <p className="manager-announcement-empty">Belum ada pengumuman terbaru dari manajer.</p>
+                <p className="leader-announcement-empty">Belum ada announcement terbaru dari leader.</p>
               )}
             </div>
           </div>

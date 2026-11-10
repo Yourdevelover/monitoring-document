@@ -9,7 +9,7 @@ datasource db {
 
 enum Role {
   ADMIN
-  MANAGER
+  LEADER
   KARYAWAN
 }
 
@@ -42,6 +42,7 @@ enum UploadStatus {
 model User {
   id            Int          @id @default(autoincrement())
   name          String
+  nik           String?        @unique
   email         String       @unique
   phoneNumber   String?
   passwordHash  String
@@ -54,10 +55,10 @@ model User {
   updatedAt     DateTime     @updatedAt
 
   team            Team?            @relation("TeamMembers", fields: [teamId], references: [id])
-  managedTeam     Team?            @relation("TeamManager")
+  ledTeam         Team?            @relation("TeamLeader")
   uploads         Upload[]
   uploadHistory   UploadHistory[]
-  importantFiles  ImportantFile[]
+  importantFiles ImportantFile[]
   announcements   Announcement[]
   profileRequests ProfileRequest[] @relation("ProfileRequestsUser")
   reviewedRequests ProfileRequest[] @relation("ProfileRequestsReviewer")
@@ -73,12 +74,14 @@ model User {
 model Team {
   id         Int      @id @default(autoincrement())
   name       String
-  managerId  Int      @unique
+  leaderId   Int      @unique
+  departmentId Int
   isActive   Boolean  @default(true)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  manager    User     @relation("TeamManager", fields: [managerId], references: [id])
+  leader     User     @relation("TeamLeader", fields: [leaderId], references: [id])
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
   members    User[]    @relation("TeamMembers")
   uploads    Upload[]
   uploadHistory UploadHistory[]
@@ -86,6 +89,18 @@ model Team {
   announcements Announcement[]
 
   @@map("teams")
+}
+
+model Department {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teams     Team[]
+
+  @@map("departments")
 }
 
 model Upload {
@@ -155,7 +170,7 @@ model ImportantFile {
 
 model Announcement {
   id            Int       @id @default(autoincrement())
-  managerId     Int
+  leaderId      Int
   teamId        Int
   targetUserId  Int?
   title         String
@@ -164,7 +179,7 @@ model Announcement {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  manager       User      @relation(fields: [managerId], references: [id])
+  leader        User      @relation(fields: [leaderId], references: [id])
   team          Team      @relation(fields: [teamId], references: [id])
 
   @@map("announcements")
@@ -239,11 +254,13 @@ model Target {
   formula      String
   threshold    Float    @default(20)
   period       String
+  isPublic     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, period, name])
+  @@index([period, isPublic])
   @@map("targets")
 }

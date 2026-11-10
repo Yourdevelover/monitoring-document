@@ -1,12 +1,12 @@
 import { prisma } from "@/lib/prisma";
-import { requireManager } from "@/lib/auth";
+import { requireLeader } from "@/lib/auth";
 import { SaveTargetNoteButton } from "@/app/components/save-target-note-button";
 import { PersonalTargetDialog } from "./personal-target-dialog";
 
-export default async function ManagerTargetPage() {
-  const manager = await requireManager();
+export default async function LeaderTargetPage() {
+  const leader = await requireLeader();
   const team = await prisma.team.findUnique({
-    where: { managerId: manager.id },
+    where: { leaderId: leader.id },
     include: { members: { where: { role: "KARYAWAN" }, select: { id: true, name: true } } },
   });
   const period = new Date().toISOString().slice(0, 7);
@@ -17,7 +17,7 @@ export default async function ManagerTargetPage() {
       orderBy: { createdAt: "desc" },
     }),
     prisma.target.findMany({
-      where: { userId: manager.id, period },
+      where: { userId: leader.id, period },
       orderBy: { createdAt: "desc" },
     }),
   ]);
@@ -45,9 +45,9 @@ export default async function ManagerTargetPage() {
             const pct = target.targetValue > 0 ? (target.currentValue / target.targetValue) * 100 : 0;
             const reached = pct >= 100;
             return (
-              <article key={`manager-${target.id}`} className="rounded-lg border border-[#e5e7eb] bg-white p-4">
+              <article key={`leader-${target.id}`} className="rounded-lg border border-[#e5e7eb] bg-white p-4">
                 <div className="mb-2 flex items-center justify-between gap-2">
-                  <p className="truncate text-[13px] font-semibold">{manager.name}</p>
+                  <p className="truncate text-[13px] font-semibold">{leader.name}</p>
                   <span className="shrink-0 rounded bg-[#e1f3fe] px-1.5 py-0.5 text-[10px] font-semibold text-[#1f6c9f]">Target Saya</span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
@@ -58,14 +58,14 @@ export default async function ManagerTargetPage() {
                 <div className="mt-2 h-2 rounded bg-[#f1f3f5]"><div className={`h-full rounded ${reached ? "bg-[#346538]" : "bg-[#956400]"}`} style={{ width: `${Math.min(100, Math.max(0, pct))}%` }} /></div>
                 <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                   <SaveTargetNoteButton name={target.name} current={target.currentValue} target={target.targetValue} pct={pct} />
-                  <form action="/api/manajer/target" method="POST" className="flex items-center gap-1.5">
+                  <form action="/api/leader/target" method="POST" className="flex items-center gap-1.5">
                     <input type="hidden" name="action" value="update" />
                     <input type="hidden" name="id" value={target.id} />
-                    <label className="sr-only" htmlFor={`manager-target-progress-${target.id}`}>Progres target {target.name}</label>
-                    <input id={`manager-target-progress-${target.id}`} name="currentValue" type="number" min="0" step="any" defaultValue={String(target.currentValue)} className="w-24 rounded border border-[#d1d5db] bg-white px-2 py-1 text-xs" />
+                    <label className="sr-only" htmlFor={`leader-target-progress-${target.id}`}>Progres target {target.name}</label>
+                    <input id={`leader-target-progress-${target.id}`} name="currentValue" type="number" min="0" step="any" defaultValue={String(target.currentValue)} className="w-24 rounded border border-[#d1d5db] bg-white px-2 py-1 text-xs" />
                     <button type="submit" className="rounded bg-white px-2 py-1 text-xs font-medium text-[#374151] ring-1 ring-[#d1d5db] hover:bg-[#f1f3f5]">Update</button>
                   </form>
-                  <form action="/api/manajer/target" method="POST">
+                  <form action="/api/leader/target" method="POST">
                     <input type="hidden" name="action" value="delete" />
                     <input type="hidden" name="id" value={target.id} />
                     <button type="submit" className="text-xs font-medium text-[#9f2f2d] hover:underline">Hapus</button>

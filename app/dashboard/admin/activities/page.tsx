@@ -1,4 +1,4 @@
-﻿import { requireAdmin } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PaginationControls } from "@/app/components/pagination-controls";
 import { DateFilter } from "./date-filter";

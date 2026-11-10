@@ -121,15 +121,33 @@ export async function POST(request: Request) {
         }
 
         await prisma.$transaction([
-          prisma.uploadHistory.deleteMany({
-            where: { sourceUploadId: importantFile.sourceUploadId },
-          }),
           prisma.importantFile.delete({ where: { id: importantFile.id } }),
-          prisma.upload.deleteMany({ where: { id: importantFile.sourceUploadId } }),
+          prisma.upload.updateMany({
+            where: { id: importantFile.sourceUploadId, userId: employee.id },
+            data: { importantSaved: false },
+          }),
         ]);
 
-        return NextResponse.json({ success: true, message: "Data penting berhasil dihapus." });
+        return NextResponse.json({ success: true, message: "Data dihapus dari Data Prioritas." });
       });
+    }
+
+    if (action === "unmark-important") {
+      const uploadId = Number(formData.get("uploadId") ?? 0);
+      if (!uploadId) {
+        return NextResponse.json({ success: false, error: "ID berkas tidak valid." }, { status: 400 });
+      }
+
+      const upload = await prisma.upload.findFirst({
+        where: { id: uploadId, userId: employee.id, isImportant: true },
+        select: { id: true },
+      });
+      if (!upload) {
+        return NextResponse.json({ success: false, error: "Data penting tidak ditemukan." }, { status: 404 });
+      }
+
+      await prisma.upload.update({ where: { id: upload.id }, data: { isImportant: false } });
+      return NextResponse.json({ success: true, message: "Berkas dihapus dari Data Prioritas." });
     }
 
     if (action === "submit") {
@@ -245,7 +263,7 @@ export async function POST(request: Request) {
         if (existingImportant) {
           return NextResponse.json({
             success: true,
-            message: "Berkas sudah tersimpan di Data Penting",
+            message: "Berkas sudah tersimpan di Data Prioritas",
           });
         }
 
@@ -292,7 +310,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({
           success: true,
-          message: "Berkas berhasil disimpan ke Data Penting",
+          message: "Berkas berhasil disimpan ke Data Prioritas",
         });
       });
     }
@@ -353,6 +371,7 @@ export async function POST(request: Request) {
 
     const category = String(formData.get("category") ?? "");
     const title = String(formData.get("title") ?? "").trim();
+    const isImportant = formData.get("isImportant") === "true";
     const file = formData.get("file");
 
     if (!VALID_CATEGORIES.has(category) || !(file instanceof File) || file.size === 0) {
@@ -374,7 +393,6 @@ export async function POST(request: Request) {
         where: {
           userId: employee.id,
           category: category as "DAILY" | "CHAT" | "PAYMENT",
-          isImportant: false,
           isSubmitted: false,
         },
       });
@@ -421,6 +439,7 @@ export async function POST(request: Request) {
           fileType: file.type || "application/octet-stream",
           category: category as "DAILY" | "CHAT" | "PAYMENT",
           status: "COMPLETED",
+          isImportant,
         },
       });
 

@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       },
     });
 
-    const dashboardRole = user.role === "ADMIN" ? "admin" : user.role === "MANAGER" ? "manajer" : "karyawan";
+    const dashboardRole = user.role === "ADMIN" ? "admin" : user.role === "LEADER" ? "leader" : "karyawan";
     return NextResponse.redirect(new URL(`/dashboard/${dashboardRole}/profil`, getBaseUrl(request)));
   } catch (error) {
     console.error(error);

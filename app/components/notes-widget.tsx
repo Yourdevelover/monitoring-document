@@ -18,7 +18,7 @@ export function NotesWidget({ initialNotes }: { initialNotes: Note[] }) {
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
   const pathname = usePathname();
-  const isHiddenPath = pathname.startsWith("/dashboard/admin") || pathname.endsWith("/profil");
+  const isHiddenPath = pathname.startsWith("/dashboard/admin") || pathname.endsWith("/profil") || pathname.includes("/announcement");
   const [content, setContent] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState("");

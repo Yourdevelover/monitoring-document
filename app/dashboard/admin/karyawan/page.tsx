@@ -1,5 +1,6 @@
-﻿import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { UserManagementTabs } from "../user-management-tabs";
 import { EmployeeSearchList } from "./employee-search-list";
 
 export default async function AdminEmployeesPage() {
@@ -8,9 +9,11 @@ export default async function AdminEmployeesPage() {
   const employees = await prisma.user.findMany({
     where: { role: "KARYAWAN" },
     include: {
+      // NIK only appears in admin views; team members' profile views do not expose it.
       team: {
         include: {
-          manager: true,
+          leader: true,
+          department: true,
           members: true,
         },
       },
@@ -25,11 +28,7 @@ export default async function AdminEmployeesPage() {
 
   return (
     <main className="space-y-4">
-      <header className="rounded-lg border border-[#e5e7eb] bg-white px-4 py-3">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">Manajemen akun</p>
-        <h1 className="mt-1 text-[13px] font-semibold tracking-tight">Kelola Karyawan</h1>
-        <p className="mt-1 text-xs text-[#6b7280]">Daftar karyawan dan informasi timnya.</p>
-      </header>
+      <UserManagementTabs activeRole="karyawan" />
       <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
         {employees.length > 0 ? (
           <EmployeeSearchList
@@ -37,6 +36,7 @@ export default async function AdminEmployeesPage() {
               id: employee.id,
               name: employee.name,
               email: employee.email,
+              nik: employee.nik,
               phoneNumber: employee.phoneNumber,
               isActive: employee.isActive,
               createdAt: employee.createdAt,
@@ -44,8 +44,9 @@ export default async function AdminEmployeesPage() {
               team: employee.team
                 ? {
                     name: employee.team.name,
-                    manager: employee.team.manager
-                      ? { id: employee.team.manager.id, name: employee.team.manager.name }
+                  department: employee.team.department.name,
+                    leader: employee.team.leader
+                      ? { id: employee.team.leader.id, name: employee.team.leader.name }
                       : null,
                     members: employee.team.members,
                   }

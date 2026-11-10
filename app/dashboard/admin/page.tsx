@@ -1,4 +1,4 @@
-﻿import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 
 export default async function AdminDashboardPage() {
@@ -17,7 +17,7 @@ export default async function AdminDashboardPage() {
   const summary = {
     totalUsers: users.length,
     totalAdmins: users.filter((item) => item.role === "ADMIN").length,
-    totalManagers: users.filter((item) => item.role === "MANAGER").length,
+    totalLeaders: users.filter((item) => item.role === "LEADER").length,
     totalEmployees: users.filter((item) => item.role === "KARYAWAN").length,
     activeTeams: teams.filter((team) => team.isActive).length,
     pendingApprovals,
@@ -39,7 +39,7 @@ export default async function AdminDashboardPage() {
     .map((t) => ({ name: t.user.name ?? t.name, pct: Math.round((t.currentValue / t.targetValue) * 100), current: t.currentValue, target: t.targetValue }))
     .sort((a, b) => b.pct - a.pct);
 
-  const teamAgg = new Map<number, { cur: number; tgt: number; count: number; teamName: string; managerName: string }>();
+  const teamAgg = new Map<number, { cur: number; tgt: number; count: number; teamName: string; leaderName: string }>();
   const usersById = new Map(users.map((user) => [user.id, user]));
   const teamsById = new Map(teams.map((team) => [team.id, team]));
   for (const t of allTargets) {
@@ -47,18 +47,18 @@ export default async function AdminDashboardPage() {
     const teamId = user?.teamId;
     if (!teamId) continue;
     const team = teamsById.get(teamId);
-    const a = teamAgg.get(teamId) ?? { cur: 0, tgt: 0, count: 0, teamName: team?.name ?? "?", managerName: "?" };
+    const a = teamAgg.get(teamId) ?? { cur: 0, tgt: 0, count: 0, teamName: team?.name ?? "?", leaderName: "?" };
     a.cur += t.currentValue;
     a.tgt += t.targetValue;
     a.count++;
-    const manager = team ? usersById.get(team.managerId) : undefined;
-    if (manager) a.managerName = manager.name;
+    const leader = team ? usersById.get(team.leaderId) : undefined;
+    if (leader) a.leaderName = leader.name;
     teamAgg.set(teamId, a);
   }
   const teamSummaryList = Array.from(teamAgg.entries()).map(([teamId, a]) => ({
     teamId,
     teamName: a.teamName,
-    managerName: a.managerName,
+    leaderName: a.leaderName,
     targetCount: a.count,
     pct: a.tgt > 0 ? Math.round((a.cur / a.tgt) * 100) : 0,
   })).sort((a, b) => b.pct - a.pct);
@@ -66,7 +66,7 @@ export default async function AdminDashboardPage() {
   const statCards = [
     { label: "Total Pengguna", value: summary.totalUsers, accent: "bg-[#e1f3fe] text-[#1f6c9f]" },
     { label: "Admin", value: summary.totalAdmins, accent: "bg-[#fdebec] text-[#9f2f2d]" },
-    { label: "Manajer", value: summary.totalManagers, accent: "bg-[#fbf3db] text-[#956400]" },
+    { label: "Leader", value: summary.totalLeaders, accent: "bg-[#fbf3db] text-[#956400]" },
     { label: "Karyawan", value: summary.totalEmployees, accent: "bg-[#edf3ec] text-[#346538]" },
     { label: "Tim Aktif", value: summary.activeTeams, accent: "bg-[#edf3ec] text-[#346538]" },
     { label: "Total File", value: summary.totalUploads, accent: "bg-[#e1f3fe] text-[#1f6c9f]" },
@@ -125,7 +125,7 @@ export default async function AdminDashboardPage() {
                 {teamSummaryList.map((ts) => (
                   <div key={ts.teamId} className="flex items-center gap-2">
                     <p className="flex-1 truncate text-[12px] font-medium">{ts.teamName}</p>
-                    <p className="w-20 text-right text-[11px] text-[#6b7280]">{ts.managerName}</p>
+                    <p className="w-20 text-right text-[11px] text-[#6b7280]">{ts.leaderName}</p>
                     <div className="h-4 w-24 flex-shrink-0 rounded bg-[#f1f3f5]">
                       <div className={`h-full rounded ${ts.pct >= 100 ? "bg-[#346538]" : "bg-[#956400]"}`} style={{ width: `${Math.min(100, ts.pct)}%` }} />
                     </div>
@@ -184,7 +184,7 @@ export default async function AdminDashboardPage() {
               <h3 className="text-xs font-semibold uppercase tracking-wide">Ringkasan</h3>
               <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
                 <div className="rounded-md bg-[#f8f9fa] px-3 py-2"><dt className="text-[#6b7280]">Admin</dt><dd className="mt-0.5 text-sm font-semibold">{summary.totalAdmins}</dd></div>
-                <div className="rounded-md bg-[#f8f9fa] px-3 py-2"><dt className="text-[#6b7280]">Manajer</dt><dd className="mt-0.5 text-sm font-semibold">{summary.totalManagers}</dd></div>
+                <div className="rounded-md bg-[#f8f9fa] px-3 py-2"><dt className="text-[#6b7280]">Leader</dt><dd className="mt-0.5 text-sm font-semibold">{summary.totalLeaders}</dd></div>
                 <div className="rounded-md bg-[#f8f9fa] px-3 py-2"><dt className="text-[#6b7280]">Karyawan</dt><dd className="mt-0.5 text-sm font-semibold">{summary.totalEmployees}</dd></div>
                 <div className="rounded-md bg-[#f8f9fa] px-3 py-2"><dt className="text-[#6b7280]">Tidak aktif</dt><dd className="mt-0.5 text-sm font-semibold">{summary.inactiveUsers}</dd></div>
               </dl>

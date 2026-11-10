@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -21,8 +21,6 @@ export function FileActions({
 }: FileActionsProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const isAlreadySaved = isImportant || importantSaved;
-
   async function handleAction(action: string, actionUploadId = uploadId) {
     setIsSubmitting(true);
     try {
@@ -54,22 +52,32 @@ export function FileActions({
     <div className="flex flex-nowrap items-center gap-2">
       {isSubmitted && (
         <>
-          <button
-            onClick={() => handleAction("add-important")}
-            disabled={isSubmitting || isAlreadySaved}
-            className="inline-flex items-center rounded-lg border border-[#e8d9a8] bg-[#fbf3db] px-3 py-1.5 text-xs font-medium text-[#956400] hover:bg-[#fbf3db] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isAlreadySaved ? "✓ Data Penting" : "Simpan"}
-          </button>
-          {isAlreadySaved ? (
+          {isImportant ? (
+            <button
+              onClick={() => handleAction("unmark-important")}
+              disabled={isSubmitting}
+              className="inline-flex items-center rounded-lg border border-[#e8d9a8] bg-[#fbf3db] px-3 py-1.5 text-xs font-medium text-[#956400] hover:bg-[#fbf3db] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              ✓ Data Prioritas
+            </button>
+          ) : importantSaved ? (
             <button
               onClick={() => importantFileId && handleAction("delete-important", importantFileId)}
               disabled={isSubmitting || !importantFileId}
               className="inline-flex items-center rounded-lg border border-red-300 bg-[#fdebec] px-3 py-1.5 text-xs font-medium text-[#9f2f2d] hover:bg-[#fdebec] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Hapus
+              Hapus dari Data Prioritas
             </button>
           ) : (
+            <button
+              onClick={() => handleAction("add-important")}
+              disabled={isSubmitting}
+              className="inline-flex items-center rounded-lg border border-[#e8d9a8] bg-[#fbf3db] px-3 py-1.5 text-xs font-medium text-[#956400] hover:bg-[#fbf3db] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Simpan
+            </button>
+          )}
+          {!isImportant && !importantSaved && (
             <button
               onClick={() => handleAction("delete")}
               disabled={isSubmitting}

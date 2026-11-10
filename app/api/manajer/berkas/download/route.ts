@@ -2,7 +2,7 @@ import { ZipArchive } from "archiver";
 import { readFile } from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
-import { requireManager } from "@/lib/auth";
+import { requireLeader } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
 
@@ -29,7 +29,7 @@ function getDateKey(date: Date) {
 }
 
 export async function GET(request: Request) {
-  const manager = await requireManager();
+  const leader = await requireLeader();
   const searchParams = new URL(request.url).searchParams;
   const category = searchParams.get("category") ?? "";
   const historyOnly = searchParams.get("history") === "true";
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Kategori tidak valid." }, { status: 400 });
   }
 
-  const team = await prisma.team.findUnique({ where: { managerId: manager.id } });
+  const team = await prisma.team.findUnique({ where: { leaderId: leader.id } });
   if (!team) {
     return NextResponse.json({ error: "Tim tidak ditemukan." }, { status: 404 });
   }

@@ -1,4 +1,4 @@
-﻿import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { requireEmployee } from "@/lib/auth";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
 import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
@@ -90,7 +90,7 @@ export default async function HistoriBerkasPage({ searchParams }: { searchParams
                             type="submit"
                             className="inline-flex items-center rounded-lg border border-[#e8d9a8] bg-[#fbf3db] px-4 py-2 text-sm font-medium text-[#956400] hover:bg-[#fbf3db]"
                           >
-                            Simpan ke Data Penting
+                            Simpan ke Data Prioritas
                           </button>
                         </form>
                     </div>

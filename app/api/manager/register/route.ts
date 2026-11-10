@@ -38,15 +38,16 @@ export async function POST(request: Request) {
     }
 
     const passwordHash = await hash(password, 10);
+    const defaultDepartment = await prisma.department.findUniqueOrThrow({ where: { name: "Collection/Penagihan" } });
 
     failedAt = "menyimpan akun, tim, dan aktivitas ke database";
     await prisma.$transaction(async (transaction) => {
-      const manager = await transaction.user.create({
+      const leader = await transaction.user.create({
         data: {
           name,
           email,
           passwordHash,
-          role: "MANAGER",
+          role: "LEADER",
           isActive: "PENDING",
         },
       });
@@ -54,18 +55,19 @@ export async function POST(request: Request) {
       const team = await transaction.team.create({
         data: {
           name: `Tim ${name}`,
-          managerId: manager.id,
+          leaderId: leader.id,
+          departmentId: defaultDepartment.id,
           isActive: false,
         },
       });
 
       await transaction.activityLog.create({
         data: {
-          actorId: manager.id,
-          action: "REGISTER_MANAGER_PENDING",
+          actorId: leader.id,
+          action: "REGISTER_LEADER_PENDING",
           targetType: "TEAM",
           targetId: team.id,
-          description: `Pendaftaran manajer ${manager.email} menunggu persetujuan admin.`,
+          description: `Pendaftaran leader ${leader.email} menunggu persetujuan admin.`,
         },
       });
     });
@@ -77,7 +79,7 @@ export async function POST(request: Request) {
       typeof error === "object" && error !== null && "code" in error && typeof error.code === "string"
         ? error.code
         : "UNKNOWN";
-    console.error("Manager registration failed:", { failedAt, errorCode, error });
+    console.error("Leader registration failed:", { failedAt, errorCode, error });
     return NextResponse.json(
       {
         success: false,

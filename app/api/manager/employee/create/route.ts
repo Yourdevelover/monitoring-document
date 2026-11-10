@@ -1,12 +1,12 @@
 import { hash } from "bcryptjs";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireManager } from "@/lib/auth";
+import { requireLeader } from "@/lib/auth";
 import { getBaseUrl } from "@/lib/redirect";
 
 export async function POST(request: Request) {
   try {
-    const manager = await requireManager();
+    const leader = await requireLeader();
 
     const formData = await request.formData();
     const bulkEmployees = String(formData.get("employees") ?? "").trim();
@@ -54,10 +54,11 @@ export async function POST(request: Request) {
         );
       }
 
+      const defaultDepartment = await prisma.department.findUniqueOrThrow({ where: { name: "Collection/Penagihan" } });
       const team = await prisma.team.upsert({
-        where: { managerId: manager.id },
+        where: { leaderId: leader.id },
         update: {},
-        create: { name: `Tim ${manager.name}`, managerId: manager.id, isActive: true },
+        create: { name: `Tim ${leader.name}`, leaderId: leader.id, departmentId: defaultDepartment.id, isActive: true },
       });
 
       const existingUsers = await prisma.user.findMany({
@@ -92,17 +93,17 @@ export async function POST(request: Request) {
           });
           await tx.activityLog.create({
             data: {
-              actorId: manager.id,
+              actorId: leader.id,
               action: "CREATE_EMPLOYEE",
               targetType: "USER",
               targetId: createdEmployee.id,
-              description: `Manager ${manager.email} menambahkan karyawan ${createdEmployee.email} ke tim ${team.name}.`,
+              description: `Leader ${leader.email} menambahkan karyawan ${createdEmployee.email} ke tim ${team.name}.`,
             },
           });
         }
       });
 
-      return NextResponse.redirect(new URL("/dashboard/manajer/karyawan", getBaseUrl(request)));
+      return NextResponse.redirect(new URL("/dashboard/leader/karyawan", getBaseUrl(request)));
     }
 
     if (!name || !email || password.length < 6) {
@@ -115,10 +116,11 @@ export async function POST(request: Request) {
       );
     }
 
+    const defaultDepartment = await prisma.department.findUniqueOrThrow({ where: { name: "Collection/Penagihan" } });
     const team = await prisma.team.upsert({
-      where: { managerId: manager.id },
+      where: { leaderId: leader.id },
       update: {},
-      create: { name: `Tim ${manager.name}`, managerId: manager.id, isActive: true },
+      create: { name: `Tim ${leader.name}`, leaderId: leader.id, departmentId: defaultDepartment.id, isActive: true },
     });
 
     const existingUser = await prisma.user.findUnique({
@@ -150,15 +152,15 @@ export async function POST(request: Request) {
 
     await prisma.activityLog.create({
       data: {
-        actorId: manager.id,
+        actorId: leader.id,
         action: "CREATE_EMPLOYEE",
         targetType: "USER",
         targetId: employee.id,
-        description: `Manager ${manager.email} menambahkan karyawan ${employee.email} ke tim ${team.name}.`,
+        description: `Leader ${leader.email} menambahkan karyawan ${employee.email} ke tim ${team.name}.`,
       },
     });
 
-    return NextResponse.redirect(new URL("/dashboard/manajer/karyawan", getBaseUrl(request)));
+    return NextResponse.redirect(new URL("/dashboard/leader/karyawan", getBaseUrl(request)));
   } catch (error) {
     console.error(error);
 

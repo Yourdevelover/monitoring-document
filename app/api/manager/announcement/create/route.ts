@@ -10,19 +10,19 @@ function getBaseUrl(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const manager = await getSessionUser();
+  const leader = await getSessionUser();
 
-  if (!manager || manager.role !== "MANAGER") {
+  if (!leader || leader.role !== "LEADER") {
     return NextResponse.json({ error: "Akses ditolak." }, { status: 403 });
   }
 
   const formData = await request.formData();
   const title = String(formData.get("title") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
-  const team = await prisma.team.findUnique({ where: { managerId: manager.id } });
+  const team = await prisma.team.findUnique({ where: { leaderId: leader.id } });
 
   if (!team) {
-    return NextResponse.json({ error: "Tim manager tidak ditemukan." }, { status: 404 });
+    return NextResponse.json({ error: "Tim leader tidak ditemukan." }, { status: 404 });
   }
 
   if (!content) {
@@ -31,12 +31,12 @@ export async function POST(request: Request) {
 
   await prisma.announcement.create({
     data: {
-      managerId: manager.id,
+      leaderId: leader.id,
       teamId: team.id,
       title,
       content,
     },
   });
 
-  return NextResponse.redirect(new URL("/dashboard/manajer/pengumuman", getBaseUrl(request)));
+  return NextResponse.redirect(new URL("/dashboard/leader/announcement", getBaseUrl(request)));
 }

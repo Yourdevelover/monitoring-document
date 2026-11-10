@@ -3,14 +3,14 @@ import { prisma } from "@/lib/prisma";
 import { getBaseUrl } from "@/lib/redirect";
 
 function redirectToTarget(request: Request, message: string) {
-  const url = new URL("/dashboard/manajer/target", getBaseUrl(request));
+  const url = new URL("/dashboard/leader/target", getBaseUrl(request));
   url.searchParams.set("toast", message);
   return Response.redirect(url, 303);
 }
 
 export async function POST(request: Request) {
-  const manager = await getSessionUser();
-  if (!manager || manager.role !== "MANAGER") {
+  const leader = await getSessionUser();
+  if (!leader || leader.role !== "LEADER") {
     return Response.json({ error: "Akses ditolak." }, { status: 403 });
   }
 
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "ID target tidak valid." }, { status: 400 });
     }
 
-    await prisma.target.deleteMany({ where: { id, userId: manager.id } });
+    await prisma.target.deleteMany({ where: { id, userId: leader.id } });
     return redirectToTarget(request, "Target pribadi dihapus.");
   }
 
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     }
 
     await prisma.target.updateMany({
-      where: { id, userId: manager.id },
+      where: { id, userId: leader.id },
       data: { currentValue },
     });
     return redirectToTarget(request, "Progres target pribadi tersimpan.");
@@ -50,9 +50,9 @@ export async function POST(request: Request) {
   }
 
   await prisma.target.upsert({
-    where: { userId_period_name: { userId: manager.id, period, name } },
+    where: { userId_period_name: { userId: leader.id, period, name } },
     create: {
-      userId: manager.id,
+      userId: leader.id,
       name,
       period,
       targetValue,

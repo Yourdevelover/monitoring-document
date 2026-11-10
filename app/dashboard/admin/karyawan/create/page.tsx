@@ -5,17 +5,14 @@ import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
 export default async function CreateEmployeePage() {
   await requireAdmin();
 
-  const teams = await prisma.team.findMany({
-    include: { manager: true },
-    orderBy: { name: "asc" },
-  });
+  const teams = await prisma.team.findMany({ include: { leader: true }, orderBy: { name: "asc" } });
 
   return (
     <main className="space-y-4">
       <header className="rounded-lg border border-[#e5e7eb] bg-white px-4 py-3">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">Manajemen akun</p>
         <h1 className="mt-1 text-[13px] font-semibold tracking-tight">Tambah Karyawan</h1>
-        <p className="mt-1 text-xs text-[#6b7280]">Pilih tim yang sudah terdaftar untuk menentukan manajer karyawan.</p>
+        <p className="mt-1 text-xs text-[#6b7280]">Pilih tim yang sudah terdaftar untuk menentukan leader karyawan.</p>
       </header>
 
       <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
@@ -25,12 +22,12 @@ export default async function CreateEmployeePage() {
         <input name="phoneNumber" type="tel" placeholder="Nomor telepon" className="border border-[#e5e7eb] px-3 py-2 text-sm" />
         <input name="password" type="password" placeholder="Password" required minLength={6} className="border border-[#e5e7eb] px-3 py-2 text-sm" />
         <label className="grid gap-1 text-xs font-medium text-[#111111]">
-          Tim dan Manajer
+          Tim dan Leader
           <select name="teamId" required defaultValue="" className="border border-[#e5e7eb] px-3 py-2 font-normal text-[#111111] text-sm">
             <option value="" disabled>Pilih tim</option>
             {teams.map((team) => (
               <option key={team.id} value={team.id}>
-                {team.name} - Manajer: {team.manager.name}
+                {team.name} - Leader: {team.leader.name}
               </option>
             ))}
           </select>

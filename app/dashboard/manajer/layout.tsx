@@ -1,17 +1,18 @@
-﻿import { requireManager } from "@/lib/auth";
+import { requireLeader } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { ManagerSidebar } from "./manager-sidebar";
+import { NotificationButton } from "@/app/components/notification-button";
+import { LeaderSidebar } from "./leader-sidebar";
 
-export default async function ManagerLayout({
+export default async function LeaderLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const manager = await requireManager();
+  const leader = await requireLeader();
   const activeSince = new Date();
   activeSince.setHours(activeSince.getHours() - 12);
   const team = await prisma.team.findUnique({
-    where: { managerId: manager.id },
+    where: { leaderId: leader.id },
     include: {
       announcements: {
         where: {
@@ -24,30 +25,29 @@ export default async function ManagerLayout({
   const announcements = team?.announcements ?? [];
 
   const navItems = [
-    { href: "/dashboard/manajer", label: "Dashboard" },
-    { href: "/dashboard/manajer/karyawan", label: "Karyawan" },
-    { href: "/dashboard/manajer/berkas", label: "Berkas" },
-    { href: "/dashboard/manajer/histori-berkas", label: "Histori Berkas" },
-    { href: "/dashboard/manajer/pengumuman", label: "Pengumuman" },
-    { href: "/dashboard/manajer/target", label: "Target" },
-    { href: "/dashboard/manajer/pengajuan-profil", label: "Persetujuan Profil" },
-    { href: "/dashboard/manajer/profil", label: "Profil" },
+    { href: "/dashboard/leader", label: "Dashboard" },
+    { href: "/dashboard/leader/karyawan", label: "Karyawan" },
+    { href: "/dashboard/leader/berkas", label: "Berkas" },
+    { href: "/dashboard/leader/histori-berkas", label: "Histori Berkas" },
+    { href: "/dashboard/leader/target", label: "Target" },
+    { href: "/dashboard/leader/pengajuan-profil", label: "Persetujuan Profil" },
+    { href: "/dashboard/leader/profil", label: "Profil" },
   ];
 
   return (
     <div className="min-h-screen bg-[#f8f9fa]">
       <div className="flex min-h-screen">
-        <ManagerSidebar navItems={navItems} />
-        <div className="manager-content min-w-0 flex-1">
-          <div className="manager-announcement-bar" role="status" aria-live="polite">
-            <span className="manager-announcement-label">Pengumuman Tim</span>
-            <div className="manager-announcement-viewport">
+        <LeaderSidebar navItems={navItems} />
+        <div className="leader-content min-w-0 flex-1">
+          <div className="leader-announcement-bar" role="status" aria-live="polite">
+            <NotificationButton href="/dashboard/manajer/announcement" count={announcements.length} />
+            <div className="leader-announcement-viewport">
               {announcements.length > 0 ? (
-                <p className="manager-announcement-single">
+                <p className="leader-announcement-single">
                   {announcements.map((announcement, index) => (
                     <span key={announcement.id}>
                       {index > 0 && "  •  "}
-                      <span className={announcement.isPinned ? "manager-announcement-important" : undefined}>
+                      <span className={announcement.isPinned ? "leader-announcement-important" : undefined}>
                         {announcement.title
                           ? `${announcement.title} - ${announcement.content}`
                           : announcement.content}
@@ -56,7 +56,7 @@ export default async function ManagerLayout({
                   ))}
                 </p>
               ) : (
-                <p className="manager-announcement-empty">Belum ada pengumuman terbaru dari manajer.</p>
+                <p className="leader-announcement-empty">Belum ada announcement terbaru dari leader.</p>
               )}
             </div>
           </div>

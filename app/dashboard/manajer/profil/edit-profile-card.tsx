@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 
@@ -25,7 +25,7 @@ export function EditProfileCard({ name, email, phoneNumber }: EditProfileCardPro
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111111]/30 p-4" onClick={() => setIsOpen(false)}>
           <section
             role="dialog"
-            aria-label="Edit Profil Manajer"
+            aria-label="Edit Profil Leader"
             className="w-full max-w-md rounded-lg border border-[#e5e7eb] bg-white p-4"
             onClick={(event) => event.stopPropagation()}
           >

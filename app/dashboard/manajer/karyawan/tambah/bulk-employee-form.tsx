@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 export function BulkEmployeeForm() {
   return (
@@ -27,7 +27,7 @@ export function BulkEmployeeForm() {
             ×
           </button>
         </div>
-        <form action="/api/manager/employee/create" method="POST" className="mt-5 space-y-4">
+        <form action="/api/leader/employee/create" method="POST" className="mt-5 space-y-4">
           <textarea
             name="employees"
             required

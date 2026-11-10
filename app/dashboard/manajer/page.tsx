@@ -1,14 +1,14 @@
-﻿import { prisma } from "@/lib/prisma";
-import { requireManager } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { requireLeader } from "@/lib/auth";
 import { PaginationControls } from "@/app/components/pagination-controls";
 import Link from "next/link";
 
-export default async function ManagerDashboardPage({
+export default async function LeaderDashboardPage({
   searchParams,
 }: {
   searchParams: Promise<{ page?: string }>;
 }) {
-  const manager = await requireManager();
+  const leader = await requireLeader();
   const params = await searchParams;
   const pageSize = 6;
   const requestedPage = Math.max(1, Number(params.page) || 1);
@@ -16,9 +16,9 @@ export default async function ManagerDashboardPage({
   activeSince.setHours(activeSince.getHours() - 12);
 
   const team = await prisma.team.findUnique({
-    where: { managerId: manager.id },
+    where: { leaderId: leader.id },
     include: {
-      manager: true,
+      leader: true,
       uploads: {
         orderBy: { createdAt: "desc" },
         take: 6,
@@ -40,9 +40,9 @@ export default async function ManagerDashboardPage({
     return (
       <main className="min-h-screen bg-[#f8f9fa] px-4 py-5 text-[#111111]">
         <div className="rounded-lg border border-[#e5e7eb] bg-white p-5">
-          <h1 className="text-base font-bold">Dashboard Manajer</h1>
+          <h1 className="text-base font-bold">Dashboard Leader</h1>
           <p className="mt-3 text-[#6b7280]">
-            Tim Anda belum tersedia. Silakan buat data tim melalui proses pendaftaran manajer.
+            Tim Anda belum tersedia. Silakan buat data tim melalui proses pendaftaran leader.
           </p>
         </div>
       </main>
@@ -104,8 +104,8 @@ export default async function ManagerDashboardPage({
         <header className="flex flex-col gap-3 rounded-lg border border-[#e5e7eb] bg-white px-4 py-3 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">Ringkasan Tim</p>
-            <h1 className="mt-1 text-[15px] font-semibold tracking-tight">Dashboard Manajer</h1>
-            <p className="mt-0.5 text-xs text-[#6b7280]">{manager.name} • {team.name}</p>
+            <h1 className="mt-1 text-[15px] font-semibold tracking-tight">Dashboard Leader</h1>
+            <p className="mt-0.5 text-xs text-[#6b7280]">{leader.name} • {team.name}</p>
           </div>
           <div className="flex items-center gap-2 text-xs">
             <span className="rounded-md bg-[#e1f3fe] px-2.5 py-1.5 font-medium text-[#1f6c9f]">{summary.totalEmployees} karyawan</span>
@@ -114,7 +114,7 @@ export default async function ManagerDashboardPage({
         </header>
 
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          {[["Karyawan", summary.totalEmployees, "bg-[#e1f3fe] text-[#1f6c9f]", "/dashboard/manajer/karyawan"], ["Karyawan Aktif", summary.activeEmployees, "bg-[#edf3ec] text-[#346538]", "/dashboard/manajer/karyawan"], ["File Tim", summary.totalUploads, "bg-[#f1f3f5] text-[#111111]", "/dashboard/manajer/berkas"], ["Pengumuman", summary.totalAnnouncements, "bg-[#fbf3db] text-[#956400]", "/dashboard/manajer/pengumuman"], ["Profil Pending", summary.pendingProfileRequests, "bg-[#fdebec] text-[#9f2f2d]", "/dashboard/manajer/pengajuan-profil"]].map(([label, value, tone, href]) => (
+          {[["Karyawan", summary.totalEmployees, "bg-[#e1f3fe] text-[#1f6c9f]", "/dashboard/leader/karyawan"], ["Karyawan Aktif", summary.activeEmployees, "bg-[#edf3ec] text-[#346538]", "/dashboard/leader/karyawan"], ["File Tim", summary.totalUploads, "bg-[#f1f3f5] text-[#111111]", "/dashboard/leader/berkas"], ["Announcement", summary.totalAnnouncements, "bg-[#fbf3db] text-[#956400]", "/dashboard/leader/announcement"], ["Profil Pending", summary.pendingProfileRequests, "bg-[#fdebec] text-[#9f2f2d]", "/dashboard/leader/pengajuan-profil"]].map(([label, value, tone, href]) => (
             <Link key={label as string} href={href as string} className="flex items-center justify-between rounded-lg border border-[#e5e7eb] bg-white px-3.5 py-3 transition hover:border-[#111111] hover:shadow-sm">
               <div><p className="text-[11px] font-medium uppercase tracking-wide text-[#6b7280]">{label}</p><p className="mt-1 text-[15px] font-semibold">{value}</p></div>
               <span className={`flex h-7 w-7 items-center justify-center rounded-md text-[11px] font-bold ${tone}`}>{value}</span>
@@ -124,9 +124,9 @@ export default async function ManagerDashboardPage({
 
         <section className="grid gap-3 sm:grid-cols-3">
           {[
-            { label: "Target Aktif", value: targetCount, accent: "bg-[#e1f3fe] text-[#1f6c9f]", href: "/dashboard/manajer/target" },
-            { label: "Tercapai (100%)", value: targetReached, accent: "bg-[#edf3ec] text-[#346538]", href: "/dashboard/manajer/target" },
-            { label: "Rata-rata", value: `${targetAvg}%`, accent: "bg-[#fbf3db] text-[#956400]", href: "/dashboard/manajer/target" },
+            { label: "Target Aktif", value: targetCount, accent: "bg-[#e1f3fe] text-[#1f6c9f]", href: "/dashboard/leader/target" },
+            { label: "Tercapai (100%)", value: targetReached, accent: "bg-[#edf3ec] text-[#346538]", href: "/dashboard/leader/target" },
+            { label: "Rata-rata", value: `${targetAvg}%`, accent: "bg-[#fbf3db] text-[#956400]", href: "/dashboard/leader/target" },
           ].map((card) => (
             <Link key={card.label} href={card.href} className="flex items-center justify-between rounded-lg border border-[#e5e7eb] bg-white px-3.5 py-3 transition hover:border-[#111111] hover:shadow-sm">
               <div>
@@ -162,7 +162,7 @@ export default async function ManagerDashboardPage({
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide">Info Tim</h2>
             <dl className="space-y-2 text-xs">
               <div className="flex justify-between rounded-md bg-[#f8f9fa] px-3 py-2"><dt className="text-[#6b7280]">Nama Tim</dt><dd className="font-semibold">{team.name}</dd></div>
-              <div className="flex justify-between rounded-md bg-[#f8f9fa] px-3 py-2"><dt className="text-[#6b7280]">Manajer</dt><dd className="font-semibold">{team.manager.name}</dd></div>
+              <div className="flex justify-between rounded-md bg-[#f8f9fa] px-3 py-2"><dt className="text-[#6b7280]">Leader</dt><dd className="font-semibold">{team.leader.name}</dd></div>
               <div className="flex justify-between rounded-md bg-[#f8f9fa] px-3 py-2"><dt className="text-[#6b7280]">Anggota</dt><dd className="font-semibold">{totalEmployees} orang</dd></div>
               <div className="flex justify-between rounded-md bg-[#f8f9fa] px-3 py-2"><dt className="text-[#6b7280]">Aktif</dt><dd className="font-semibold">{activeEmployees} orang</dd></div>
               <div className="flex justify-between rounded-md bg-[#f8f9fa] px-3 py-2"><dt className="text-[#6b7280]">Dibuat</dt><dd className="font-semibold">{new Date(team.createdAt).toLocaleDateString("id-ID", { dateStyle: "medium" })}</dd></div>
@@ -205,7 +205,7 @@ export default async function ManagerDashboardPage({
                 </div>
               )) : <p className="px-4 py-6 text-center text-xs text-[#6b7280]">Belum ada anggota.</p>}
             </div>
-            <div className="border-t border-[#e5e7eb] px-4 py-2.5"><PaginationControls basePath="/dashboard/manajer" page={page} totalItems={totalEmployees} /></div>
+            <div className="border-t border-[#e5e7eb] px-4 py-2.5"><PaginationControls basePath="/dashboard/leader" page={page} totalItems={totalEmployees} /></div>
           </div>
           <div className="space-y-4">
             <div className="rounded-lg border border-[#e5e7eb] bg-white">
@@ -220,11 +220,11 @@ export default async function ManagerDashboardPage({
               </div>
             </div>
             <div className="rounded-lg border border-[#e5e7eb] bg-white">
-              <div className="border-b border-[#e5e7eb] px-4 py-3"><h2 className="text-xs font-semibold uppercase tracking-wide">Pengumuman</h2></div>
+              <div className="border-b border-[#e5e7eb] px-4 py-3"><h2 className="text-xs font-semibold uppercase tracking-wide">Announcement</h2></div>
               <div className="divide-y divide-[#f1f3f5]">
                 {team.announcements.length ? team.announcements.slice(0, 3).map((a) => (
                   <div key={a.id} className="px-4 py-2.5"><p className="line-clamp-2 text-[13px] leading-snug">{a.content}</p><p className="mt-1 text-[11px] text-[#9ca3af]">{new Date(a.createdAt).toLocaleDateString("id-ID", { dateStyle: "medium" })}</p></div>
-                )) : <p className="px-4 py-6 text-center text-xs text-[#6b7280]">Belum ada pengumuman.</p>}
+                )) : <p className="px-4 py-6 text-center text-xs text-[#6b7280]">Belum ada announcement.</p>}
               </div>
             </div>
           </div>

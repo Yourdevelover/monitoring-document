@@ -1,17 +1,17 @@
 import { prisma } from "@/lib/prisma";
-import { requireManager } from "@/lib/auth";
+import { requireLeader } from "@/lib/auth";
 import Link from "next/link";
 import { ConfirmActionForm } from "@/app/components/confirm-action-form";
 
-type ManagerEmployeeDetailProps = {
+type LeaderEmployeeDetailProps = {
   params: Promise<{ id: string }>;
 };
 
-export default async function ManagerEmployeeDetailPage({ params }: ManagerEmployeeDetailProps) {
-  const manager = await requireManager();
+export default async function LeaderEmployeeDetailPage({ params }: LeaderEmployeeDetailProps) {
+  const leader = await requireLeader();
   const { id } = await params;
   const employeeId = Number(id);
-  const team = await prisma.team.findUnique({ where: { managerId: manager.id } });
+  const team = await prisma.team.findUnique({ where: { leaderId: leader.id } });
   const employee = team && employeeId
     ? await prisma.user.findFirst({
         where: { id: employeeId, teamId: team.id, role: "KARYAWAN" },
@@ -44,7 +44,7 @@ export default async function ManagerEmployeeDetailPage({ params }: ManagerEmplo
     <main className="min-h-screen text-[#111111]">
       <div className="mx-auto max-w-3xl space-y-4">
         <div className="border-b border-[#e5e7eb] pb-4">
-          <Link href="/dashboard/manajer/karyawan" className="text-xs font-semibold text-blue-600 hover:text-blue-800">
+          <Link href="/dashboard/leader/karyawan" className="text-xs font-semibold text-blue-600 hover:text-blue-800">
             ← Daftar Karyawan
           </Link>
           <h1 className="text-base font-bold">Informasi Karyawan</h1>
@@ -111,11 +111,11 @@ export default async function ManagerEmployeeDetailPage({ params }: ManagerEmplo
         </section>
 
         <div className="flex flex-wrap gap-3">
-          <Link href="/dashboard/manajer/karyawan" className="rounded-lg border border-[#e5e7eb] px-4 py-2 text-sm font-semibold text-[#111111] hover:bg-[#f8f9fa]">
+          <Link href="/dashboard/leader/karyawan" className="rounded-lg border border-[#e5e7eb] px-4 py-2 text-sm font-semibold text-[#111111] hover:bg-[#f8f9fa]">
             Kembali
           </Link>
           {employee.isActive === "ACTIVE" && (
-            <ConfirmActionForm action="/api/manager/employee/action" confirmMessage={`Nonaktifkan akun ${employee.name}?`}>
+            <ConfirmActionForm action="/api/leader/employee/action" confirmMessage={`Nonaktifkan akun ${employee.name}?`}>
               <input type="hidden" name="userId" value={employee.id} />
               <input type="hidden" name="action" value="deactivate" />
               <button type="submit" className="rounded-lg border border-amber-300 px-4 py-2 text-sm font-semibold text-[#956400] hover:bg-[#fbf3db]">
@@ -123,7 +123,7 @@ export default async function ManagerEmployeeDetailPage({ params }: ManagerEmplo
               </button>
             </ConfirmActionForm>
           )}
-          <ConfirmActionForm action="/api/manager/employee/action" confirmMessage={`Hapus karyawan ${employee.name}? Data akun dan berkasnya akan dihapus.`}>
+          <ConfirmActionForm action="/api/leader/employee/action" confirmMessage={`Hapus karyawan ${employee.name}? Data akun dan berkasnya akan dihapus.`}>
             <input type="hidden" name="userId" value={employee.id} />
             <input type="hidden" name="action" value="delete" />
             <button type="submit" className="rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-[#9f2f2d] hover:bg-[#fdebec]">

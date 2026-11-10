@@ -1,18 +1,18 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { Logo } from "@/app/components/logo";
 
-export default function ManagerRegistrationPage() {
+export default function LeaderRegistrationPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#f8f9fa] px-6 py-12 text-[#111111]">
       <div className="w-full max-w-md">
         <div className="mb-1 flex items-end justify-between gap-3">
           <Logo className="h-16 w-auto shrink-0" />
           <p className="text-right text-[10px] leading-snug text-[#9ca3af]">
-            Daftar sebagai manajer baru
+            Daftar sebagai leader baru
           </p>
         </div>
 
-        <form action="/api/manager/register" method="POST" className="rounded-lg border border-[#e5e7eb] bg-white p-6">
+        <form action="/api/leader/register" method="POST" className="rounded-lg border border-[#e5e7eb] bg-white p-6">
           <div className="space-y-4">
             <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
               Setelah mendaftar, akun Anda perlu disetujui admin sebelum dapat digunakan.

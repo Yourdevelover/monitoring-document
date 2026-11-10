@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { requireManager } from "@/lib/auth";
+import { requireLeader } from "@/lib/auth";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
 
 const CATEGORY_KEYS = {
@@ -12,13 +12,13 @@ type FileDetailPageProps = {
   params: Promise<{ category: string; id: string }>;
 };
 
-export default async function ManagerFileDetailPage({ params }: FileDetailPageProps) {
-  const manager = await requireManager();
+export default async function LeaderFileDetailPage({ params }: FileDetailPageProps) {
+  const leader = await requireLeader();
   const { category, id } = await params;
   const categoryKey = CATEGORY_KEYS[category as keyof typeof CATEGORY_KEYS];
   const uploadId = Number(id);
 
-  const team = await prisma.team.findUnique({ where: { managerId: manager.id } });
+  const team = await prisma.team.findUnique({ where: { leaderId: leader.id } });
   const upload = categoryKey && team && uploadId
     ? await prisma.upload.findFirst({
         where: {

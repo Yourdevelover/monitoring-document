@@ -1,4 +1,4 @@
-﻿import { redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSessionUser } from "@/lib/auth";
 import { Logo } from "@/app/components/logo";
@@ -12,8 +12,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     redirect("/dashboard/admin");
   }
 
-  if (user?.role === "MANAGER") {
-    redirect("/dashboard/manajer");
+  if (user?.role === "LEADER") {
+    redirect("/dashboard/leader");
   }
 
   return (
@@ -22,7 +22,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         <div className="mb-1 flex items-end justify-between gap-3">
           <Logo className="h-16 w-auto shrink-0" />
           <p className="text-right text-[10px] leading-snug text-[#9ca3af]">
-            Login dengan akun yang sudah manajer buat
+            Login dengan akun yang sudah leader buat
           </p>
         </div>
 
@@ -35,8 +35,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <LoginForm />
 
           <div className="mt-4 text-center text-sm text-[#6b7280]">
-            Daftar sebagai manajer{" "}
-            <Link href="/daftar-manajer" className="font-medium text-[#2563eb] hover:underline">
+            Daftar sebagai leader{" "}
+            <Link href="/daftar-leader" className="font-medium text-[#2563eb] hover:underline">
               Daftar
             </Link>
           </div>

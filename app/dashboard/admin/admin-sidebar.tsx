@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -13,6 +13,11 @@ type AdminSidebarProps = {
 export function AdminSidebar({ navItems }: AdminSidebarProps) {
   const [isOpen, setIsOpen] = useState(true);
   const pathname = usePathname();
+  const isActive = (href: string) =>
+    pathname === href ||
+    pathname.startsWith(`${href}/`) ||
+    (href === "/dashboard/admin/users" &&
+      (pathname.startsWith("/dashboard/admin/leaders") || pathname.startsWith("/dashboard/admin/karyawan")));
 
   return (
     <aside className={`relative ${isOpen ? "w-56" : "w-14"} shrink-0 bg-[#18181b] text-[#d4d4d8] transition-[width] duration-200`}>
@@ -46,7 +51,7 @@ export function AdminSidebar({ navItems }: AdminSidebarProps) {
               key={item.href}
               href={item.href}
               className={`block rounded-md px-3 py-2 text-[13px] font-medium transition ${
-                pathname === item.href
+                isActive(item.href)
                   ? "bg-[#27272a] text-[#fafafa]"
                   : "text-[#d4d4d8] hover:bg-[#1f1f23] hover:text-[#fafafa]"
               }`}
@@ -65,7 +70,7 @@ export function AdminSidebar({ navItems }: AdminSidebarProps) {
                 href={item.href}
                 title={item.label}
                 className={`flex h-8 w-8 items-center justify-center rounded-md transition ${
-                  pathname === item.href
+                  isActive(item.href)
                     ? "bg-[#27272a] text-[#fafafa]"
                     : "text-[#d4d4d8] hover:bg-[#1f1f23] hover:text-[#fafafa]"
                 }`}

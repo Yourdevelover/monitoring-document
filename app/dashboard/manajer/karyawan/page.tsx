@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireManager } from "@/lib/auth";
+import { requireLeader } from "@/lib/auth";
 import { EmployeeProfileCard } from "../employee-profile-card";
 import { EmployeeSearch } from "./employee-search";
 import { PaginationControls } from "@/app/components/pagination-controls";
 
-export default async function ManagerEmployeesPage({
+export default async function LeaderEmployeesPage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string; page?: string }>;
 }) {
-  const manager = await requireManager();
+  const leader = await requireLeader();
   const { q, page: pageParam } = await searchParams;
   const searchTerm = q?.trim() ?? "";
   const pageSize = 6;
@@ -28,7 +28,7 @@ export default async function ManagerEmployeesPage({
   };
 
   const team = await prisma.team.findUnique({
-    where: { managerId: manager.id },
+    where: { leaderId: leader.id },
   });
   const totalMembers = team
     ? await prisma.user.count({ where: { ...memberWhere, teamId: team.id } })
@@ -70,7 +70,7 @@ export default async function ManagerEmployeesPage({
             <div className="flex flex-wrap items-center gap-3">
               <EmployeeSearch initialValue={searchTerm} />
               <Link
-                href="/dashboard/manajer/karyawan/tambah"
+                href="/dashboard/leader/karyawan/tambah"
                 className="inline-flex min-h-10 items-center rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
               >
                 Tambah Karyawan
@@ -132,7 +132,7 @@ export default async function ManagerEmployeesPage({
             )}
           </div>
           <PaginationControls
-            basePath="/dashboard/manajer/karyawan"
+            basePath="/dashboard/leader/karyawan"
             page={page}
             totalItems={totalMembers}
             query={{ q: searchTerm || undefined }}

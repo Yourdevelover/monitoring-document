@@ -13,10 +13,10 @@ export async function POST(request: Request) {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const phoneNumber = String(formData.get("phoneNumber") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const manager = await prisma.user.findFirst({ where: { id: userId, role: "MANAGER" } });
-  if (!manager) return NextResponse.json({ error: "Manajer tidak ditemukan." }, { status: 404 });
+  const leader = await prisma.user.findFirst({ where: { id: userId, role: "LEADER" } });
+  if (!leader) return NextResponse.json({ error: "Leader tidak ditemukan." }, { status: 404 });
   const duplicate = await prisma.user.findFirst({ where: { email, NOT: { id: userId } } });
   if (duplicate) return NextResponse.json({ error: "Email sudah digunakan." }, { status: 409 });
   await prisma.user.update({ where: { id: userId }, data: { name, email, phoneNumber: phoneNumber || null, ...(password ? { passwordHash: await hash(password, 10) } : {}) } });
-  return NextResponse.redirect(new URL(`/dashboard/admin/managers/${userId}`, getBaseUrl(request)));
+  return NextResponse.redirect(new URL(`/dashboard/admin/leaders/${userId}`, getBaseUrl(request)));
 }

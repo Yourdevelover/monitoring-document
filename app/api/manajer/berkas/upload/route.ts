@@ -1,7 +1,7 @@
 import { mkdir, unlink, writeFile } from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
-import { requireManager } from "@/lib/auth";
+import { requireLeader } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { enqueueFileTask } from "@/lib/upload-queue";
 import { exceedsUploadRequestLimit, MAX_UPLOAD_SIZE_BYTES } from "@/lib/upload-limits";
@@ -10,13 +10,13 @@ const VALID_CATEGORIES = new Set(["DAILY", "CHAT", "PAYMENT"]);
 
 export async function POST(request: Request) {
   try {
-    const manager = await requireManager();
+    const leader = await requireLeader();
     if (exceedsUploadRequestLimit(request)) {
       return NextResponse.json({ success: false, error: "Ukuran permintaan melebihi batas unggah." }, { status: 413 });
     }
 
     const team = await prisma.team.findUnique({
-      where: { managerId: manager.id },
+      where: { leaderId: leader.id },
     });
 
     if (!team) {
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
         const upload = await prisma.upload.findFirst({
           where: {
             id: uploadId,
-            userId: manager.id,
+            userId: leader.id,
             teamId: team.id,
           },
         });
@@ -75,11 +75,11 @@ export async function POST(request: Request) {
 
         await prisma.activityLog.create({
           data: {
-            actorId: manager.id,
+            actorId: leader.id,
             action: "DELETE_FILE",
             targetType: "UPLOAD",
             targetId: upload.id,
-            description: `${manager.name} menghapus berkas ${upload.fileName} (${upload.category}).`,
+            description: `${leader.name} menghapus berkas ${upload.fileName} (${upload.category}).`,
           },
         });
 
@@ -115,21 +115,21 @@ export async function POST(request: Request) {
         "uploads",
         "teams",
         String(team.id),
-        "managers",
-        String(manager.id)
+        "leaders",
+        String(leader.id)
       );
       await mkdir(storageFolder, { recursive: true });
 
       const uniqueFileName = `${Date.now()}-${safeFileName}`;
       const filePathOnDisk = path.join(storageFolder, uniqueFileName);
-      const publicFilePath = `/uploads/teams/${team.id}/managers/${manager.id}/${uniqueFileName}`;
+      const publicFilePath = `/uploads/teams/${team.id}/leaders/${leader.id}/${uniqueFileName}`;
 
       const buffer = Buffer.from(await file.arrayBuffer());
       await writeFile(filePathOnDisk, buffer);
 
       const upload = await prisma.upload.create({
         data: {
-          userId: manager.id,
+          userId: leader.id,
           teamId: team.id,
           title: title || safeFileName,
           fileName: safeFileName,
@@ -144,11 +144,11 @@ export async function POST(request: Request) {
 
       await prisma.activityLog.create({
         data: {
-          actorId: manager.id,
+          actorId: leader.id,
           action: "UPLOAD_FILE",
           targetType: "UPLOAD",
           targetId: upload.id,
-          description: `${manager.name} membagikan berkas ${upload.fileName} (${upload.category}) ke tim.`,
+          description: `${leader.name} membagikan berkas ${upload.fileName} (${upload.category}) ke tim.`,
         },
       });
 

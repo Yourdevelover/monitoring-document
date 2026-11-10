@@ -1,7 +1,8 @@
-﻿import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { ConfirmActionForm } from "@/app/components/confirm-action-form";
 import { PaginationControls } from "@/app/components/pagination-controls";
+import { UserManagementTabs } from "../user-management-tabs";
 import { AdminUsersToolbar } from "./admin-users-toolbar";
 
 export default async function AdminUsersPage({
@@ -44,11 +45,7 @@ export default async function AdminUsersPage({
 
   return (
     <main className="space-y-4">
-      <header className="rounded-lg border border-[#e5e7eb] bg-white px-4 py-3">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">Manajemen akun</p>
-        <h1 className="mt-1 text-[13px] font-semibold tracking-tight">Kelola Admin</h1>
-        <p className="mt-1 text-xs text-[#6b7280]">Daftar admin aktif sistem.</p>
-      </header>
+      <UserManagementTabs activeRole="admin" />
 
       <AdminUsersToolbar searchQuery={searchQuery} statusFilter={statusFilter} />
 

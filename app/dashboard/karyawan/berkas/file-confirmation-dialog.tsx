@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -7,6 +7,7 @@ import { toast } from "@/app/components/toast";
 type FileConfirmationDialogProps = {
   fileName: string;
   categoryKey: string;
+  isImportant?: boolean;
   isNewUpload?: boolean;
   newFile?: File;
   onClose?: () => void;
@@ -18,6 +19,7 @@ export function FileConfirmationDialog({
   uploadId,
   fileName,
   categoryKey,
+  isImportant = false,
   isNewUpload = false,
   newFile,
   onClose,
@@ -36,6 +38,7 @@ export function FileConfirmationDialog({
           const uploadFormData = new FormData();
           uploadFormData.append("category", categoryKey);
           uploadFormData.append("title", fileName);
+          uploadFormData.append("isImportant", String(isImportant));
           uploadFormData.append("file", newFile);
 
           const uploadResponse = await fetch("/api/karyawan/upload", {

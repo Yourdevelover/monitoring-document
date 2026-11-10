@@ -23,6 +23,27 @@ export async function POST(req: Request) {
     return Response.redirect(new URL("/dashboard/karyawan/target?toast=" + encodeURIComponent("Target dihapus."), base), 303);
   }
 
+  if (action === "visibility") {
+    const id = Number(form.get("id"));
+    const isPublicValue = form.get("isPublic");
+    if (!Number.isInteger(id) || id <= 0 || (isPublicValue !== "true" && isPublicValue !== "false")) {
+      return Response.json({ error: "Pengaturan visibilitas tidak valid." }, { status: 400 });
+    }
+
+    const result = await prisma.target.updateMany({
+      where: { id, userId: employee.id },
+      data: { isPublic: isPublicValue === "true" },
+    });
+    if (result.count === 0) {
+      return Response.json({ error: "Target tidak ditemukan." }, { status: 404 });
+    }
+
+    const message = isPublicValue === "true"
+      ? "Target dapat dilihat oleh anggota tim."
+      : "Target hanya dapat dilihat oleh Anda dan Leader.";
+    return Response.redirect(new URL("/dashboard/karyawan/target?toast=" + encodeURIComponent(message), base), 303);
+  }
+
   if (action === "update") {
     const id = Number(form.get("id"));
     const name = String(form.get("name") ?? "").trim();
@@ -43,6 +64,7 @@ export async function POST(req: Request) {
   const currentValue = Number(form.get("currentValue") ?? 0);
   const formula = String(form.get("formula") ?? "bagi");
   const threshold = Number(form.get("threshold") ?? 20);
+  const isPublic = form.getAll("isPublic").includes("true");
 
   if (!name || !period || !isFinite(targetValue) || targetValue <= 0 || !OPS.includes(formula as (typeof OPS)[number])) {
     return Response.json({ error: "Data tidak valid" }, { status: 400 });
@@ -50,8 +72,8 @@ export async function POST(req: Request) {
 
   await prisma.target.upsert({
     where: { userId_period_name: { userId: employee.id, period, name } },
-    create: { userId: employee.id, name, period, targetValue, currentValue, formula, threshold },
-    update: { targetValue, currentValue, formula, threshold },
+    create: { userId: employee.id, name, period, targetValue, currentValue, formula, threshold, isPublic },
+    update: { targetValue, currentValue, formula, threshold, isPublic },
   });
 
   return Response.redirect(new URL("/dashboard/karyawan/target?toast=" + encodeURIComponent("Target tersimpan."), base), 303);

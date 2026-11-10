@@ -1,5 +1,5 @@
-﻿import { prisma } from "@/lib/prisma";
-import { requireManager } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { requireLeader } from "@/lib/auth";
 import { PaginationControls } from "@/app/components/pagination-controls";
 
 function parseProfilePayload(value: string | null | undefined) {
@@ -14,18 +14,18 @@ function parseProfilePayload(value: string | null | undefined) {
   }
 }
 
-export default async function ManagerProfileRequestsPage({
+export default async function LeaderProfileRequestsPage({
   searchParams,
 }: {
   searchParams: Promise<{ page?: string }>;
 }) {
-  const manager = await requireManager();
+  const leader = await requireLeader();
   const params = await searchParams;
   const pageSize = 6;
   const requestedPage = Math.max(1, Number(params.page) || 1);
 
   const team = await prisma.team.findUnique({
-    where: { managerId: manager.id },
+    where: { leaderId: leader.id },
   });
 
   const requestWhere = {
@@ -65,7 +65,7 @@ export default async function ManagerProfileRequestsPage({
             </div>
 
             {requests.length > 0 ? (
-              <form action="/api/manajer/profile-request" method="POST">
+              <form action="/api/leader/profile-request" method="POST">
                 <input type="hidden" name="action" value="approve" />
                 <button
                   type="submit"
@@ -119,7 +119,7 @@ export default async function ManagerProfileRequestsPage({
 
                       {request.status === "PENDING" ? (
                         <div className="flex gap-2">
-                          <form action="/api/manajer/profile-request" method="POST">
+                          <form action="/api/leader/profile-request" method="POST">
                             <input type="hidden" name="requestId" value={request.id} />
                             <input type="hidden" name="action" value="approve" />
                             <button
@@ -130,7 +130,7 @@ export default async function ManagerProfileRequestsPage({
                             </button>
                           </form>
 
-                          <form action="/api/manajer/profile-request" method="POST">
+                          <form action="/api/leader/profile-request" method="POST">
                             <input type="hidden" name="requestId" value={request.id} />
                             <input type="hidden" name="action" value="reject" />
                             <button
@@ -154,7 +154,7 @@ export default async function ManagerProfileRequestsPage({
               <p className="text-[#6b7280]">Belum ada permintaan perubahan profil.</p>
             )}
           </div>
-          <PaginationControls basePath="/dashboard/manajer/pengajuan-profil" page={page} totalItems={totalRequests} />
+          <PaginationControls basePath="/dashboard/leader/pengajuan-profil" page={page} totalItems={totalRequests} />
         </section>
       </div>
     </main>

@@ -12,6 +12,7 @@ export async function POST(request: Request) {
     const name = String(formData.get("name") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim().toLowerCase();
     const phoneNumber = String(formData.get("phoneNumber") ?? "").trim();
+    const nik = String(formData.get("nik") ?? "").trim();
     const password = String(formData.get("password") ?? "").trim();
 
     const profile = await prisma.user.findUnique({
@@ -44,6 +45,13 @@ export async function POST(request: Request) {
       }
     }
 
+    if (nik && nik !== profile.nik) {
+      const existingNik = await prisma.user.findFirst({ where: { nik, NOT: { id: employee.id } } });
+      if (existingNik) {
+        return NextResponse.json({ success: false, error: "NIK sudah digunakan oleh akun lain." }, { status: 409 });
+      }
+    }
+
     if (password && password.length < 6) {
       return NextResponse.json(
         {
@@ -70,6 +78,11 @@ export async function POST(request: Request) {
     if (phoneNumber !== (profile.phoneNumber ?? "")) {
       oldValuePayload.phoneNumber = profile.phoneNumber ?? "";
       newValuePayload.phoneNumber = phoneNumber || null;
+    }
+
+    if (nik !== (profile.nik ?? "")) {
+      oldValuePayload.nik = profile.nik ?? "";
+      newValuePayload.nik = nik || null;
     }
 
     if (password) {
@@ -102,7 +115,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.redirect(new URL("/dashboard/karyawan/profil?toast=" + encodeURIComponent("Pengajuan perubahan profil berhasil dikirim ke manajer."), getBaseUrl(request)));
+    return NextResponse.redirect(new URL("/dashboard/karyawan/profil?toast=" + encodeURIComponent("Pengajuan perubahan profil berhasil dikirim ke leader."), getBaseUrl(request)));
   } catch (error) {
     console.error(error);
     return NextResponse.json(

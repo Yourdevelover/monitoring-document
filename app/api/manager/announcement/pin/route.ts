@@ -10,9 +10,9 @@ function getBaseUrl(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const manager = await getSessionUser();
+  const leader = await getSessionUser();
 
-  if (!manager || manager.role !== "MANAGER") {
+  if (!leader || leader.role !== "LEADER") {
     return NextResponse.json({ error: "Akses ditolak." }, { status: 403 });
   }
 
@@ -20,19 +20,19 @@ export async function POST(request: Request) {
   const announcementId = Number(formData.get("announcementId") ?? 0);
 
   if (!announcementId) {
-    return NextResponse.json({ error: "ID pengumuman tidak valid." }, { status: 400 });
+    return NextResponse.json({ error: "ID announcement tidak valid." }, { status: 400 });
   }
 
   const announcement = await prisma.announcement.findFirst({
     where: {
       id: announcementId,
-      managerId: manager.id,
+      leaderId: leader.id,
     },
   });
 
   if (!announcement) {
     return NextResponse.json(
-      { error: "Pengumuman tidak ditemukan atau bukan milik Anda." },
+      { error: "Announcement tidak ditemukan atau bukan milik Anda." },
       { status: 404 }
     );
   }
@@ -42,5 +42,5 @@ export async function POST(request: Request) {
     data: { isPinned: !announcement.isPinned },
   });
 
-  return NextResponse.redirect(new URL("/dashboard/manajer/pengumuman", getBaseUrl(request)));
+  return NextResponse.redirect(new URL("/dashboard/leader/announcement", getBaseUrl(request)));
 }

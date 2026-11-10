@@ -15,15 +15,16 @@ export async function POST(request: Request) {
   if (!name || !email || password.length < 6) return NextResponse.json({ error: "Nama, email, dan password minimal 6 karakter wajib diisi." }, { status: 400 });
   if (await prisma.user.findUnique({ where: { email } })) return NextResponse.json({ error: "Email sudah digunakan." }, { status: 409 });
   const passwordHash = await hash(password, 10);
+  const defaultDepartment = await prisma.department.findUniqueOrThrow({ where: { name: "Collection/Penagihan" } });
 
   await prisma.$transaction(async (tx) => {
-    const manager = await tx.user.create({
+    const leader = await tx.user.create({
       data: {
         name,
         email,
         phoneNumber: phoneNumber || null,
         passwordHash,
-        role: "MANAGER",
+        role: "LEADER",
         isActive: "ACTIVE",
       },
     });
@@ -31,7 +32,8 @@ export async function POST(request: Request) {
     const team = await tx.team.create({
       data: {
         name: `Tim ${name}`,
-        managerId: manager.id,
+        leaderId: leader.id,
+        departmentId: defaultDepartment.id,
         isActive: true,
       },
     });
@@ -39,12 +41,12 @@ export async function POST(request: Request) {
     await tx.activityLog.create({
       data: {
         actorId: admin.id,
-        action: "CREATE_MANAGER",
+        action: "CREATE_LEADER",
         targetType: "TEAM",
         targetId: team.id,
-        description: `Admin ${admin.email} membuat manajer ${manager.email} dan tim ${team.name}.`,
+        description: `Admin ${admin.email} membuat akun leader ${leader.email} dan tim ${team.name}.`,
       },
     });
   });
-  return NextResponse.redirect(new URL("/dashboard/admin/managers", getBaseUrl(request)));
+  return NextResponse.redirect(new URL("/dashboard/admin/leaders", getBaseUrl(request)));
 }

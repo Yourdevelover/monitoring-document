@@ -2,18 +2,18 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
 
-export default async function ManagerHistoryPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function LeaderHistoryPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdmin();
   const { id } = await params;
-  const manager = await prisma.user.findFirst({
-    where: { id: Number(id), role: "MANAGER" },
-    include: { managedTeam: true },
+  const leader = await prisma.user.findFirst({
+    where: { id: Number(id), role: "LEADER" },
+    include: { ledTeam: true },
   });
-  if (!manager) return <p className="p-4 text-sm text-[#6b7280]">Manajer tidak ditemukan.</p>;
+  if (!leader) return <p className="p-4 text-sm text-[#6b7280]">Leader tidak ditemukan.</p>;
 
-  const files = manager.managedTeam
+  const files = leader.ledTeam
     ? await prisma.uploadHistory.findMany({
-      where: { teamId: manager.managedTeam.id },
+      where: { teamId: leader.ledTeam.id },
         include: { user: true },
       orderBy: { submittedAt: "desc" },
       })
@@ -23,7 +23,7 @@ export default async function ManagerHistoryPage({ params }: { params: Promise<{
     <main className="space-y-4 p-4 text-[#111111]">
       <header className="flex flex-wrap items-end justify-between gap-3 border-b border-[#e5e7eb] pb-4">
         <div>
-          <h1 className="text-base font-bold">Histori Berkas {manager.name}</h1>
+          <h1 className="text-base font-bold">Histori Berkas {leader.name}</h1>
         </div>
         <span className="text-xs text-[#6b7280]">{files.length} file</span>
       </header>

@@ -42,7 +42,7 @@ export function PersonalTargetDialog({ period }: { period: string }) {
               </button>
             </div>
 
-            <form action="/api/manajer/target" method="POST" className="grid grid-cols-2 gap-3">
+            <form action="/api/leader/target" method="POST" className="grid grid-cols-2 gap-3">
               <input type="hidden" name="period" value={period} />
               <label className="col-span-2 text-xs font-medium text-[#374151]">
                 Nama Target

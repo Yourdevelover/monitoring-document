@@ -9,33 +9,33 @@ export async function POST(request: Request) {
   const formData = await request.formData();
   const userId = Number(formData.get("userId"));
   const action = String(formData.get("action") ?? "");
-  const manager = await prisma.user.findFirst({ where: { id: userId, role: "MANAGER" }, include: { managedTeam: true } });
-  if (!manager) return NextResponse.json({ error: "Manajer tidak ditemukan." }, { status: 404 });
+  const leader = await prisma.user.findFirst({ where: { id: userId, role: "LEADER" }, include: { ledTeam: true } });
+  if (!leader) return NextResponse.json({ error: "Leader tidak ditemukan." }, { status: 404 });
 
   if (action === "approve" || action === "reject") {
-    if (manager.isActive !== "PENDING") {
-      return NextResponse.redirect(new URL("/dashboard/admin/managers", getBaseUrl(request)));
+    if (leader.isActive !== "PENDING") {
+      return NextResponse.redirect(new URL("/dashboard/admin/leaders", getBaseUrl(request)));
     }
 
     const approved = action === "approve";
     await prisma.$transaction(async (transaction) => {
       const updated = await transaction.user.updateMany({
-        where: { id: userId, role: "MANAGER", isActive: "PENDING" },
+        where: { id: userId, role: "LEADER", isActive: "PENDING" },
         data: { isActive: approved ? "ACTIVE" : "REJECTED" },
       });
       if (updated.count === 0) return;
 
       await transaction.team.updateMany({
-        where: { managerId: userId },
+        where: { leaderId: userId },
         data: { isActive: approved },
       });
       await transaction.activityLog.create({
         data: {
           actorId: admin.id,
-          action: approved ? "APPROVE_MANAGER" : "REJECT_MANAGER",
+          action: approved ? "APPROVE_LEADER" : "REJECT_LEADER",
           targetType: "USER",
           targetId: userId,
-          description: `Admin ${admin.email} ${approved ? "menyetujui" : "menolak"} pendaftaran manajer ${manager.email}.`,
+          description: `Admin ${admin.email} ${approved ? "menyetujui" : "menolak"} pendaftaran leader ${leader.email}.`,
         },
       });
     });
@@ -44,11 +44,11 @@ export async function POST(request: Request) {
   } else if (action === "activate") {
     await prisma.user.update({ where: { id: userId }, data: { isActive: "ACTIVE" } });
   } else if (action === "delete") {
-    if (manager.managedTeam) return NextResponse.json({ error: "Manajer masih memiliki tim. Nonaktifkan akun terlebih dahulu." }, { status: 409 });
+    if (leader.ledTeam) return NextResponse.json({ error: "Leader masih memiliki tim. Nonaktifkan akun terlebih dahulu." }, { status: 409 });
     await prisma.user.delete({ where: { id: userId } });
   } else {
     return NextResponse.json({ error: "Aksi tidak valid." }, { status: 400 });
   }
 
-  return NextResponse.redirect(new URL("/dashboard/admin/managers", getBaseUrl(request)));
+  return NextResponse.redirect(new URL("/dashboard/admin/leaders", getBaseUrl(request)));
 }

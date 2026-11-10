@@ -50,7 +50,7 @@ export async function POST(request: Request) {
 
     let redirect = "/dashboard/karyawan";
     if (user.role === "ADMIN") redirect = "/dashboard/admin";
-    else if (user.role === "MANAGER") redirect = "/dashboard/manajer";
+    else if (user.role === "LEADER") redirect = "/dashboard/leader";
 
     const response = NextResponse.json({ success: true, redirect });
 

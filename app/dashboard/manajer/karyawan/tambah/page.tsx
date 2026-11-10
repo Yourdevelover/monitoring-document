@@ -1,4 +1,4 @@
-﻿import { BulkEmployeeForm } from "./bulk-employee-form";
+import { BulkEmployeeForm } from "./bulk-employee-form";
 
 export default function CreateEmployeePage() {
   return (
@@ -7,7 +7,7 @@ export default function CreateEmployeePage() {
         <h1 className="text-base font-semibold">Tambah Karyawan</h1>
         <p className="mt-2 text-[#6b7280]">Tambahkan satu karyawan atau beberapa karyawan sekaligus.</p>
 
-        <form id="single-employee-form" action="/api/manager/employee/create" method="POST" className="mt-6 space-y-4">
+        <form id="single-employee-form" action="/api/leader/employee/create" method="POST" className="mt-6 space-y-4">
           <div>
             <label htmlFor="name" className="mb-1 block text-sm font-medium">
               Nama

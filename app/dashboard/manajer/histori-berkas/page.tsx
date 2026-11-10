@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { requireManager } from "@/lib/auth";
+import { requireLeader } from "@/lib/auth";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
 
 const categories = [
@@ -28,18 +28,18 @@ function formatDate(dateKey: string) {
   }).format(new Date(`${dateKey}T00:00:00+07:00`));
 }
 
-export default async function ManagerHistoryPage({
+export default async function LeaderHistoryPage({
   searchParams,
 }: {
   searchParams: Promise<{ category?: string; date?: string }>;
 }) {
-  const manager = await requireManager();
+  const leader = await requireLeader();
   const params = await searchParams;
   const selectedCategory = categories.some((category) => category.key === params.category)
     ? (params.category as CategoryKey)
     : null;
   const selectedDate = /^\d{4}-\d{2}-\d{2}$/.test(params.date ?? "") ? params.date ?? null : null;
-  const team = await prisma.team.findUnique({ where: { managerId: manager.id } });
+  const team = await prisma.team.findUnique({ where: { leaderId: leader.id } });
   const submittedFiles = team
     ? await prisma.uploadHistory.findMany({
         where: {
@@ -66,7 +66,7 @@ export default async function ManagerHistoryPage({
             <p className="mt-1 text-xs text-slate-500">Pilih kategori dan tanggal untuk melihat berkas yang masuk.</p>
           </div>
           {selectedCategory && (
-            <a href="/dashboard/manajer/histori-berkas" className="text-sm font-semibold text-blue-600 hover:text-blue-800">
+            <a href="/dashboard/leader/histori-berkas" className="text-sm font-semibold text-blue-600 hover:text-blue-800">
               Semua tanggal
             </a>
           )}
@@ -81,7 +81,7 @@ export default async function ManagerHistoryPage({
                   <h2 className="mt-1 text-sm font-semibold">{formatDate(selectedDate)}</h2>
                 </div>
                 <a
-                  href={`/api/manajer/berkas/download?category=${selectedCategory}&history=true&date=${selectedDate}`}
+                  href={`/api/leader/berkas/download?category=${selectedCategory}&history=true&date=${selectedDate}`}
                   className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700"
                 >
                   Unduh Semua
@@ -132,7 +132,7 @@ export default async function ManagerHistoryPage({
                           {categoryDateEntries.map(([dateKey, count]) => (
                             <a
                               key={dateKey}
-                              href={`/dashboard/manajer/histori-berkas?category=${category.key}&date=${dateKey}`}
+                              href={`/dashboard/leader/histori-berkas?category=${category.key}&date=${dateKey}`}
                               className="flex min-h-9 items-center justify-between gap-2 rounded px-2 py-1.5 text-xs hover:bg-blue-50"
                             >
                               <span className="truncate text-slate-700">{formatDate(dateKey)}</span>
@@ -146,7 +146,7 @@ export default async function ManagerHistoryPage({
                   {recentDateEntries.length > 0 ? (
                     <div className="space-y-2">
                       {recentDateEntries.map(([dateKey, count]) => (
-                        <a key={dateKey} href={`/dashboard/manajer/histori-berkas?category=${category.key}&date=${dateKey}`} className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 hover:border-blue-300 hover:bg-blue-50">
+                        <a key={dateKey} href={`/dashboard/leader/histori-berkas?category=${category.key}&date=${dateKey}`} className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 hover:border-blue-300 hover:bg-blue-50">
                           <span className="text-sm font-medium text-slate-800">{formatDate(dateKey)}</span>
                           <span className="text-xs text-slate-500">{count} file</span>
                         </a>

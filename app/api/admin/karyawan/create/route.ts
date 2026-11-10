@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
   const [existingUser, team] = await Promise.all([
     prisma.user.findUnique({ where: { email } }),
-    prisma.team.findUnique({ where: { id: teamId }, include: { manager: true } }),
+    prisma.team.findUnique({ where: { id: teamId }, include: { leader: true } }),
   ]);
 
   if (existingUser) {
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
       action: "CREATE_EMPLOYEE",
       targetType: "USER",
       targetId: employee.id,
-      description: `Admin ${admin.email} menambahkan karyawan ${employee.email} ke tim ${team.name} dengan manajer ${team.manager.name}.`,
+      description: `Admin ${admin.email} menambahkan karyawan ${employee.email} ke tim ${team.name} dengan leader ${team.leader.name}.`,
     },
   });
 

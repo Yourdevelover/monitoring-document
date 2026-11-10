@@ -1,6 +1,7 @@
 import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { DashboardAutoRefresh } from "@/app/components/dashboard-auto-refresh";
 import { NotesWidget } from "@/app/components/notes-widget";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -13,6 +14,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <>
+      <DashboardAutoRefresh />
       {user && <NotesWidget initialNotes={notes} />}
       {children}
     </>

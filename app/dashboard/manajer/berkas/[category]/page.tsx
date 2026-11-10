@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { requireManager } from "@/lib/auth";
+import { requireLeader } from "@/lib/auth";
 import { EmployeeProfileCard } from "../../employee-profile-card";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
 import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
@@ -16,8 +16,8 @@ type CategoryPageProps = {
   searchParams: Promise<{ employee?: string; q?: string; page?: string }>;
 };
 
-export default async function ManagerCategoryPage({ params, searchParams }: CategoryPageProps) {
-  const manager = await requireManager();
+export default async function LeaderCategoryPage({ params, searchParams }: CategoryPageProps) {
+  const leader = await requireLeader();
   const { category } = await params;
   const { employee: selectedEmployeeId, q, page: pageParam } = await searchParams;
   const pageSize = 6;
@@ -31,7 +31,7 @@ export default async function ManagerCategoryPage({ params, searchParams }: Cate
   }
 
   const team = await prisma.team.findUnique({
-    where: { managerId: manager.id },
+    where: { leaderId: leader.id },
     include: {
       uploads: {
         where: {
@@ -112,7 +112,7 @@ export default async function ManagerCategoryPage({ params, searchParams }: Cate
               </button>
             </form>
             <a
-              href={`/api/manajer/berkas/download?category=${categoryInfo.key}`}
+              href={`/api/leader/berkas/download?category=${categoryInfo.key}`}
               className="text-sm font-semibold text-emerald-700 hover:text-emerald-900"
             >
               Unduh semua
@@ -167,7 +167,7 @@ export default async function ManagerCategoryPage({ params, searchParams }: Cate
             {searchTerm ? `Tidak ada hasil untuk "${searchTerm}".` : "Belum ada berkas masuk pada kategori ini."}
           </p>
         )}
-        <PaginationControls basePath={`/dashboard/manajer/berkas/${category}`} page={page} totalItems={visibleUploads.length} query={{ employee: selectedEmployeeId, q: searchTerm || undefined }} />
+        <PaginationControls basePath={`/dashboard/leader/berkas/${category}`} page={page} totalItems={visibleUploads.length} query={{ employee: selectedEmployeeId, q: searchTerm || undefined }} />
       </div>
 
       <div className="flex justify-end pb-6">

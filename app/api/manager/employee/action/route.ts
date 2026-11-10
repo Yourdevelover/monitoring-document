@@ -4,16 +4,16 @@ import { prisma } from "@/lib/prisma";
 import { getBaseUrl } from "@/lib/redirect";
 
 export async function POST(request: Request) {
-  const manager = await getSessionUser();
+  const leader = await getSessionUser();
 
-  if (!manager || manager.role !== "MANAGER") {
+  if (!leader || leader.role !== "LEADER") {
     return NextResponse.json({ error: "Akses ditolak." }, { status: 403 });
   }
 
   const formData = await request.formData();
   const userId = Number(formData.get("userId"));
   const action = String(formData.get("action") ?? "");
-  const team = await prisma.team.findUnique({ where: { managerId: manager.id } });
+  const team = await prisma.team.findUnique({ where: { leaderId: leader.id } });
   const employee = team && userId
     ? await prisma.user.findFirst({ where: { id: userId, teamId: team.id, role: "KARYAWAN" } })
     : null;
@@ -37,5 +37,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Aksi tidak valid." }, { status: 400 });
   }
 
-  return NextResponse.redirect(new URL("/dashboard/manajer/karyawan", getBaseUrl(request)));
+  return NextResponse.redirect(new URL("/dashboard/leader/karyawan", getBaseUrl(request)));
 }

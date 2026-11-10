@@ -1,11 +1,11 @@
-﻿import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { requireEmployee } from "@/lib/auth";
 import Link from "next/link";
 import { UploadForm } from "./upload-form";
 import { FileConfirmationDialog } from "./file-confirmation-dialog";
 import { FileActions } from "./file-actions";
 import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
-import { ManagerFilePopover } from "./manager-file-popover";
+import { LeaderFilePopover } from "./leader-file-popover";
 
 const CATEGORY_DETAILS = [
   {
@@ -32,12 +32,12 @@ export default async function EmployeeFilesPage() {
   const employee = await requireEmployee();
   const startOfToday = getStartOfCurrentJakartaDay(new Date());
 
-  const [managerSharedFiles, employeeUploads, importantFiles] = await Promise.all([
+  const [leaderSharedFiles, employeeUploads, importantFiles] = await Promise.all([
     prisma.upload.findMany({
       where: {
         teamId: employee.teamId ?? 0,
         user: {
-          role: "MANAGER",
+          role: "LEADER",
         },
         isSubmitted: true,
         isImportant: false,
@@ -80,27 +80,27 @@ export default async function EmployeeFilesPage() {
         <header className="rounded-lg border border-[#e5e7eb] bg-white px-4 py-3">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">Monitoring</p>
           <div className="mt-1 flex flex-wrap items-center gap-2">
-            <h1 className="text-[15px] font-semibold tracking-tight">Berkas dari Manajer</h1>
-            <span className="rounded-md bg-[#e1f3fe] px-2 py-1 text-xs font-medium text-[#1f6c9f]">{managerSharedFiles.length} file dibagikan</span>
+            <h1 className="text-[15px] font-semibold tracking-tight">Berkas dari Leader</h1>
+            <span className="rounded-md bg-[#e1f3fe] px-2 py-1 text-xs font-medium text-[#1f6c9f]">{leaderSharedFiles.length} file dibagikan</span>
           </div>
-          <p className="mt-1 text-xs text-[#6b7280]">File yang dibagikan oleh manajer untuk diunduh oleh tim.</p>
+          <p className="mt-1 text-xs text-[#6b7280]">File yang dibagikan oleh leader untuk diunduh oleh tim.</p>
 
-          {managerSharedFiles.length > 0 && (
+          {leaderSharedFiles.length > 0 && (
             <div className="mt-3 grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
-              {managerSharedFiles.map((upload) => (
+              {leaderSharedFiles.map((upload) => (
                 <div key={upload.id} className="flex items-center justify-between gap-2 rounded-md bg-[#f8f9fa] px-2.5 py-1.5">
                   <div className="min-w-0">
                     <p className="truncate text-[13px] font-medium text-[#111111]">{upload.title}</p>
                     <p className="truncate text-xs text-[#6b7280]">{upload.fileName}</p>
                   </div>
-                  <ManagerFilePopover
+                  <LeaderFilePopover
                     file={{
                       id: upload.id,
                       title: upload.title,
                       fileName: upload.fileName,
                       category: upload.category,
                       filePath: upload.filePath,
-                      uploaderName: upload.user.name ?? "Manajer",
+                      uploaderName: upload.user.name ?? "Leader",
                     }}
                   />
                 </div>
@@ -112,9 +112,9 @@ export default async function EmployeeFilesPage() {
         <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
           <div className="grid gap-3 lg:grid-cols-3">
             {CATEGORY_DETAILS.map((category) => {
-              const categoryUploads = uploadsByCategory.get(category.key) ?? [];
+              const allCategoryUploads = uploadsByCategory.get(category.key) ?? [];
               const isMulti = category.key !== "DAILY";
-              const uploadedFile = categoryUploads[0];
+              const pendingDailyUpload = allCategoryUploads.find((upload) => !upload.isSubmitted);
 
               return (
                 <div key={category.key} className="rounded-md border border-[#e5e7eb] bg-[#f8f9fa] p-3">
@@ -131,15 +131,15 @@ export default async function EmployeeFilesPage() {
                       categoryLabel={category.label}
                     />
                   )}
-                  {!isMulti && !uploadedFile && (
+                  {!isMulti && !pendingDailyUpload && (
                     <UploadForm
                       categoryKey={category.key}
                       categoryLabel={category.label}
                     />
                   )}
-                  {!isMulti && uploadedFile && (
+                  {!isMulti && pendingDailyUpload && (
                     <div className="rounded-md bg-white p-2.5 text-xs text-[#6b7280]">
-                      File daily sudah dikirim hari ini. Kelola di daftar berkas di bawah.
+                      File Daily menunggu untuk dikirim. Selesaikan atau hapus dari daftar berkas di bawah sebelum mengunggah lagi.
                     </div>
                   )}
                 </div>
@@ -150,7 +150,7 @@ export default async function EmployeeFilesPage() {
           <div className="mt-4 flex items-end justify-between border-t border-[#e5e7eb] pt-3">
             <div>
               <h2 className="text-xs font-semibold uppercase tracking-wide text-[#111111]">Unggah Berkas</h2>
-              <p className="mt-0.5 text-xs text-[#6b7280]">Jangan lupa untuk simpan data penting.</p>
+              <p className="mt-0.5 text-xs text-[#6b7280]">Jangan lupa untuk simpan data prioritas.</p>
             </div>
             <Link
               href="/dashboard/karyawan/histori-berkas"
@@ -165,7 +165,7 @@ export default async function EmployeeFilesPage() {
           <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-3">
             <div>
               <h2 className="text-xs font-semibold uppercase tracking-wide text-[#111111]">Daftar Berkas Saya</h2>
-              <p className="mt-0.5 text-xs text-[#6b7280]">Kelola file: lihat, kirim, ganti, hapus, atau simpan ke data penting.</p>
+              <p className="mt-0.5 text-xs text-[#6b7280]">Kelola file: lihat, kirim, ganti, hapus, atau simpan ke data prioritas.</p>
             </div>
             <span className="text-[11px] text-[#6b7280]">{employeeUploads.length} file</span>
           </div>
@@ -181,12 +181,20 @@ export default async function EmployeeFilesPage() {
                       <span className="rounded bg-white/70 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#6b7280]">
                         {uploadedFile.category.toLowerCase()}
                       </span>
+                      {uploadedFile.isImportant && (
+                        <span className="rounded bg-[#fbf3db] px-1.5 py-0.5 text-[10px] font-semibold text-[#956400]">
+                          Data Prioritas untuk Leader
+                        </span>
+                      )}
                       <p className="text-[13px] font-semibold" style={{ color: uploadedFile.isSubmitted ? '#346538' : '#956400' }}>
                         {uploadedFile.isSubmitted ? '✓ Sudah Dikirim' : '⏳ Belum Dikirim'}
                       </p>
                     </div>
                     <p className="mt-1 truncate text-xs" style={{ color: uploadedFile.isSubmitted ? '#4a7a4e' : '#a06a00' }}>
                       {uploadedFile.fileName}
+                    </p>
+                    <p className="mt-1 text-[11px] text-[#6b7280]">
+                      Diunggah: {new Date(uploadedFile.createdAt).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}
                     </p>
                   </div>
 

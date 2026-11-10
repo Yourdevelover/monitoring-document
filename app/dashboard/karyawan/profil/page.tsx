@@ -14,7 +14,7 @@ export default async function EmployeeProfilePage({ searchParams }: EmployeeProf
   const profile = await prisma.user.findUnique({
     where: { id: Number(viewedUserId) || employee.id },
     include: {
-      team: true,
+      team: { include: { department: true } },
     },
   });
 
@@ -44,6 +44,7 @@ export default async function EmployeeProfilePage({ searchParams }: EmployeeProf
                 name={profile.name}
                 email={profile.email}
                 phoneNumber={profile.phoneNumber}
+                nik={profile.nik}
               />
             )}
           </div>
@@ -53,8 +54,10 @@ export default async function EmployeeProfilePage({ searchParams }: EmployeeProf
           <div className="divide-y divide-[#e5e7eb]">
             {[
               ["Email", profile.email],
+              ...(profile.id === employee.id ? [["NIK", profile.nik ?? "Belum diisi"]] : []),
               ["Nomor Telepon", profile.phoneNumber ?? "Belum diisi"],
               ["Tim", profile.team?.name ?? "Belum ditentukan"],
+              ["Departemen", profile.team?.department.name ?? "Belum ditentukan"],
               ["Role", profile.role],
             ].map(([label, value]) => (
               <div key={label} className="flex items-center justify-between gap-4 py-4">

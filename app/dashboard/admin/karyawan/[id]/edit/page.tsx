@@ -12,9 +12,7 @@ export default async function EditEmployeePage({ params }: EditEmployeePageProps
   await requireAdmin();
   const { id } = await params;
 
-  const employee = await prisma.user.findFirst({
-    where: { id: Number(id), role: "KARYAWAN" },
-  });
+  const employee = await prisma.user.findFirst({ where: { id: Number(id), role: "KARYAWAN" } });
 
   if (!employee) notFound();
 
@@ -71,6 +69,7 @@ export default async function EditEmployeePage({ params }: EditEmployeePageProps
               className="w-full rounded-md border border-[#e5e7eb] bg-white px-3 py-2 text-sm outline-none transition focus:border-[#2563eb] focus:bg-white"
             />
           </div>
+
 
           <div className="md:col-span-2">
             <label htmlFor="password" className="mb-1 block text-xs font-medium text-[#111111]">
