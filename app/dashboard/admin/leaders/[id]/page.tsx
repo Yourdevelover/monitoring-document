@@ -17,7 +17,6 @@ export default async function AdminLeaderDetailPage({ params }: LeaderDetailProp
       ledTeam: {
         include: {
           department: true,
-          members: { orderBy: { createdAt: "desc" } },
           uploads: { orderBy: { createdAt: "desc" }, take: 10 },
         },
       },
@@ -39,16 +38,9 @@ export default async function AdminLeaderDetailPage({ params }: LeaderDetailProp
 
   return (
     <main className="space-y-4">
-      <header className="flex flex-wrap items-end justify-between gap-3 rounded-lg border border-[#e5e7eb] bg-white px-4 py-3">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">Detail</p>
-          <h1 className="mt-1 text-[13px] font-semibold tracking-tight">Informasi Leader</h1>
-        </div>
-        <span className="text-xs text-[#6b7280]">{leader.isActive}</span>
-      </header>
-
       <div className="flex flex-wrap gap-2 border-b border-[#e5e7eb] pb-3">
         <a href={`/dashboard/admin/leaders/${leader.id}/history`} className="btn">Lihat Histori Berkas</a>
+        {leader.ledTeam && <a href={`/dashboard/admin/leaders/${leader.id}/members`} className="btn">Kelola Anggota Tim</a>}
         <a href={`/dashboard/admin/leaders/${leader.id}/edit`} className="btn">Edit Leader</a>
         {leader.isActive === "PENDING" ? (
           <>
@@ -72,7 +64,7 @@ export default async function AdminLeaderDetailPage({ params }: LeaderDetailProp
         )}
         <ConfirmActionForm
           action="/api/admin/leaders/action"
-          confirmMessage="Apakah Anda yakin ingin menghapus leader ini? Data terkait leader akan dihapus setelah akun tidak memiliki tim."
+          confirmMessage="Leader hanya bisa dihapus jika semua karyawan sudah dipindahkan atau dihapus. Jika tim kosong, data tim dan berkas terkait akan dihapus."
         >
           <input type="hidden" name="userId" value={leader.id} />
           <input type="hidden" name="action" value="delete" />
@@ -80,60 +72,58 @@ export default async function AdminLeaderDetailPage({ params }: LeaderDetailProp
         </ConfirmActionForm>
       </div>
 
-      <section className="grid gap-3 rounded-lg border border-[#e5e7eb] bg-white p-4 sm:grid-cols-2">
-        <div><p className="text-[11px] text-[#6b7280]">Nama</p><p className="mt-0.5 text-[13px] font-semibold">{leader.name}</p></div>
-        <div><p className="text-[11px] text-[#6b7280]">Email</p><p className="mt-0.5 text-[13px] font-semibold">{leader.email}</p></div>
-        <div><p className="text-[11px] text-[#6b7280]">Nomor Telepon</p><p className="mt-0.5 text-[13px] font-semibold">{leader.phoneNumber ?? "Belum diisi"}</p></div>
-        <div><p className="text-[11px] text-[#6b7280]">Akun dibuat</p><p className="mt-0.5 text-[13px] font-semibold">{new Date(leader.createdAt).toLocaleString("id-ID")}</p></div>
-      </section>
-
-      <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
-        <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-wide">Aktivitas Terakhir</h2>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <p className="text-[11px] text-[#6b7280]">Login terakhir</p>
-            <p className="text-[13px] font-semibold">{latestLogin ? new Date(latestLogin.createdAt).toLocaleString("id-ID") : "Belum ada data"}</p>
+      <section className="overflow-hidden rounded-lg border border-[#e1e5e9] bg-white shadow-sm">
+        <header className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#6b7280]">Detail Leader</p>
+            <h1 className="mt-1 break-words text-lg font-semibold text-[#111111]">{leader.name}</h1>
           </div>
-          <div>
-            <p className="text-[11px] text-[#6b7280]">Logout terakhir</p>
-            <p className="text-[13px] font-semibold">{latestLogout ? new Date(latestLogout.createdAt).toLocaleString("id-ID") : "Belum ada data"}</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
-        <div className="mb-3 flex items-center justify-between border-b border-[#e5e7eb] pb-2">
-          <h2 className="text-[11px] font-semibold uppercase tracking-wide">Tim</h2>
-          <span className="text-[11px] text-[#6b7280]">{leader.ledTeam?.members.length ?? 0} anggota</span>
-        </div>
-        {leader.ledTeam ? (
-          <>
-            <p className="mb-3 text-[13px] text-[#111111]">Nama tim: <strong>{leader.ledTeam.name}</strong></p>
-            <p className="mb-3 text-[13px] text-[#111111]">Departemen: <strong>{leader.ledTeam.department.name}</strong></p>
-            <div className="divide-y divide-slate-200 border-y border-[#e5e7eb]">
-              {leader.ledTeam.members.map((member) => (
-                <div key={member.id} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 py-2 text-[13px]">
-                  <span className="truncate font-medium">{member.name}</span>
-                  <span className="truncate text-[#6b7280]">{member.email}</span>
-                  <span className="text-[11px] text-[#6b7280]">{member.isActive}</span>
-                </div>
-              ))}
+          <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${leader.isActive === "ACTIVE" ? "bg-[#edf3ec] text-[#346538]" : leader.isActive === "PENDING" ? "bg-[#fff4dd] text-[#8a5a00]" : leader.isActive === "REJECTED" ? "bg-[#fdebec] text-[#9f2f2d]" : "bg-[#f3f4f6] text-[#6b7280]"}`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${leader.isActive === "ACTIVE" ? "bg-[#4f8a53]" : leader.isActive === "PENDING" ? "bg-[#c0841a]" : leader.isActive === "REJECTED" ? "bg-[#c1423c]" : "bg-[#9ca3af]"}`} />
+            {leader.isActive === "ACTIVE" ? "Aktif" : leader.isActive === "PENDING" ? "Menunggu persetujuan" : leader.isActive === "REJECTED" ? "Ditolak" : "Nonaktif"}
+          </span>
+        </header>
+        <div className="border-y border-[#e9ecef] bg-[#f7f9fa] px-5 py-4">
+          <h2 className="mb-3 text-xs font-semibold text-[#111111]">Aktivitas Akun Terakhir</h2>
+          <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
+            <div className="border-l-2 border-[#5c8f68] pl-3">
+              <dt className="text-[11px] text-[#6b7280]">Login terakhir</dt>
+              <dd className="mt-1 text-xs font-medium text-[#111111]">{latestLogin ? new Date(latestLogin.createdAt).toLocaleString("id-ID") : "Belum ada data"}</dd>
             </div>
-          </>
-        ) : <p className="text-[13px] text-[#6b7280]">Leader belum memiliki tim.</p>}
+            <div className="border-l-2 border-[#c7ced3] pl-3">
+              <dt className="text-[11px] text-[#6b7280]">Logout terakhir</dt>
+              <dd className="mt-1 text-xs font-medium text-[#111111]">{latestLogout ? new Date(latestLogout.createdAt).toLocaleString("id-ID") : "Belum ada data"}</dd>
+            </div>
+          </dl>
+        </div>
+        <div className="px-5 py-4">
+          <h2 className="mb-2 text-xs font-semibold text-[#111111]">Rincian Profil</h2>
+          <dl className="grid gap-x-8 sm:grid-cols-2">
+            {[
+              ["Email", leader.email],
+              ["Nomor telepon", leader.phoneNumber ?? "Belum diisi"],
+              ["Akun dibuat", new Date(leader.createdAt).toLocaleString("id-ID")],
+            ].map(([label, value]) => (
+              <div key={label} className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3 border-b border-[#f1f3f5] py-2.5">
+                <dt className="text-xs text-[#6b7280]">{label}</dt>
+                <dd className="break-words text-left text-xs font-medium text-[#111111]">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
       </section>
 
-      <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
-        <div className="mb-3 border-b border-[#e5e7eb] pb-2">
-          <h2 className="text-[11px] font-semibold uppercase tracking-wide">Berkas Terbaru Tim</h2>
+      <section>
+        <div className="mb-2 border-b border-[#e5e7eb] pb-2">
+          <h2 className="text-xs font-semibold text-[#111111]">Berkas Terbaru Tim</h2>
         </div>
-        <div className="divide-y divide-slate-200 border-y border-[#e5e7eb]">
-          {leader.ledTeam?.uploads.map((upload) => (
-            <div key={upload.id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 py-2 text-[13px]">
-              <span className="truncate" title={upload.fileName}>{upload.fileName}</span>
+        <div className="divide-y divide-[#f1f3f5]">
+          {leader.ledTeam && leader.ledTeam.uploads.length > 0 ? leader.ledTeam.uploads.map((upload) => (
+            <div key={upload.id} className="grid gap-1 py-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-3">
+              <span className="truncate text-xs" title={upload.fileName}>{upload.fileName}</span>
               <span className="text-[11px] text-[#6b7280]">{upload.category}</span>
             </div>
-          )) ?? <p className="py-4 text-[13px] text-[#6b7280]">Belum ada berkas tim.</p>}
+          )) : <p className="py-3 text-xs text-[#6b7280]">Belum ada berkas tim.</p>}
         </div>
       </section>
 
