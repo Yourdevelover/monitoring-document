@@ -9,7 +9,7 @@ export default async function EmployeeProfileRequestPage({
 }) {
   const employee = await requireEmployee();
   const params = await searchParams;
-  const pageSize = 6;
+  const pageSize = 20;
   const requestedPage = Math.max(1, Number(params.page) || 1);
   const totalRequests = await prisma.profileRequest.count({ where: { userId: employee.id } });
   const totalPages = Math.max(1, Math.ceil(totalRequests / pageSize));

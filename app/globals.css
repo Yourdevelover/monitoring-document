@@ -121,7 +121,7 @@ h1, h2, h3 { letter-spacing: -0.02em; }
   display: flex;
   width: max-content;
   flex: 0 0 auto;
-  animation: employee-announcement-loop 28s linear infinite;
+  animation: employee-announcement-loop 6s linear infinite;
   will-change: transform;
 }
 .employee-announcement-copy {
@@ -147,9 +147,6 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 @keyframes employee-announcement-loop {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .employee-announcement-track { animation: none; }
 }
 
 /* ── Content containers ── */

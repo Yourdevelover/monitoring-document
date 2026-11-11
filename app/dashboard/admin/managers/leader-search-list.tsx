@@ -82,7 +82,7 @@ function AdminLeaderCard({ leader }: { leader: LeaderSearchListProps["leaders"][
 export function LeaderSearchList({ leaders }: LeaderSearchListProps) {
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
-  const pageSize = 6;
+  const pageSize = 20;
 
   const filteredLeaders = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -120,31 +120,26 @@ export function LeaderSearchList({ leaders }: LeaderSearchListProps) {
               setPage(1);
             }}
             placeholder="Ketik nama atau email leader..."
-            className="w-full rounded-md border border-[#e5e7eb] bg-white px-3 py-2 text-xs text-[#111111] outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
+            className="h-8 w-full rounded-md border border-[#e5e7eb] bg-white px-3 text-xs text-[#111111] outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
           />
         </div>
 
         <Link
           href="/dashboard/admin/leaders/create"
-          className="inline-flex shrink-0 items-center justify-center rounded-md bg-[#111111] px-3 py-2 text-xs font-medium text-white transition hover:bg-[#1c1c1c]"
+          className="inline-flex h-8 shrink-0 items-center justify-center rounded-md bg-[#111111] px-3 text-xs font-medium text-white transition hover:bg-[#1c1c1c]"
         >
           Tambah Leader
         </Link>
         {filteredLeaders.length > 0 && (
           <div className="flex shrink-0 items-center gap-2 text-xs">
-            <span className="text-[#6b7280]">6 data per halaman</span>
-            <button type="button" disabled={page === 1} onClick={() => setPage((current) => current - 1)} className="border border-[#e5e7eb] px-2 py-1 disabled:cursor-not-allowed disabled:opacity-40">‹</button>
+            <button type="button" aria-label="Halaman sebelumnya" disabled={page === 1} onClick={() => setPage((current) => current - 1)} className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#e5e7eb] text-xs disabled:cursor-not-allowed disabled:opacity-40">‹</button>
             {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
-              <button key={pageNumber} type="button" aria-current={pageNumber === page ? 'page' : undefined} onClick={() => setPage(pageNumber)} className={pageNumber === page ? 'border border-[#111111] bg-[#111111] px-2 py-1 text-white' : 'border border-[#e5e7eb] px-2 py-1 hover:bg-[#f8f9fa]'}>{pageNumber}</button>
+              <button key={pageNumber} type="button" aria-current={pageNumber === page ? 'page' : undefined} onClick={() => setPage(pageNumber)} className={pageNumber === page ? 'inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#111111] bg-[#111111] text-xs text-white' : 'inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#e5e7eb] text-xs hover:bg-[#f8f9fa]'}>{pageNumber}</button>
             ))}
-            <button type="button" disabled={page === totalPages} onClick={() => setPage((current) => current + 1)} className="border border-[#e5e7eb] px-2 py-1 disabled:cursor-not-allowed disabled:opacity-40">›</button>
+            <button type="button" aria-label="Halaman berikutnya" disabled={page === totalPages} onClick={() => setPage((current) => current + 1)} className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#e5e7eb] text-xs disabled:cursor-not-allowed disabled:opacity-40">›</button>
           </div>
         )}
       </div>
-
-      <p className="text-[11px] text-[#6b7280]">
-        {filteredLeaders.length} hasil cocok
-      </p>
 
       <div className="border-y border-[#e5e7eb]">
         {filteredLeaders.length > 0 ? (

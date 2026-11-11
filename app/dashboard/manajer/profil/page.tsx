@@ -1,50 +1,39 @@
 import { prisma } from "@/lib/prisma";
-import { EditProfileCard } from "./edit-profile-card";
-import { requireLeader } from "@/lib/auth";
+import { requireManajer } from "@/lib/auth";
 
-export default async function LeaderProfilePage() {
-  const leader = await requireLeader();
-
+export default async function ManagerProfilePage() {
+  const manager = await requireManajer();
   const profile = await prisma.user.findUnique({
-    where: { id: leader.id },
+    where: { id: manager.id },
+    include: { department: true },
   });
-
+  const fields = [
+    ["Nama", profile?.name ?? "-"],
+    ["Email", profile?.email ?? "-"],
+    ["Nomor telepon", profile?.phoneNumber ?? "Belum diisi"],
+    ["Departemen", profile?.department?.name ?? "-"],
+    ["Status", profile?.isActive ?? "-"],
+  ];
   return (
     <main className="min-h-screen bg-[#f8f9fa] px-4 py-5 text-[#111111]">
-      <div className="mx-auto max-w-3xl rounded-lg bg-white p-4">
-        <header className="border-b border-[#e5e7eb] pb-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#6b7280]">Profil</p>
-          <h1 className="mt-1 text-base font-bold">Profil Leader</h1>
-          <p className="mt-1 text-sm text-[#6b7280]">Kelola informasi akun dan data kontak Anda.</p>
+      <div className="mx-auto max-w-3xl space-y-4">
+        <header className="border-b border-[#e5e7eb] pb-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">
+            Akun
+          </p>
+          <h1 className="mt-1 text-[15px] font-semibold">Profil Manajer</h1>
         </header>
-
-        <div className="mt-6 space-y-4">
-          <div className="rounded-lg border border-[#e5e7eb] p-4">
-            <p className="text-sm text-[#6b7280]">Nama</p>
-            <p className="mt-1 text-sm font-medium">{profile?.name}</p>
-          </div>
-
-          <div className="rounded-lg border border-[#e5e7eb] p-4">
-            <p className="text-sm text-[#6b7280]">Email</p>
-            <p className="mt-1 text-sm font-medium">{profile?.email}</p>
-          </div>
-
-          <div className="rounded-lg border border-[#e5e7eb] p-4">
-            <p className="text-sm text-[#6b7280]">Nomor Telepon</p>
-            <p className="mt-1 text-sm font-medium">{profile?.phoneNumber ?? "Belum diisi"}</p>
-          </div>
-
-          <div className="rounded-lg border border-[#e5e7eb] p-4">
-            <p className="text-sm text-[#6b7280]">Role</p>
-            <p className="mt-1 text-sm font-medium">{profile?.role}</p>
-          </div>
-        </div>
-
-        <EditProfileCard
-          name={profile?.name ?? ""}
-          email={profile?.email ?? ""}
-          phoneNumber={profile?.phoneNumber ?? ""}
-        />
+        <section className="divide-y divide-[#e5e7eb] border-y border-[#d1d5db] bg-white px-4">
+          {fields.map(([label, value]) => (
+            <div
+              key={label}
+              className="grid gap-1 py-3 sm:grid-cols-[10rem_1fr]"
+            >
+              <span className="text-xs text-[#6b7280]">{label}</span>
+              <span className="break-words text-xs font-medium">{value}</span>
+            </div>
+          ))}
+        </section>
       </div>
     </main>
   );

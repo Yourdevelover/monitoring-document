@@ -28,12 +28,16 @@ export function Toaster() {
       if (d?.message) push(d.message, d.kind ?? "success");
     };
     window.addEventListener("app-toast", handler);
-    const q = new URLSearchParams(window.location.search).get("toast");
+    const searchParams = new URLSearchParams(window.location.search);
+    const q = searchParams.get("toast");
+    const queryKind = searchParams.get("toastType");
+    const queryToastKind: ToastKind = queryKind === "error" ? "error" : queryKind === "info" ? "info" : "success";
     let initialToastTimer: number | undefined;
     if (q) {
-      initialToastTimer = window.setTimeout(() => push(q, "success"), 0);
+      initialToastTimer = window.setTimeout(() => push(q, queryToastKind), 0);
       const url = new URL(window.location.href);
       url.searchParams.delete("toast");
+      url.searchParams.delete("toastType");
       window.history.replaceState(null, "", url.toString());
     }
     return () => {

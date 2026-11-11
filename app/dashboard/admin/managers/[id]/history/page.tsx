@@ -6,7 +6,7 @@ export default async function LeaderHistoryPage({ params }: { params: Promise<{ 
   await requireAdmin();
   const { id } = await params;
   const leader = await prisma.user.findFirst({
-    where: { id: Number(id), role: "LEADER" },
+    where: { id: Number(id), role: "MANAJER" },
     include: { ledTeam: true },
   });
   if (!leader) return <p className="p-4 text-sm text-[#6b7280]">Leader tidak ditemukan.</p>;

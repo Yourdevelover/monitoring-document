@@ -6,7 +6,7 @@ import { DeleteImportantButton } from "./delete-priority-button";
 export default async function DataPentingPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const employee = await requireEmployee();
   const params = await searchParams;
-  const pageSize = 6;
+  const pageSize = 20;
   const requestedPage = Math.max(1, Number(params.page) || 1);
   const [importantUploadCount, archivedFileCount] = await Promise.all([
     prisma.upload.count({ where: { userId: employee.id, isImportant: true, isSubmitted: true } }),

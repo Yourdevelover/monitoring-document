@@ -73,7 +73,7 @@ export async function GET(
     const teamMatch = relativePath.match(/^teams\/(\d+)\//);
     if (teamMatch) {
       const fileTeamId = Number(teamMatch[1]);
-      if (user.role !== "ADMIN") {
+      if (user.role !== "ADMIN" && user.role !== "MANAJER") {
         let userTeamId: number | null = user.teamId ?? null;
         // Leader's team is via ledTeam, not teamId
         if (user.role === "LEADER" && !userTeamId) {

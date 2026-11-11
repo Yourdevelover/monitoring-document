@@ -4,7 +4,7 @@ import { getSessionUser } from "@/lib/auth";
 import { Logo } from "@/app/components/logo";
 import { LoginForm } from "@/app/login-form";
 
-export default async function HomePage({ searchParams }: { searchParams: Promise<{ registration?: string }> }) {
+export default async function HomePage({ searchParams }: { searchParams: Promise<{ registration?: string; account?: string }> }) {
   const user = await getSessionUser();
   const params = await searchParams;
 
@@ -14,6 +14,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
   if (user?.role === "LEADER") {
     redirect("/dashboard/leader");
+  }
+
+  if (user?.role === "MANAJER") {
+    redirect("/dashboard/manajer");
   }
 
   return (
@@ -30,6 +34,16 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           {params.registration === "pending" && (
             <p role="status" className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
               Pendaftaran berhasil. Akun Anda menunggu persetujuan admin; Anda bisa masuk setelah disetujui.
+            </p>
+          )}
+          {params.account === "disabled" && (
+            <p role="alert" className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-800">
+              Akun Anda dinonaktifkan oleh admin. Anda telah dikeluarkan dari sesi.
+            </p>
+          )}
+          {params.account === "session-expired" && (
+            <p role="alert" className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
+              Sesi Anda berakhir. Silakan masuk kembali.
             </p>
           )}
           <LoginForm />

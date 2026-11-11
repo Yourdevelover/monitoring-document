@@ -21,7 +21,7 @@ export default async function LeaderProfileRequestsPage({
 }) {
   const leader = await requireLeader();
   const params = await searchParams;
-  const pageSize = 6;
+  const pageSize = 20;
   const requestedPage = Math.max(1, Number(params.page) || 1);
 
   const team = await prisma.team.findUnique({

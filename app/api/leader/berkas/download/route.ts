@@ -8,7 +8,7 @@ import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
 
 export const runtime = "nodejs";
 
-const VALID_CATEGORIES = new Set(["DAILY", "CHAT", "PAYMENT"]);
+const VALID_CATEGORIES = new Set(["DAILY", "CHAT", "PAYMENT", "OTHER"]);
 
 type DownloadRecord = {
   filePath: string;
@@ -46,7 +46,7 @@ export async function GET(request: Request) {
 
   const uploadRecords: DownloadRecord[] = historyOnly
     ? (await prisma.uploadHistory.findMany({
-        where: { teamId: team.id, category: category as "DAILY" | "CHAT" | "PAYMENT" },
+        where: { teamId: team.id, category: category as "DAILY" | "CHAT" | "PAYMENT" | "OTHER" },
         include: { user: true },
         orderBy: { submittedAt: "asc" },
       })).map((upload) => ({
@@ -58,7 +58,7 @@ export async function GET(request: Request) {
     : (await prisma.upload.findMany({
         where: {
           teamId: team.id,
-          category: category as "DAILY" | "CHAT" | "PAYMENT",
+          category: category as "DAILY" | "CHAT" | "PAYMENT" | "OTHER",
           isSubmitted: true,
           isImportant: false,
           submissionDate: { gte: getStartOfCurrentJakartaDay() },

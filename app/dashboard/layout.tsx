@@ -6,7 +6,7 @@ import { NotesWidget } from "@/app/components/notes-widget";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await getSessionUser();
-  const notes = user
+  const notes = user && user.role !== "MANAJER"
     ? await prisma.$queryRaw<Array<{ id: number; content: string; createdAt: Date; updatedAt: Date }>>(
         Prisma.sql`SELECT id, content, "createdAt", "updatedAt" FROM personal_notes WHERE "userId" = ${user.id} ORDER BY "updatedAt" DESC`
       )
@@ -15,7 +15,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <>
       <DashboardAutoRefresh />
-      {user && <NotesWidget initialNotes={notes} />}
+      {user && user.role !== "MANAJER" && <NotesWidget initialNotes={notes} />}
       {children}
     </>
   );

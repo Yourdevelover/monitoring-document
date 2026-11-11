@@ -22,12 +22,13 @@ export async function POST(request: Request) {
     const name = String(formData.get("name") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim().toLowerCase();
     const password = String(formData.get("password") ?? "");
+    const departmentId = Number(formData.get("departmentId") ?? 0);
 
-    if (!name || !email || password.length < 6) {
+    if (!name || !email || !/^\d{6}$/.test(password) || !Number.isInteger(departmentId) || departmentId <= 0) {
       return NextResponse.json(
         {
           success: false,
-          error: "Nama, email, dan password wajib diisi dengan password minimal 6 karakter.",
+          error: "Nama, email, departemen, dan password 6 angka wajib diisi.",
         },
         { status: 400 }
       );
@@ -47,6 +48,11 @@ export async function POST(request: Request) {
       );
     }
 
+    const department = await prisma.department.findFirst({ where: { id: departmentId, isActive: true } });
+    if (!department) {
+      return NextResponse.json({ success: false, error: "Departemen tidak ditemukan atau nonaktif." }, { status: 400 });
+    }
+
     const passwordHash = await hash(password, 10);
 
     const newAdmin = await prisma.user.create({
@@ -55,6 +61,7 @@ export async function POST(request: Request) {
         email,
         passwordHash,
         role: "ADMIN",
+        departmentId: department.id,
         isActive: "ACTIVE",
       },
     });

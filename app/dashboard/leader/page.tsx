@@ -10,7 +10,7 @@ export default async function LeaderDashboardPage({
 }) {
   const leader = await requireLeader();
   const params = await searchParams;
-  const pageSize = 6;
+  const pageSize = 20;
   const requestedPage = Math.max(1, Number(params.page) || 1);
   const activeSince = new Date();
   activeSince.setHours(activeSince.getHours() - 12);

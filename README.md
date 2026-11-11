@@ -1,6 +1,6 @@
 # Monitoring — Sistem Berkas Tim
 
-Aplikasi monitoring berkas tim berbasis web dengan 3 peran: **Admin**, **Leader**, dan **Karyawan**. Leader membagikan berkas ke tim, karyawan mengunggah dan mengirim berkas harian (daily/chat/payment), menyimpan data prioritas, mengajukan perubahan profil, dan memantau target. Semua file disajikan lewat API dengan kontrol akses per tim.
+Aplikasi monitoring berkas tim berbasis web dengan 4 peran: **Admin**, **Leader**, **Karyawan**, dan **Manajer**. Manajer dibuat oleh admin, berada di departemen Backoffice/Pendukung, dan memiliki akses baca lintas departemen. Leader membagikan berkas ke tim dan menambah akun karyawan; karyawan mengunggah dan mengirim berkas harian (daily/chat/payment), menyimpan data prioritas, mengajukan perubahan profil, dan memantau target. Semua file disajikan lewat API dengan kontrol akses.
 
 ## Tech Stack
 

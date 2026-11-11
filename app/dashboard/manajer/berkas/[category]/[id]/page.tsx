@@ -1,68 +1,52 @@
+import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireLeader } from "@/lib/auth";
-import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
+import { requireManajer } from "@/lib/auth";
 
-const CATEGORY_KEYS = {
-  "daily": "DAILY",
-  "chat": "CHAT",
-  "payment": "PAYMENT",
-} as const;
+const categories = { daily: "DAILY", chat: "CHAT", payment: "PAYMENT", other: "OTHER" } as const;
 
-type FileDetailPageProps = {
-  params: Promise<{ category: string; id: string }>;
-};
-
-export default async function LeaderFileDetailPage({ params }: FileDetailPageProps) {
-  const leader = await requireLeader();
+export default async function ManagerFileDetailPage({ params }: { params: Promise<{ category: string; id: string }> }) {
+  await requireManajer();
   const { category, id } = await params;
-  const categoryKey = CATEGORY_KEYS[category as keyof typeof CATEGORY_KEYS];
+  const selected = categories[category as keyof typeof categories];
   const uploadId = Number(id);
-
-  const team = await prisma.team.findUnique({ where: { leaderId: leader.id } });
-  const upload = categoryKey && team && uploadId
-    ? await prisma.upload.findFirst({
-        where: {
-          id: uploadId,
-          teamId: team.id,
-          category: categoryKey,
-          isSubmitted: true,
-        },
-        include: { user: true },
-      })
-    : null;
-
-  if (!upload) {
-    return <p className="text-sm text-[#6b7280]">Berkas tidak ditemukan.</p>;
-  }
+  if (!selected || !Number.isInteger(uploadId) || uploadId <= 0) notFound();
+  const upload = await prisma.upload.findFirst({ where: { id: uploadId, category: selected }, include: { user: true, team: { include: { department: true } } } });
+  if (!upload) notFound();
 
   return (
-    <main className="min-h-screen text-[#111111]">
+    <main className="min-h-screen bg-[#f8f9fa] px-4 py-5 text-[#111111]">
       <div className="mx-auto max-w-3xl space-y-4">
-        <div className="border-b border-[#e5e7eb] pb-4">
-          <h1 className="text-base font-bold">Pratinjau Berkas</h1>
-        </div>
-
-        <section className="space-y-2">
-          <p className="text-sm font-medium">{upload.fileName}</p>
-          <p className="text-sm text-[#6b7280]">Kategori: {upload.category.toLowerCase()}</p>
-          <p className="text-sm text-[#6b7280]">Karyawan: {upload.user.name}</p>
-          <p className="text-xs text-[#6b7280]">
-            Dikirim: {new Date(upload.submissionDate).toLocaleString("id-ID")}
-          </p>
-          <a
-            href={upload.filePath}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-flex rounded-lg bg-[#111111] px-4 py-2 text-sm font-medium text-white hover:bg-[#333333]"
-          >
-            Lihat / Unduh Berkas
-          </a>
+        <header className="border-b border-[#e5e7eb] pb-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">Informasi berkas</p>
+          <h1 className="mt-1 break-words text-[15px] font-semibold">{upload.fileName}</h1>
+        </header>
+        <section className="grid gap-3 border-y border-[#d1d5db] bg-white p-4 sm:grid-cols-2">
+          <Info label="Karyawan" value={upload.user.name} />
+          <Info label="Email" value={upload.user.email} />
+          <Info label="Departemen" value={upload.team.department.name} />
+          <Info label="Tim" value={upload.team.name} />
+          <Info label="Kategori" value={upload.category} />
+          <Info label="Status" value={upload.status} />
+          <Info label="Dikirim" value={upload.submissionDate.toLocaleString("id-ID")} />
         </section>
-
-        <div className="flex justify-end">
-          <BackToPreviousButton />
-        </div>
+        <a
+          href={upload.filePath}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex rounded bg-[#111111] px-4 py-2 text-xs font-semibold text-white"
+        >
+          Lihat / Unduh
+        </a>
       </div>
     </main>
+  );
+}
+
+function Info({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[11px] text-[#6b7280]">{label}</p>
+      <p className="mt-1 break-words text-xs font-medium">{value}</p>
+    </div>
   );
 }

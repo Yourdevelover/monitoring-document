@@ -13,11 +13,14 @@ type AdminSidebarProps = {
 export function AdminSidebar({ navItems }: AdminSidebarProps) {
   const [isOpen, setIsOpen] = useState(true);
   const pathname = usePathname();
-  const isActive = (href: string) =>
-    pathname === href ||
-    pathname.startsWith(`${href}/`) ||
-    (href === "/dashboard/admin/users" &&
-      (pathname.startsWith("/dashboard/admin/leaders") || pathname.startsWith("/dashboard/admin/karyawan")));
+  const isActive = (href: string) => {
+    if (href === "/dashboard/admin") return pathname === href;
+
+    return pathname === href ||
+      pathname.startsWith(`${href}/`) ||
+      (href === "/dashboard/admin/users" &&
+        (pathname.startsWith("/dashboard/admin/leaders") || pathname.startsWith("/dashboard/admin/karyawan") || pathname.startsWith("/dashboard/admin/managers")));
+  };
 
   return (
     <aside className={`relative ${isOpen ? "w-56" : "w-14"} shrink-0 bg-[#18181b] text-[#d4d4d8] transition-[width] duration-200`}>

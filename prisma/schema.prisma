@@ -11,6 +11,7 @@ enum Role {
   ADMIN
   LEADER
   KARYAWAN
+  MANAJER
 }
 
 enum UserStatus {
@@ -30,6 +31,7 @@ enum FileCategory {
   DAILY
   CHAT
   PAYMENT
+  OTHER
 }
 
 enum UploadStatus {
@@ -45,9 +47,12 @@ model User {
   nik           String?        @unique
   email         String       @unique
   phoneNumber   String?
+  address       String?
   passwordHash  String
   role          Role
   teamId        Int?
+  departmentId  Int?
+  position      String?
   isActive      UserStatus   @default(ACTIVE)
   profilePicture String?
   lastLoginAt   DateTime?
@@ -55,6 +60,7 @@ model User {
   updatedAt     DateTime     @updatedAt
 
   team            Team?            @relation("TeamMembers", fields: [teamId], references: [id])
+  department      Department?      @relation(fields: [departmentId], references: [id], onDelete: SetNull)
   ledTeam         Team?            @relation("TeamLeader")
   uploads         Upload[]
   uploadHistory   UploadHistory[]
@@ -99,6 +105,7 @@ model Department {
   updatedAt DateTime @updatedAt
 
   teams     Team[]
+  users     User[]
 
   @@map("departments")
 }

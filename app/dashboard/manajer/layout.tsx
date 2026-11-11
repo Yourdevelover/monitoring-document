@@ -1,37 +1,34 @@
-import { requireLeader } from "@/lib/auth";
+import { requireManajer } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NotificationButton } from "@/app/components/notification-button";
 import { LeaderSidebar } from "./leader-sidebar";
 
-export default async function LeaderLayout({
+export default async function ManajerLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const leader = await requireLeader();
+  await requireManajer();
   const activeSince = new Date();
   activeSince.setHours(activeSince.getHours() - 12);
-  const team = await prisma.team.findUnique({
-    where: { leaderId: leader.id },
-    include: {
-      announcements: {
-        where: {
-          OR: [{ isPinned: true }, { createdAt: { gte: activeSince } }],
-        },
-        orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
-      },
-    },
+  const announcements = await prisma.announcement.findMany({
+    where: { OR: [{ isPinned: true }, { createdAt: { gte: activeSince } }] },
+    orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
+    take: 8,
   });
-  const announcements = team?.announcements ?? [];
-
   const navItems = [
-    { href: "/dashboard/leader", label: "Dashboard" },
-    { href: "/dashboard/leader/karyawan", label: "Karyawan" },
-    { href: "/dashboard/leader/berkas", label: "Berkas" },
-    { href: "/dashboard/leader/histori-berkas", label: "Histori Berkas" },
-    { href: "/dashboard/leader/target", label: "Target" },
-    { href: "/dashboard/leader/pengajuan-profil", label: "Persetujuan Profil" },
-    { href: "/dashboard/leader/profil", label: "Profil" },
+    { href: "/dashboard/manajer", label: "Dashboard" },
+    { href: "/dashboard/manajer/karyawan", label: "Karyawan" },
+    { href: "/dashboard/manajer/pengguna", label: "Pengguna" },
+    { href: "/dashboard/manajer/leader", label: "Leader" },
+    { href: "/dashboard/manajer/organisasi", label: "Organisasi" },
+    { href: "/dashboard/manajer/aktivitas", label: "Aktivitas" },
+    { href: "/dashboard/manajer/berkas", label: "Berkas" },
+    { href: "/dashboard/manajer/histori-berkas", label: "Histori Berkas" },
+    { href: "/dashboard/manajer/target", label: "Target" },
+    { href: "/dashboard/manajer/pengajuan-profil", label: "Pengajuan Profil" },
+    { href: "/dashboard/manajer/announcement", label: "Pengumuman" },
+    { href: "/dashboard/manajer/profil", label: "Profil" },
   ];
 
   return (
@@ -42,21 +39,17 @@ export default async function LeaderLayout({
           <div className="leader-announcement-bar" role="status" aria-live="polite">
             <NotificationButton href="/dashboard/manajer/announcement" count={announcements.length} />
             <div className="leader-announcement-viewport">
-              {announcements.length > 0 ? (
+              {announcements.length ? (
                 <p className="leader-announcement-single">
-                  {announcements.map((announcement, index) => (
-                    <span key={announcement.id}>
-                      {index > 0 && "  •  "}
-                      <span className={announcement.isPinned ? "leader-announcement-important" : undefined}>
-                        {announcement.title
-                          ? `${announcement.title} - ${announcement.content}`
-                          : announcement.content}
-                      </span>
+                  {announcements.map((item, index) => (
+                    <span key={item.id}>
+                      {index > 0 && "  ·  "}
+                      {item.title ? `${item.title} - ${item.content}` : item.content}
                     </span>
                   ))}
                 </p>
               ) : (
-                <p className="leader-announcement-empty">Belum ada announcement terbaru dari leader.</p>
+                <p className="leader-announcement-empty">Belum ada pengumuman terbaru.</p>
               )}
             </div>
           </div>

@@ -23,6 +23,7 @@ export async function POST(request: Request) {
     const name = String(formData.get("name") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim().toLowerCase();
     const phoneNumber = String(formData.get("phoneNumber") ?? "").trim();
+    const address = String(formData.get("address") ?? "").trim();
     const password = String(formData.get("password") ?? "");
 
     if (!userId || !name || !email) {
@@ -67,11 +68,13 @@ export async function POST(request: Request) {
       name: string;
       email: string;
       phoneNumber: string | null;
+      address: string | null;
       passwordHash?: string;
     } = {
       name,
       email,
       phoneNumber: phoneNumber || null,
+      address: address || null,
     };
 
     if (password) {

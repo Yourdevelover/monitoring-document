@@ -71,13 +71,6 @@ function AdminLeaderCard({ leader }: { leader: LeaderSearchListProps["leaders"][
               </div>
               <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusClass}`}>{statusLabel}</span>
             </header>
-            <section className="border-y border-[#e9ecef] bg-[#f7f9fa] px-4 py-3">
-              <h3 className="mb-2 text-xs font-semibold text-[#111111]">Aktivitas Akun Terakhir</h3>
-              <div className="border-l-2 border-[#5c8f68] pl-3">
-                <p className="text-[11px] text-[#6b7280]">Login terakhir</p>
-                <p className="mt-1 text-xs font-medium text-[#111111]">{leader.latestLoginAt ? new Date(leader.latestLoginAt).toLocaleString("id-ID") : "Belum ada data"}</p>
-              </div>
-            </section>
             <div className="px-4 py-3">
               <h3 className="mb-1 text-xs font-semibold text-[#111111]">Rincian Profil</h3>
               <dl className="divide-y divide-[#f1f3f5] text-xs">
@@ -96,6 +89,13 @@ function AdminLeaderCard({ leader }: { leader: LeaderSearchListProps["leaders"][
               ))}
             </dl>
             </div>
+            <section className="border-y border-[#e9ecef] bg-[#f7f9fa] px-4 py-3">
+              <h3 className="mb-2 text-xs font-semibold text-[#111111]">Aktivitas Akun Terakhir</h3>
+              <div className="border-l-2 border-[#5c8f68] pl-3">
+                <p className="text-[11px] text-[#6b7280]">Login terakhir</p>
+                <p className="mt-1 text-xs font-medium text-[#111111]">{leader.latestLoginAt ? new Date(leader.latestLoginAt).toLocaleString("id-ID") : "Belum ada data"}</p>
+              </div>
+            </section>
             <div className="border-t border-[#e9ecef] px-4 py-3">
             <Link href={`/dashboard/admin/leaders/${leader.id}`} onClick={() => setIsOpen(false)} className="block w-full rounded-md border border-[#e1f3fe] px-3 py-2 text-center text-xs font-medium text-[#1f6c9f] hover:bg-[#e1f3fe]">Lihat info lebih lanjut</Link>
             {leader.isActive === "PENDING" || leader.isActive === "REJECTED" ? null : (

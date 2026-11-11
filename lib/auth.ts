@@ -63,6 +63,22 @@ export const getSessionUser = cache(async function getSessionUser() {
   }
 });
 
+export async function getSessionStatus(): Promise<"active" | "disabled" | "unauthenticated"> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
+  if (!token) return "unauthenticated";
+
+  try {
+    const { payload } = await jwtVerify(token, getSessionSecret());
+    const userId = Number(payload.userId);
+    if (!userId) return "unauthenticated";
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { isActive: true } });
+    return user?.isActive === "ACTIVE" ? "active" : "disabled";
+  } catch {
+    return "unauthenticated";
+  }
+}
+
 export async function requireAdmin() {
   const user = await getSessionUser();
 
@@ -77,6 +93,16 @@ export async function requireLeader() {
   const user = await getSessionUser();
 
   if (!user || user.role !== "LEADER") {
+    redirect("/");
+  }
+
+  return user;
+}
+
+export async function requireManajer() {
+  const user = await getSessionUser();
+
+  if (!user || user.role !== "MANAJER") {
     redirect("/");
   }
 

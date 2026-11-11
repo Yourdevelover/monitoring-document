@@ -7,7 +7,7 @@ import { PaginationControls } from "@/app/components/pagination-controls";
 export default async function HistoriBerkasPage({ searchParams }: { searchParams: Promise<{ page?: string; expiredPage?: string }> }) {
   const employee = await requireEmployee();
   const params = await searchParams;
-  const pageSize = 6;
+  const pageSize = 20;
   const requestedPage = Math.max(1, Number(params.page) || 1);
   const requestedExpiredPage = Math.max(1, Number(params.expiredPage) || 1);
 

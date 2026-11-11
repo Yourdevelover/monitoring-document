@@ -13,7 +13,7 @@ export default async function LeaderEmployeesPage({
   const leader = await requireLeader();
   const { q, page: pageParam } = await searchParams;
   const searchTerm = q?.trim() ?? "";
-  const pageSize = 6;
+  const pageSize = 20;
   const requestedPage = Math.max(1, Number(pageParam) || 1);
   const memberWhere = {
     teamId: 0,
@@ -42,6 +42,7 @@ export default async function LeaderEmployeesPage({
         skip: (page - 1) * pageSize,
         take: pageSize,
         include: {
+          department: true,
           uploads: { orderBy: { submissionDate: "desc" } },
           activityLogs: {
             where: { action: "LOGIN" },
@@ -102,6 +103,7 @@ export default async function LeaderEmployeesPage({
                   <div className="min-w-0">
                     <p className="truncate text-[13px] font-medium text-[#111111]">{member.name}</p>
                     <p className="truncate text-[11px] text-[#6b7280]">{member.email}</p>
+                    <p className="truncate text-[10px] text-[#9ca3af]">{member.department?.name ?? "-"} · {member.position ?? "Jabatan belum diisi"}</p>
                   </div>
                 </div>
 

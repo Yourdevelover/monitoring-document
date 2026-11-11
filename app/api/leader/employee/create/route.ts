@@ -12,6 +12,7 @@ export async function POST(request: Request) {
     const bulkEmployees = String(formData.get("employees") ?? "").trim();
     const name = String(formData.get("name") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim().toLowerCase();
+    const position = String(formData.get("position") ?? "").trim();
     const password = String(formData.get("password") ?? "");
 
     if (bulkEmployees) {
@@ -24,18 +25,19 @@ export async function POST(request: Request) {
         return row.split(delimiter).map((value) => value.trim());
       });
       const invalidRow = employeeParts.findIndex(
-        (parts) => parts.length !== 3 || parts.some((part) => !part)
+        (parts) => parts.length !== 4 || parts.some((part) => !part)
       );
       if (invalidRow >= 0) {
         return NextResponse.json(
-          { success: false, error: `Baris ${invalidRow + 1} harus memakai format: nama,email,password.` },
+          { success: false, error: `Baris ${invalidRow + 1} harus memakai format: nama,email,jabatan,password.` },
           { status: 400 }
         );
       }
 
-      const employees = employeeParts.map(([employeeName, employeeEmail, employeePassword]) => ({
+      const employees = employeeParts.map(([employeeName, employeeEmail, employeePosition, employeePassword]) => ({
         name: employeeName,
         email: employeeEmail.toLowerCase(),
+        position: employeePosition,
         password: employeePassword,
       }));
 
@@ -47,19 +49,21 @@ export async function POST(request: Request) {
       }
 
       const emails = employees.map((employee) => employee.email);
-      if (new Set(emails).size !== emails.length || employees.some((employee) => employee.password.length < 6)) {
+      if (new Set(emails).size !== emails.length || employees.some((employee) => !/^\d{6}$/.test(employee.password))) {
         return NextResponse.json(
-          { success: false, error: "Email dalam daftar tidak boleh duplikat dan password minimal 6 karakter." },
+          { success: false, error: "Email tidak boleh duplikat dan password harus tepat 6 angka." },
           { status: 400 }
         );
       }
 
-      const defaultDepartment = await prisma.department.findFirst({ where: { name: "Collection/Penagihan" } });
-      if (!defaultDepartment) return NextResponse.json({ error: "Departemen Collection/Penagihan belum tersedia." }, { status: 500 });
+      const leaderDepartment = leader.departmentId
+        ? await prisma.department.findFirst({ where: { id: leader.departmentId, isActive: true } })
+        : null;
+      if (!leaderDepartment) return NextResponse.json({ error: "Departemen Leader belum ditentukan atau sudah nonaktif." }, { status: 400 });
       const team = await prisma.team.upsert({
         where: { leaderId: leader.id },
         update: {},
-        create: { name: `Tim ${leader.name}`, leaderId: leader.id, departmentId: defaultDepartment.id, isActive: true },
+        create: { name: `Tim ${leader.name}`, leaderId: leader.id, departmentId: leaderDepartment.id, isActive: true },
       });
 
       const existingUsers = await prisma.user.findMany({
@@ -89,6 +93,8 @@ export async function POST(request: Request) {
               passwordHash: employee.passwordHash,
               role: "KARYAWAN",
               teamId: team.id,
+              departmentId: team.departmentId,
+              position: employee.position,
               isActive: "ACTIVE",
             },
           });
@@ -107,22 +113,24 @@ export async function POST(request: Request) {
       return NextResponse.redirect(new URL("/dashboard/leader/karyawan", getBaseUrl(request)));
     }
 
-    if (!name || !email || password.length < 6) {
+    if (!name || !email || !position || !/^\d{6}$/.test(password)) {
       return NextResponse.json(
         {
           success: false,
-          error: "Nama, email, dan password wajib diisi dengan password minimal 6 karakter.",
+          error: "Nama, email, jabatan, dan password 6 angka wajib diisi.",
         },
         { status: 400 }
       );
     }
 
-    const defaultDepartment = await prisma.department.findFirst({ where: { name: "Collection/Penagihan" } });
-    if (!defaultDepartment) return NextResponse.json({ error: "Departemen Collection/Penagihan belum tersedia." }, { status: 500 });
+    const leaderDepartment = leader.departmentId
+      ? await prisma.department.findFirst({ where: { id: leader.departmentId, isActive: true } })
+      : null;
+    if (!leaderDepartment) return NextResponse.json({ error: "Departemen Leader belum ditentukan atau sudah nonaktif." }, { status: 400 });
     const team = await prisma.team.upsert({
       where: { leaderId: leader.id },
       update: {},
-      create: { name: `Tim ${leader.name}`, leaderId: leader.id, departmentId: defaultDepartment.id, isActive: true },
+      create: { name: `Tim ${leader.name}`, leaderId: leader.id, departmentId: leaderDepartment.id, isActive: true },
     });
 
     const existingUser = await prisma.user.findUnique({
@@ -148,6 +156,8 @@ export async function POST(request: Request) {
         passwordHash,
         role: "KARYAWAN",
         teamId: team.id,
+        departmentId: team.departmentId,
+        position,
         isActive: "ACTIVE",
       },
     });

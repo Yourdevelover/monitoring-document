@@ -12,41 +12,39 @@ export async function POST(request: Request) {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const phoneNumber = String(formData.get("phoneNumber") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  if (!name || !email || password.length < 6) return NextResponse.json({ error: "Nama, email, dan password minimal 6 karakter wajib diisi." }, { status: 400 });
+  const departmentId = Number(formData.get("departmentId") ?? 0);
+  if (!name || !email || !/^\d{6}$/.test(password) || !Number.isInteger(departmentId) || departmentId <= 0) {
+    return NextResponse.json({ error: "Nama, email, password 6 angka, dan departemen wajib diisi." }, { status: 400 });
+  }
   if (await prisma.user.findUnique({ where: { email } })) return NextResponse.json({ error: "Email sudah digunakan." }, { status: 409 });
+  const department = await prisma.department.findFirst({ where: { id: departmentId, isActive: true } });
+  if (!department) return NextResponse.json({ error: "Departemen tidak ditemukan atau nonaktif." }, { status: 400 });
   const passwordHash = await hash(password, 10);
-  const defaultDepartment = await prisma.department.findUniqueOrThrow({ where: { name: "Collection/Penagihan" } });
 
-  await prisma.$transaction(async (tx) => {
-    const leader = await tx.user.create({
+  const manager = await prisma.$transaction(async (tx) => {
+    const createdManager = await tx.user.create({
       data: {
         name,
         email,
         phoneNumber: phoneNumber || null,
         passwordHash,
-        role: "LEADER",
+        role: "MANAJER",
+        departmentId: department.id,
         isActive: "ACTIVE",
-      },
-    });
-
-    const team = await tx.team.create({
-      data: {
-        name: `Tim ${name}`,
-        leaderId: leader.id,
-        departmentId: defaultDepartment.id,
-        isActive: true,
       },
     });
 
     await tx.activityLog.create({
       data: {
         actorId: admin.id,
-        action: "CREATE_LEADER",
-        targetType: "TEAM",
-        targetId: team.id,
-        description: `Admin ${admin.email} membuat akun leader ${leader.email} dan tim ${team.name}.`,
+        action: "CREATE_MANAGER",
+        targetType: "USER",
+        targetId: createdManager.id,
+        description: `Admin ${admin.email} membuat akun manajer ${createdManager.email} di departemen ${department.name}.`,
       },
     });
+
+    return createdManager;
   });
-  return NextResponse.redirect(new URL("/dashboard/admin/leaders", getBaseUrl(request)));
+  return NextResponse.redirect(new URL(`/dashboard/admin/managers/${manager.id}`, getBaseUrl(request)));
 }

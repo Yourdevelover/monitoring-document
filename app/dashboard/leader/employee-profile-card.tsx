@@ -113,7 +113,7 @@ export function EmployeeProfileCard({ employee, files = [], mode = "avatar" }: E
               <div className="flex justify-between gap-4 py-3">
                 <dt className="text-[#6b7280]">Status berkas</dt>
                 <dd className="flex flex-wrap justify-end gap-2 text-xs font-medium text-[#111111]">
-                  {["DAILY", "CHAT", "PAYMENT"].map((category) => {
+                  {["DAILY", "CHAT", "PAYMENT", "OTHER"].map((category) => {
                     const file = files.find((item) => item.category === category);
                     return (
                       <span key={category}>
@@ -122,10 +122,10 @@ export function EmployeeProfileCard({ employee, files = [], mode = "avatar" }: E
                             href={`/dashboard/leader/berkas/${category.toLowerCase()}/${file.id}`}
                             className="text-[#1f6c9f] hover:text-[#1d4ed8] hover:underline"
                           >
-                            ✓ {category.replace("DAILY", "daily").replace("CHAT", "chat").replace("PAYMENT", "payment")}
+                            ✓ {category === "OTHER" ? "Berkas Lainnya" : category.replace("DAILY", "daily").replace("CHAT", "chat").replace("PAYMENT", "payment")}
                           </Link>
                         ) : (
-                          <span className="text-[#6b7280]">✕ {category.replace("DAILY", "daily").replace("CHAT", "chat").replace("PAYMENT", "payment")}</span>
+                          <span className="text-[#6b7280]">✕ {category === "OTHER" ? "Berkas Lainnya" : category.replace("DAILY", "daily").replace("CHAT", "chat").replace("PAYMENT", "payment")}</span>
                         )}
                       </span>
                     );

@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { Logo } from "@/app/components/logo";
+import { prisma } from "@/lib/prisma";
+import { GeneratedPasswordInput } from "@/app/components/generated-password-input";
 
-export default function LeaderRegistrationPage() {
+export default async function LeaderRegistrationPage() {
+  const departments = await prisma.department.findMany({ where: { isActive: true }, orderBy: { name: "asc" } });
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#f8f9fa] px-6 py-12 text-[#111111]">
       <div className="w-full max-w-md">
@@ -47,13 +51,23 @@ export default function LeaderRegistrationPage() {
               <label htmlFor="password" className="mb-1.5 block text-sm font-medium">
                 Password
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
+              <GeneratedPasswordInput id="password" className="min-w-0 flex-1 rounded-md border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20" />
+            </div>
+
+            <div>
+              <label htmlFor="departmentId" className="mb-1.5 block text-sm font-medium">
+                Departemen
+              </label>
+              <select
+                id="departmentId"
+                name="departmentId"
                 required
+                defaultValue=""
                 className="w-full rounded-md border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
-              />
+              >
+                <option value="" disabled>Pilih departemen</option>
+                {departments.map((department) => <option key={department.id} value={department.id}>{department.name}</option>)}
+              </select>
             </div>
 
             <button

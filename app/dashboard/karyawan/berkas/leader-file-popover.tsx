@@ -41,7 +41,7 @@ export function LeaderFilePopover({ file }: { file: SharedFile }) {
           <p className="text-sm font-semibold text-[#111111]">{file.title}</p>
           <p className="mt-1 break-all text-xs text-[#6b7280]">{file.fileName}</p>
           <p className="mt-2 text-xs text-[#6b7280]">
-            Kategori: {file.category} • oleh {file.uploaderName}
+            Kategori: {file.category === "OTHER" ? "Berkas Lainnya" : file.category.toLowerCase()} • oleh {file.uploaderName}
           </p>
           <div className="mt-3 flex gap-2">
             <a

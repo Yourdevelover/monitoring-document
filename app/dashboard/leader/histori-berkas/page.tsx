@@ -6,6 +6,7 @@ const categories = [
   { key: "DAILY", label: "daily" },
   { key: "CHAT", label: "chat" },
   { key: "PAYMENT", label: "payment" },
+  { key: "OTHER", label: "Berkas Lainnya" },
 ] as const;
 
 type CategoryKey = (typeof categories)[number]["key"];

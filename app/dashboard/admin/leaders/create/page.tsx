@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
+import { GeneratedPasswordInput } from "@/app/components/generated-password-input";
 
 export default async function CreateLeaderPage() {
   await requireAdmin();
@@ -18,7 +19,10 @@ export default async function CreateLeaderPage() {
         <input name="name" placeholder="Nama leader" required className="border border-[#e5e7eb] px-3 py-2" />
         <input name="email" type="email" placeholder="Email" required className="border border-[#e5e7eb] px-3 py-2" />
         <input name="phoneNumber" type="tel" placeholder="Nomor telepon (opsional)" className="border border-[#e5e7eb] px-3 py-2" />
-        <input name="password" type="password" placeholder="Password" required minLength={6} className="border border-[#e5e7eb] px-3 py-2" />
+        <label className="grid gap-1 text-xs font-medium text-[#111111]">
+          Password
+          <GeneratedPasswordInput className="min-w-0 flex-1 rounded-md border border-[#e5e7eb] px-3 py-2 text-sm" />
+        </label>
         <label className="grid gap-1 text-xs font-medium text-[#111111]">
           Departemen
           <select name="departmentId" required defaultValue="" className="border border-[#e5e7eb] px-3 py-2 font-normal text-sm">

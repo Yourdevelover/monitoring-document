@@ -9,6 +9,7 @@ const CATEGORY_LABELS = {
   "daily": { key: "DAILY", label: "daily" },
   "chat": { key: "CHAT", label: "chat" },
   "payment": { key: "PAYMENT", label: "payment" },
+  "other": { key: "OTHER", label: "Berkas Lainnya" },
 } as const;
 
 type CategoryPageProps = {
@@ -20,7 +21,7 @@ export default async function LeaderCategoryPage({ params, searchParams }: Categ
   const leader = await requireLeader();
   const { category } = await params;
   const { employee: selectedEmployeeId, q, page: pageParam } = await searchParams;
-  const pageSize = 6;
+  const pageSize = 20;
   const requestedPage = Math.max(1, Number(pageParam) || 1);
   const searchTerm = q?.trim() ?? "";
   const startOfToday = getStartOfCurrentJakartaDay();

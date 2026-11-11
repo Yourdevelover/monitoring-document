@@ -9,46 +9,46 @@ export async function POST(request: Request) {
   const formData = await request.formData();
   const userId = Number(formData.get("userId"));
   const action = String(formData.get("action") ?? "");
-  const leader = await prisma.user.findFirst({ where: { id: userId, role: "LEADER" }, include: { ledTeam: true } });
-  if (!leader) return NextResponse.json({ error: "Leader tidak ditemukan." }, { status: 404 });
+  const manager = await prisma.user.findFirst({ where: { id: userId, role: "MANAJER" } });
+  if (!manager) return NextResponse.json({ error: "Manajer tidak ditemukan." }, { status: 404 });
 
-  if (action === "approve" || action === "reject") {
-    if (leader.isActive !== "PENDING") {
-      return NextResponse.redirect(new URL("/dashboard/admin/leaders", getBaseUrl(request)));
-    }
-
-    const approved = action === "approve";
-    await prisma.$transaction(async (transaction) => {
-      const updated = await transaction.user.updateMany({
-        where: { id: userId, role: "LEADER", isActive: "PENDING" },
-        data: { isActive: approved ? "ACTIVE" : "REJECTED" },
-      });
-      if (updated.count === 0) return;
-
-      await transaction.team.updateMany({
-        where: { leaderId: userId },
-        data: { isActive: approved },
-      });
-      await transaction.activityLog.create({
-        data: {
-          actorId: admin.id,
-          action: approved ? "APPROVE_LEADER" : "REJECT_LEADER",
-          targetType: "USER",
-          targetId: userId,
-          description: `Admin ${admin.email} ${approved ? "menyetujui" : "menolak"} pendaftaran leader ${leader.email}.`,
+  if (action === "deactivate" || action === "activate") {
+    if (action === "deactivate" && manager.departmentId) {
+      const activeEmployees = await prisma.user.count({
+        where: {
+          role: "KARYAWAN",
+          isActive: "ACTIVE",
+          OR: [
+            { departmentId: manager.departmentId },
+            { team: { departmentId: manager.departmentId } },
+          ],
         },
       });
+      if (activeEmployees > 0) {
+        const blockedUrl = new URL("/dashboard/admin/managers", getBaseUrl(request));
+        blockedUrl.searchParams.set("toast", `Manajer tidak dapat dinonaktifkan karena masih ada ${activeEmployees} karyawan aktif di departemennya.`);
+        blockedUrl.searchParams.set("toastType", "error");
+        return NextResponse.redirect(blockedUrl);
+      }
+    }
+    await prisma.user.update({
+      where: { id: userId },
+      data: { isActive: action === "activate" ? "ACTIVE" : "INACTIVE" },
     });
-  } else if (action === "deactivate") {
-    await prisma.user.update({ where: { id: userId }, data: { isActive: "INACTIVE" } });
-  } else if (action === "activate") {
-    await prisma.user.update({ where: { id: userId }, data: { isActive: "ACTIVE" } });
-  } else if (action === "delete") {
-    if (leader.ledTeam) return NextResponse.json({ error: "Leader masih memiliki tim. Nonaktifkan akun terlebih dahulu." }, { status: 409 });
-    await prisma.user.delete({ where: { id: userId } });
+    await prisma.activityLog.create({
+      data: {
+        actorId: admin.id,
+        action: action === "activate" ? "ACTIVATE_MANAGER" : "DEACTIVATE_MANAGER",
+        targetType: "USER",
+        targetId: userId,
+        description: `Admin ${admin.email} ${action === "activate" ? "mengaktifkan" : "menonaktifkan"} manajer ${manager.email}.`,
+      },
+    });
   } else {
     return NextResponse.json({ error: "Aksi tidak valid." }, { status: 400 });
   }
 
-  return NextResponse.redirect(new URL("/dashboard/admin/leaders", getBaseUrl(request)));
+  const responseUrl = new URL(`/dashboard/admin/managers/${userId}`, getBaseUrl(request));
+  responseUrl.searchParams.set("toast", `Akun Manajer berhasil ${action === "activate" ? "diaktifkan" : "dinonaktifkan"}.`);
+  return NextResponse.redirect(responseUrl);
 }

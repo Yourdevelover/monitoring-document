@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { enqueueFileTask } from "@/lib/upload-queue";
 import { exceedsUploadRequestLimit, MAX_UPLOAD_SIZE_BYTES } from "@/lib/upload-limits";
 
-const VALID_CATEGORIES = new Set(["DAILY", "CHAT", "PAYMENT"]);
+const VALID_CATEGORIES = new Set(["DAILY", "CHAT", "PAYMENT", "OTHER"]);
 
 export async function POST(request: Request) {
   try {
@@ -135,7 +135,7 @@ export async function POST(request: Request) {
           fileName: safeFileName,
           filePath: publicFilePath,
           fileType: file.type || "application/octet-stream",
-          category: category as "DAILY" | "CHAT" | "PAYMENT",
+          category: category as "DAILY" | "CHAT" | "PAYMENT" | "OTHER",
           status: "COMPLETED",
           isSubmitted: true,
           submissionDate: new Date(),

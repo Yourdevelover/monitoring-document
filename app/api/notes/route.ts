@@ -12,6 +12,7 @@ export async function POST(request: Request) {
   try {
     const user = await getUser();
     if (!user) return NextResponse.json({ error: "Sesi tidak valid." }, { status: 401 });
+    if (user.role === "MANAJER") return NextResponse.json({ error: "Akun manajer hanya memiliki akses baca." }, { status: 403 });
 
     const body = await request.json();
     const content = String(body.content ?? "").trim();
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   const user = await getUser();
   if (!user) return NextResponse.json({ error: "Sesi tidak valid." }, { status: 401 });
+  if (user.role === "MANAJER") return NextResponse.json({ error: "Akun manajer hanya memiliki akses baca." }, { status: 403 });
 
   const body = await request.json();
   const noteId = Number(body.id);
@@ -57,6 +59,7 @@ export async function PATCH(request: Request) {
 export async function DELETE(request: Request) {
   const user = await getUser();
   if (!user) return NextResponse.json({ error: "Sesi tidak valid." }, { status: 401 });
+  if (user.role === "MANAJER") return NextResponse.json({ error: "Akun manajer hanya memiliki akses baca." }, { status: 403 });
 
   const body = await request.json();
   const noteId = Number(body.id);

@@ -10,11 +10,16 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json({ error: "Sesi tidak valid." }, { status: 401 });
     }
+    if (user.role === "MANAJER") {
+      return NextResponse.json({ error: "Akun manajer hanya memiliki akses baca." }, { status: 403 });
+    }
 
     const formData = await request.formData();
     const name = String(formData.get("name") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim().toLowerCase();
     const phoneNumber = String(formData.get("phoneNumber") ?? "").trim();
+    const nik = String(formData.get("nik") ?? "").trim();
+    const address = String(formData.get("address") ?? "").trim();
     const password = String(formData.get("password") ?? "").trim();
 
     if (!name || !email) {
@@ -32,12 +37,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Email sudah digunakan." }, { status: 409 });
     }
 
+    if (nik) {
+      const existingNik = await prisma.user.findFirst({
+        where: { nik, NOT: { id: user.id } },
+      });
+      if (existingNik) {
+        return NextResponse.json({ error: "NIK sudah digunakan." }, { status: 409 });
+      }
+    }
+
     await prisma.user.update({
       where: { id: user.id },
       data: {
         name,
         email,
         phoneNumber: phoneNumber || null,
+        nik: nik || null,
+        address: address || null,
         ...(password ? { passwordHash: await hash(password, 10) } : {}),
       },
     });

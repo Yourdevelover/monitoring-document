@@ -6,6 +6,7 @@ const CATEGORY_KEYS = {
   "daily": "DAILY",
   "chat": "CHAT",
   "payment": "PAYMENT",
+  "other": "OTHER",
 } as const;
 
 type FileDetailPageProps = {

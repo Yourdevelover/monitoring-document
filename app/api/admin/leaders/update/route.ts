@@ -19,7 +19,9 @@ export async function POST(request: Request) {
   const duplicate = await prisma.user.findFirst({ where: { email, NOT: { id: userId } } });
   if (duplicate) return NextResponse.json({ error: "Email sudah digunakan." }, { status: 409 });
   if (!Number.isInteger(departmentId) || !await prisma.department.findFirst({ where: { id: departmentId, isActive: true } })) return NextResponse.json({ error: "Departemen tidak ditemukan atau nonaktif." }, { status: 400 });
-  await prisma.user.update({ where: { id: userId }, data: { name, email, phoneNumber: phoneNumber || null, ...(password ? { passwordHash: await hash(password, 10) } : {}) } });
-  await prisma.team.updateMany({ where: { leaderId: userId }, data: { departmentId } });
+  await prisma.$transaction([
+    prisma.user.update({ where: { id: userId }, data: { name, email, phoneNumber: phoneNumber || null, departmentId, ...(password ? { passwordHash: await hash(password, 10) } : {}) } }),
+    prisma.team.updateMany({ where: { leaderId: userId }, data: { departmentId } }),
+  ]);
   return NextResponse.redirect(new URL(`/dashboard/admin/leaders/${userId}`, getBaseUrl(request)));
 }

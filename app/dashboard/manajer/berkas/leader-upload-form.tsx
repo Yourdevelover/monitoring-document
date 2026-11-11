@@ -7,6 +7,7 @@ const CATEGORY_OPTIONS = [
   { key: "DAILY", label: "daily" },
   { key: "CHAT", label: "chat" },
   { key: "PAYMENT", label: "payment" },
+  { key: "OTHER", label: "Berkas Lainnya" },
 ] as const;
 
 export function LeaderUploadForm() {

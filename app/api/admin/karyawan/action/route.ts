@@ -22,15 +22,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Karyawan tidak ditemukan." }, { status: 404 });
   }
 
-  if (action === "deactivate") {
+  if (action === "deactivate" || action === "activate") {
     await prisma.user.update({
       where: { id: userId },
-      data: { isActive: "INACTIVE" },
-    });
-  } else if (action === "activate") {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { isActive: "ACTIVE" },
+      data: { isActive: action === "activate" ? "ACTIVE" : "INACTIVE" },
     });
   } else if (action === "delete") {
     await prisma.$transaction(async (tx) => {
@@ -41,12 +36,14 @@ export async function POST(request: Request) {
       });
 
       await tx.profileRequest.deleteMany({
-        where: { userId },
+        where: { OR: [{ userId }, { reviewerId: userId }] },
       });
 
       await tx.upload.deleteMany({
         where: { userId },
       });
+      await tx.uploadHistory.deleteMany({ where: { userId } });
+      await tx.importantFile.deleteMany({ where: { userId } });
 
       await tx.activityLog.deleteMany({
         where: { actorId: userId },
@@ -64,5 +61,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Aksi tidak valid." }, { status: 400 });
   }
 
-  return NextResponse.redirect(new URL("/dashboard/admin/karyawan", getBaseUrl(request)));
+  const responseUrl = new URL("/dashboard/admin/karyawan", getBaseUrl(request));
+  if (action === "deactivate" || action === "activate") {
+    responseUrl.searchParams.set("toast", `Akun karyawan berhasil ${action === "activate" ? "diaktifkan" : "dinonaktifkan"}.`);
+  }
+  return NextResponse.redirect(responseUrl);
 }

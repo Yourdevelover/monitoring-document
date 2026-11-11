@@ -22,7 +22,7 @@ export default async function LeaderAnnouncementsPage({ searchParams }: { search
       },
     },
   });
-  const pageSize = 6;
+  const pageSize = 20;
   const requestedPage = Math.max(1, Number(params.page) || 1);
   const announcements = team?.announcements ?? [];
   const totalPages = Math.max(1, Math.ceil(announcements.length / pageSize));

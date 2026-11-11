@@ -12,7 +12,7 @@ export default async function AdminUsersPage({
 }) {
   await requireAdmin();
   const params = await searchParams;
-  const pageSize = 6;
+  const pageSize = 20;
   const requestedPage = Math.max(1, Number(params.page) || 1);
   const searchQuery = params.q?.trim() || null;
   const statusFilter = params.status || null;
@@ -50,7 +50,6 @@ export default async function AdminUsersPage({
       <AdminUsersToolbar searchQuery={searchQuery} statusFilter={statusFilter} />
 
       <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
-        <p className="mb-2 text-[11px] text-[#6b7280]">{totalUsers} admin terdaftar</p>
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-xs">
             <thead>

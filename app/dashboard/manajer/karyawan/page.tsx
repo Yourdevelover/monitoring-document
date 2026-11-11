@@ -1,144 +1,100 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireLeader } from "@/lib/auth";
-import { EmployeeProfileCard } from "../employee-profile-card";
+import { requireManajer } from "@/lib/auth";
 import { EmployeeSearch } from "./employee-search";
 import { PaginationControls } from "@/app/components/pagination-controls";
 
-export default async function LeaderEmployeesPage({
+export default async function ManagerEmployeesPage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string; page?: string }>;
 }) {
-  const leader = await requireLeader();
+  await requireManajer();
   const { q, page: pageParam } = await searchParams;
   const searchTerm = q?.trim() ?? "";
-  const pageSize = 6;
+  const pageSize = 12;
   const requestedPage = Math.max(1, Number(pageParam) || 1);
-  const memberWhere = {
-    teamId: 0,
+  const where = {
+    role: "KARYAWAN" as const,
     ...(searchTerm
       ? {
           OR: [
             { name: { contains: searchTerm, mode: "insensitive" as const } },
             { email: { contains: searchTerm, mode: "insensitive" as const } },
+            { position: { contains: searchTerm, mode: "insensitive" as const } },
+            { department: { name: { contains: searchTerm, mode: "insensitive" as const } } },
           ],
         }
       : {}),
   };
-
-  const team = await prisma.team.findUnique({
-    where: { leaderId: leader.id },
-  });
-  const totalMembers = team
-    ? await prisma.user.count({ where: { ...memberWhere, teamId: team.id } })
-    : 0;
-  const totalPages = Math.max(1, Math.ceil(totalMembers / pageSize));
+  const totalItems = await prisma.user.count({ where });
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const page = Math.min(requestedPage, totalPages);
-  const members = team
-    ? await prisma.user.findMany({
-        where: { ...memberWhere, teamId: team.id },
-        orderBy: { createdAt: "desc" },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        include: {
-          uploads: { orderBy: { submissionDate: "desc" } },
-          activityLogs: {
-            where: { action: "LOGIN" },
-            orderBy: { createdAt: "desc" },
-            take: 1,
-          },
-        },
-      })
-    : [];
+  const employees = await prisma.user.findMany({
+    where,
+    include: { department: true, team: { include: { department: true } } },
+    orderBy: { name: "asc" },
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+  });
+
   return (
     <main className="min-h-screen bg-[#f8f9fa] px-4 py-5 text-[#111111]">
       <div className="mx-auto max-w-7xl space-y-4">
-        <header className="flex flex-wrap items-end justify-between gap-4 rounded-lg border border-[#e5e7eb] bg-white p-4">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.16em] text-[#6b7280]">
-              Kelola
-            </p>
-            <h1 className="mt-1 text-sm font-bold">Karyawan Tim</h1>
-          </div>
-
+        <header className="border-b border-[#e5e7eb] pb-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">
+            Seluruh Departemen
+          </p>
+          <h1 className="mt-1 text-[15px] font-semibold">Data Karyawan</h1>
         </header>
-
-        <section className="rounded-lg border border-[#e5e7eb] bg-white p-3">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e5e7eb] pb-2.5">
-            <h2 className="text-xs font-semibold">Daftar Karyawan</h2>
-            <div className="flex flex-wrap items-center gap-3">
-              <EmployeeSearch initialValue={searchTerm} />
-              <Link
-                href="/dashboard/leader/karyawan/tambah"
-                className="inline-flex min-h-10 items-center rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
-              >
-                Tambah Karyawan
-              </Link>
-            </div>
+        <section className="bg-white">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e5e7eb] p-3">
+            <p className="text-xs text-[#6b7280]">{totalItems} karyawan</p>
+            <EmployeeSearch initialValue={searchTerm} />
           </div>
-
-          <div className="mt-3">
-            {members.map((member) => (
-              <div key={member.id} className="relative flex cursor-pointer items-center justify-between gap-3 border-t border-[#e5e7eb] px-2 py-2.5 transition-colors hover:bg-[#f8f9fa] first:border-t-0 last:border-b">
-                <div className="flex min-w-0 flex-1 items-center gap-2.5 pl-11">
-                  <EmployeeProfileCard
-                    employee={{
-                      ...member,
-                      latestLoginAt: member.activityLogs[0]?.createdAt ?? null,
-                    }}
-                    mode="row"
-                    files={member.uploads.map((file) => ({
-                      id: file.id,
-                      fileName: file.fileName,
-                      filePath: file.filePath,
-                      category: file.category,
-                      status: file.status,
-                      isSubmitted: file.isSubmitted,
-                      submissionDate: file.submissionDate,
-                      expiresAt: file.expiresAt,
-                    }))}
-                  />
-                  <div className="min-w-0">
-                    <p className="truncate text-[13px] font-medium text-[#111111]">{member.name}</p>
-                    <p className="truncate text-[11px] text-[#6b7280]">{member.email}</p>
-                  </div>
-                </div>
-
-                <time
-                  dateTime={member.createdAt.toISOString()}
-                  className="hidden w-24 shrink-0 text-right text-xs text-[#6b7280] sm:block"
-                >
-                  {new Date(member.createdAt).toLocaleDateString("id-ID", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </time>
-
-                <div className="flex shrink-0 items-center gap-2">
-                  <span className="hidden text-[10px] text-[#6b7280] sm:inline">Lihat info</span>
-                  <span className="text-[11px] text-[#6b7280]">→</span>
-                  <span className="bg-[#edf3ec] px-1.5 py-1 text-center text-[10px] font-medium text-[#346538]">
-                    {member.isActive}
-                  </span>
-                </div>
-              </div>
+          <div className="divide-y divide-[#e5e7eb]">
+            {employees.map((employee) => (
+              <Link
+                key={employee.id}
+                href={`/dashboard/manajer/karyawan/${employee.id}`}
+                className="grid gap-1 px-3 py-3 hover:bg-[#f8f9fa] sm:grid-cols-[1.2fr_1.2fr_1fr_1fr_auto] sm:items-center"
+              >
+                <span className="min-w-0">
+                  <strong className="block truncate text-xs">
+                    {employee.name}
+                  </strong>
+                  <small className="block truncate text-[#6b7280]">
+                    {employee.email}
+                  </small>
+                </span>
+                <span className="truncate text-xs">
+                  {employee.department?.name ??
+                    employee.team?.department.name ?? "-"}
+                </span>
+                <span className="truncate text-xs text-[#6b7280]">
+                  {employee.position ?? "-"}
+                </span>
+                <span className="text-xs text-[#6b7280]">
+                  {employee.team?.name ?? "Tanpa tim"}
+                </span>
+                <span className="text-[11px] text-[#6b7280]">
+                  {employee.isActive}
+                </span>
+              </Link>
             ))}
-            {members.length === 0 && (
-              <p className="border-y border-dashed border-[#d1d5db] py-5 text-center text-xs text-[#6b7280]">
-                {searchTerm ? `Tidak ada karyawan yang cocok dengan "${searchTerm}".` : "Belum ada karyawan pada tim Anda."}
+            {employees.length === 0 && (
+              <p className="px-4 py-8 text-center text-xs text-[#6b7280]">
+                Tidak ada karyawan yang cocok.
               </p>
             )}
           </div>
           <PaginationControls
-            basePath="/dashboard/leader/karyawan"
+            basePath="/dashboard/manajer/karyawan"
             page={page}
-            totalItems={totalMembers}
+            totalItems={totalItems}
             query={{ q: searchTerm || undefined }}
           />
         </section>
-
       </div>
     </main>
   );

@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   const phoneNumber = String(formData.get("phoneNumber") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const departmentId = Number(formData.get("departmentId") ?? 0);
-  if (!name || !email || password.length < 6 || !Number.isInteger(departmentId) || departmentId <= 0) return NextResponse.json({ error: "Nama, email, password minimal 6 karakter, dan departemen wajib diisi." }, { status: 400 });
+  if (!name || !email || !/^\d{6}$/.test(password) || !Number.isInteger(departmentId) || departmentId <= 0) return NextResponse.json({ error: "Nama, email, password 6 angka, dan departemen wajib diisi." }, { status: 400 });
   if (await prisma.user.findUnique({ where: { email } })) return NextResponse.json({ error: "Email sudah digunakan." }, { status: 409 });
   if (!await prisma.department.findFirst({ where: { id: departmentId, isActive: true } })) return NextResponse.json({ error: "Departemen tidak ditemukan atau nonaktif." }, { status: 400 });
   const passwordHash = await hash(password, 10);
@@ -26,6 +26,7 @@ export async function POST(request: Request) {
         phoneNumber: phoneNumber || null,
         passwordHash,
         role: "LEADER",
+        departmentId,
         isActive: "ACTIVE",
       },
     });

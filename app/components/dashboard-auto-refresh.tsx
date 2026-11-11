@@ -15,13 +15,32 @@ export function DashboardAutoRefresh() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!dashboardHomePaths.has(pathname)) return;
+    if (!pathname.startsWith("/dashboard")) return;
 
-    const refreshDashboard = () => {
-      if (document.visibilityState === "visible") router.refresh();
+    let isRedirecting = false;
+
+    const checkSession = async () => {
+      if (isRedirecting || document.visibilityState !== "visible") return;
+      try {
+        const response = await fetch("/api/session/status", { cache: "no-store" });
+        const result = await response.json() as { status?: string };
+        if (result.status !== "active") {
+          isRedirecting = true;
+          router.replace(result.status === "disabled" ? "/?account=disabled" : "/?account=session-expired");
+        }
+      } catch {
+        // Keep the current view when a transient network failure prevents the status check.
+      }
     };
 
-    const intervalId = window.setInterval(refreshDashboard, 30_000);
+    const refreshDashboard = () => {
+      if (document.visibilityState !== "visible") return;
+      void checkSession();
+      if (dashboardHomePaths.has(pathname)) router.refresh();
+    };
+
+    void checkSession();
+    const intervalId = window.setInterval(refreshDashboard, 10_000);
     document.addEventListener("visibilitychange", refreshDashboard);
 
     return () => {

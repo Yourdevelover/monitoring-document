@@ -9,6 +9,7 @@ const CATEGORIES = [
   { key: "DAILY", label: "daily" },
   { key: "CHAT", label: "chat" },
   { key: "PAYMENT", label: "payment" },
+  { key: "OTHER", label: "Berkas Lainnya" },
 ] as const;
 
 export default async function LeaderFilesPage() {
@@ -62,7 +63,7 @@ export default async function LeaderFilesPage() {
         </header>
 
         <section aria-label="Kategori berkas">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {CATEGORIES.map((category) => {
               const count = uploads.filter((u) => u.category === category.key).length;
               return (

@@ -70,6 +70,19 @@ export default async function EditEmployeePage({ params }: EditEmployeePageProps
             />
           </div>
 
+          <div className="md:col-span-2">
+            <label htmlFor="address" className="mb-1 block text-xs font-medium text-[#111111]">
+              Alamat
+            </label>
+            <textarea
+              id="address"
+              name="address"
+              rows={3}
+              defaultValue={employee.address ?? ""}
+              className="w-full rounded-md border border-[#e5e7eb] bg-white px-3 py-2 text-sm outline-none transition focus:border-[#2563eb] focus:bg-white"
+            />
+          </div>
+
 
           <div className="md:col-span-2">
             <label htmlFor="password" className="mb-1 block text-xs font-medium text-[#111111]">

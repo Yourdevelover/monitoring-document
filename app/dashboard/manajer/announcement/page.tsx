@@ -1,80 +1,60 @@
 import { prisma } from "@/lib/prisma";
-import { requireLeader } from "@/lib/auth";
-import { DeleteAnnouncementForm } from "./delete-announcement-form";
-import { NewAnnouncementForm } from "./new-announcement-form";
-import { PinAnnouncementForm } from "./pin-announcement-form";
+import { requireManajer } from "@/lib/auth";
 import { PaginationControls } from "@/app/components/pagination-controls";
 
-export default async function LeaderAnnouncementsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
-  const leader = await requireLeader();
+export default async function ManagerAnnouncementsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  await requireManajer();
   const params = await searchParams;
-  const activeSince = new Date();
-  activeSince.setHours(activeSince.getHours() - 12);
-
-  const team = await prisma.team.findUnique({
-    where: { leaderId: leader.id },
-    include: {
-      announcements: {
-        where: {
-          OR: [{ isPinned: true }, { createdAt: { gte: activeSince } }],
-        },
-        orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
-      },
-    },
-  });
-  const pageSize = 6;
+  const pageSize = 12;
   const requestedPage = Math.max(1, Number(params.page) || 1);
-  const announcements = team?.announcements ?? [];
-  const totalPages = Math.max(1, Math.ceil(announcements.length / pageSize));
+  const totalItems = await prisma.announcement.count();
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const page = Math.min(requestedPage, totalPages);
-  const visibleAnnouncements = announcements.slice((page - 1) * pageSize, page * pageSize);
+  const announcements = await prisma.announcement.findMany({ include: { leader: true, team: { include: { department: true } } }, orderBy: { createdAt: "desc" }, skip: (page - 1) * pageSize, take: pageSize });
 
   return (
     <main className="min-h-screen bg-[#f8f9fa] px-4 py-5 text-[#111111]">
-      <div className="mx-auto max-w-7xl space-y-4">
-        <header className="flex flex-wrap items-start justify-between gap-4 rounded-lg border border-[#e5e7eb] bg-white p-4">
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-[#6b7280]">
-              Informasi
-            </p>
-            <h1 className="text-base font-bold">Notifikasi Tim</h1>
-            <p className="mt-2 max-w-xl text-sm text-[#6b7280]">
-              Buat dan kelola informasi terbaru untuk anggota tim.
-            </p>
-          </div>
+      <div className="mx-auto max-w-6xl space-y-4">
+        <header className="border-b border-[#e5e7eb] pb-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">
+            Informasi lintas tim
+          </p>
+          <h1 className="mt-1 text-[15px] font-semibold">Pengumuman</h1>
         </header>
-
-        <NewAnnouncementForm />
-
-        <section className="rounded-lg border border-[#e5e7eb] bg-white p-4">
-          <p className="mb-4 text-xs text-[#6b7280]">Announcement otomatis hilang setelah 12 jam. Announcement yang disematkan tetap tampil sampai dihapus.</p>
-          <div className="space-y-1">
-            {visibleAnnouncements.length > 0 ? visibleAnnouncements.map((item) => (
-              <div key={item.id} className="rounded-lg border border-[#e5e7eb] p-3">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium">{item.title}</p>
-                      {item.isPinned && (
-                        <span className="rounded-full bg-[#fbf3db] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#956400]">
-                          Info penting
-                        </span>
-                      )}
-                    </div>
-                    <p className="mt-2 text-sm text-[#6b7280]">{item.content}</p>
-                  </div>
-                  <div className="flex shrink-0 flex-wrap justify-end gap-2">
-                    <PinAnnouncementForm announcementId={item.id} isPinned={item.isPinned} />
-                    <DeleteAnnouncementForm announcementId={item.id} />
-                  </div>
-                </div>
+        <section className="divide-y divide-[#e5e7eb] border-y border-[#d1d5db] bg-white">
+          {announcements.map((item) => (
+            <article key={item.id} className="px-4 py-3">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <h2 className="text-xs font-semibold">{item.title}</h2>
+                {item.isPinned && (
+                  <span className="text-[10px] font-semibold text-[#956400]">
+                    PENTING
+                  </span>
+                )}
+                <span className="text-[11px] text-[#6b7280]">
+                  {item.team.department.name} · {item.team.name} ·{" "}
+                  {item.leader.name}
+                </span>
               </div>
-            )) : (
-              <p className="text-[#6b7280]">Belum ada announcement yang dibuat untuk tim Anda.</p>
-            )}
-          </div>
-          <PaginationControls basePath="/dashboard/leader/announcement" page={page} totalItems={announcements.length} />
+              <p className="mt-2 whitespace-pre-wrap text-xs text-[#374151]">
+                {item.content}
+              </p>
+              <time className="mt-2 block text-[11px] text-[#6b7280]">
+                {item.createdAt.toLocaleString("id-ID")}
+              </time>
+            </article>
+          ))}
+          {announcements.length === 0 && (
+            <p className="px-4 py-8 text-center text-xs text-[#6b7280]">
+              Belum ada pengumuman.
+            </p>
+          )}
         </section>
+        <PaginationControls
+          basePath="/dashboard/manajer/announcement"
+          page={page}
+          totalItems={totalItems}
+        />
       </div>
     </main>
   );

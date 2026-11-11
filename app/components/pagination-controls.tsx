@@ -14,7 +14,7 @@ export function PaginationControls({
   basePath,
   page,
   totalItems,
-  pageSize = 6,
+  pageSize = 20,
   query = {},
 }: PaginationControlsProps) {
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
@@ -31,10 +31,7 @@ export function PaginationControls({
 
   return (
     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#e5e7eb] pt-3 text-xs">
-        <div className="flex items-center gap-2 text-[#6b7280]">
-          Jumlah data:
-          <span className="text-[#6b7280]">{pageSize} data per halaman</span>
-        </div>
+        <div className="flex items-center gap-2 text-[#6b7280]">Jumlah data: {totalItems}</div>
       <div className="flex items-center gap-1.5">
         <span className="text-[#6b7280]">Halaman</span>
         {page > 1 && (

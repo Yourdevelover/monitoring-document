@@ -1,8 +1,11 @@
 import { requireAdmin } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { GeneratedPasswordInput } from "@/app/components/generated-password-input";
 
 export default async function CreateAdminPage() {
   await requireAdmin();
+  const departments = await prisma.department.findMany({ where: { isActive: true }, orderBy: { name: "asc" } });
 
   return (
     <main className="space-y-4">
@@ -40,17 +43,26 @@ export default async function CreateAdminPage() {
           </div>
 
           <div className="md:col-span-2">
+            <label htmlFor="departmentId" className="mb-1 block text-xs font-medium text-[#111111]">
+              Departemen
+            </label>
+            <select
+              id="departmentId"
+              name="departmentId"
+              required
+              defaultValue=""
+              className="w-full rounded-md border border-[#e5e7eb] bg-white px-3 py-2 text-[13px] outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
+            >
+              <option value="" disabled>Pilih departemen</option>
+              {departments.map((department) => <option key={department.id} value={department.id}>{department.name}</option>)}
+            </select>
+          </div>
+
+          <div className="md:col-span-2">
             <label htmlFor="password" className="mb-1 block text-xs font-medium text-[#111111]">
               Password
             </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              minLength={6}
-              className="w-full rounded-md border border-[#e5e7eb] bg-white px-3 py-2 text-[13px] outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
-            />
+            <GeneratedPasswordInput id="password" className="min-w-0 flex-1 rounded-md border border-[#e5e7eb] bg-white px-3 py-2 text-[13px] outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20" />
           </div>
 
           <div className="md:col-span-2 flex justify-end gap-2">
