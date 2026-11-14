@@ -14,13 +14,7 @@ export async function POST(request: Request) {
     const departmentId = Number(formData.get("departmentId") ?? 0);
 
     if (!name || !email || !/^\d{6}$/.test(password) || !Number.isInteger(departmentId) || departmentId <= 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Nama, email, departemen, dan password 6 angka wajib diisi.",
-        },
-        { status: 400 }
-      );
+      return NextResponse.redirect(new URL("/daftar-leader?error=invalid-input", getBaseUrl(request)), 303);
     }
 
     failedAt = "memeriksa email di database";
@@ -29,18 +23,12 @@ export async function POST(request: Request) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Email sudah terdaftar.",
-        },
-        { status: 409 }
-      );
+      return NextResponse.redirect(new URL("/daftar-leader?error=email-registered", getBaseUrl(request)), 303);
     }
 
     const department = await prisma.department.findFirst({ where: { id: departmentId, isActive: true } });
     if (!department) {
-      return NextResponse.json({ success: false, error: "Departemen tidak ditemukan atau nonaktif." }, { status: 400 });
+      return NextResponse.redirect(new URL("/daftar-leader?error=department-unavailable", getBaseUrl(request)), 303);
     }
 
     const passwordHash = await hash(password, 10);
@@ -86,12 +74,7 @@ export async function POST(request: Request) {
         ? error.code
         : "UNKNOWN";
     console.error("Leader registration failed:", { failedAt, errorCode, error });
-    return NextResponse.json(
-      {
-        success: false,
-        error: `Pendaftaran gagal saat ${failedAt} (kode: ${errorCode}).`,
-      },
-      { status: 500 }
-    );
+    const errorUrl = new URL("/daftar-leader?error=registration-failed", getBaseUrl(request));
+    return NextResponse.redirect(errorUrl, 303);
   }
 }

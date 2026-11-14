@@ -22,18 +22,18 @@ export default async function ManagerFileHistoryPage({
   const selectedDate = /^\d{4}-\d{2}-\d{2}$/.test(params.date ?? "")
     ? params.date
     : null;
-  const files = await prisma.uploadHistory.findMany({
-    where: category ? { category } : {},
+  const files = await prisma.upload.findMany({
+    where: { isSubmitted: true, ...(category ? { category } : {}) },
     include: {
       user: true,
       team: { include: { department: true } },
     },
-    orderBy: { submittedAt: "desc" },
+    orderBy: { submissionDate: "desc" },
   });
   const filtered = selectedDate
-    ? files.filter((file) => dateKey(file.submittedAt) === selectedDate)
+    ? files.filter((file) => dateKey(file.submissionDate) === selectedDate)
     : files;
-  const dates = [...new Set(files.map((file) => dateKey(file.submittedAt)))];
+  const dates = [...new Set(files.map((file) => dateKey(file.submissionDate)))];
 
   return (
     <main className="min-h-screen bg-[#f8f9fa] px-4 py-5 text-[#111111]">
@@ -82,15 +82,16 @@ export default async function ManagerFileHistoryPage({
               rel="noreferrer"
               className="grid gap-1 px-4 py-3 hover:bg-[#f8f9fa] sm:grid-cols-[1.5fr_1fr_1fr_auto] sm:items-center"
             >
-              <span className="truncate text-xs font-semibold">
-                {file.fileName}
+              <span className="min-w-0">
+                <span className="block truncate text-xs font-semibold">{file.fileName}</span>
+                {file.note && <span className="mt-1 block whitespace-pre-wrap break-words text-xs font-normal text-[#374151]">Catatan: {file.note}</span>}
               </span>
               <span className="truncate text-xs">{file.user.name}</span>
               <span className="truncate text-xs text-[#6b7280]">
                 {file.team.department.name} · {file.category}
               </span>
               <time className="text-[11px] text-[#6b7280]">
-                {file.submittedAt.toLocaleString("id-ID")}
+                {file.submissionDate.toLocaleString("id-ID")}
               </time>
             </a>
           ))}

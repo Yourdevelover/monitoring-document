@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireEmployee } from "@/lib/auth";
 import { PaginationControls } from "@/app/components/pagination-controls";
+import { readProfileRequests } from "@/lib/profile-requests";
 
 export default async function EmployeeProfileRequestPage({
   searchParams,
@@ -11,20 +12,16 @@ export default async function EmployeeProfileRequestPage({
   const params = await searchParams;
   const pageSize = 20;
   const requestedPage = Math.max(1, Number(params.page) || 1);
-  const totalRequests = await prisma.profileRequest.count({ where: { userId: employee.id } });
+  const profile = await prisma.user.findUnique({
+    where: { id: employee.id },
+    select: { profileRequests: true },
+  });
+  const allRequests = readProfileRequests(profile?.profileRequests ?? [] as never)
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+  const totalRequests = allRequests.length;
   const totalPages = Math.max(1, Math.ceil(totalRequests / pageSize));
   const page = Math.min(requestedPage, totalPages);
-
-  const requests = await prisma.profileRequest.findMany({
-    where: {
-      userId: employee.id,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    skip: (page - 1) * pageSize,
-    take: pageSize,
-  });
+  const requests = allRequests.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <main className="min-h-screen bg-[#f8f9fa] px-4 py-5 text-[#111111]">

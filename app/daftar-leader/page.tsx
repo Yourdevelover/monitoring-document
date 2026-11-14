@@ -3,8 +3,19 @@ import { Logo } from "@/app/components/logo";
 import { prisma } from "@/lib/prisma";
 import { GeneratedPasswordInput } from "@/app/components/generated-password-input";
 
-export default async function LeaderRegistrationPage() {
+export default async function LeaderRegistrationPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const params = await searchParams;
   const departments = await prisma.department.findMany({ where: { isActive: true }, orderBy: { name: "asc" } });
+  const errorMessages: Record<string, string> = {
+    "email-registered": "Email sudah terpakai dan pendaftaran ditolak. Silakan hubungi admin untuk bantuan.",
+    "invalid-input": "Periksa kembali nama, email, departemen, dan password 6 angka Anda.",
+    "department-unavailable": "Departemen tidak ditemukan atau sedang tidak aktif. Silakan pilih departemen lain.",
+    "registration-failed": "Pendaftaran belum berhasil diproses. Silakan coba kembali.",
+  };
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#f8f9fa] px-6 py-12 text-[#111111]">
@@ -18,6 +29,11 @@ export default async function LeaderRegistrationPage() {
 
         <form action="/api/leader/register" method="POST" className="rounded-lg border border-[#e5e7eb] bg-white p-6">
           <div className="space-y-4">
+            {params.error && errorMessages[params.error] ? (
+              <p role="alert" className="rounded-md border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-800">
+                {errorMessages[params.error]}
+              </p>
+            ) : null}
             <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
               Setelah mendaftar, akun Anda perlu disetujui admin sebelum dapat digunakan.
             </p>

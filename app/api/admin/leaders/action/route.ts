@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getBaseUrl } from "@/lib/redirect";
+import { removeProfileRequestsForDeletedUser } from "@/lib/profile-requests";
 
 export async function POST(request: Request) {
   const admin = await getSessionUser();
@@ -65,25 +66,17 @@ export async function POST(request: Request) {
         return NextResponse.redirect(blockedUrl);
       }
 
-      const [uploads, histories, importantFiles] = await Promise.all([
-        prisma.upload.findMany({ where: { teamId: leader.ledTeam.id }, select: { filePath: true } }),
-        prisma.uploadHistory.findMany({ where: { teamId: leader.ledTeam.id }, select: { filePath: true } }),
-        prisma.importantFile.findMany({ where: { teamId: leader.ledTeam.id }, select: { filePath: true } }),
-      ]);
-      const filePaths = [...new Set([...uploads, ...histories, ...importantFiles].map((file) => file.filePath))];
+      const uploads = await prisma.upload.findMany({
+        where: { teamId: leader.ledTeam.id },
+        select: { filePath: true, importantCopyPath: true },
+      });
+      const filePaths = [...new Set(uploads.flatMap((file) => [file.filePath, file.importantCopyPath].filter((filePath): filePath is string => Boolean(filePath))))];
 
       await prisma.$transaction(async (transaction) => {
-        await transaction.message.deleteMany({
-          where: { OR: [{ senderId: leader.id }, { recipientId: leader.id }] },
-        });
-        await transaction.profileRequest.deleteMany({
-          where: { OR: [{ userId: leader.id }, { reviewerId: leader.id }] },
-        });
+        await removeProfileRequestsForDeletedUser(transaction, leader.id);
         await transaction.announcement.deleteMany({
           where: { OR: [{ leaderId: leader.id }, { teamId: leader.ledTeam!.id }] },
         });
-        await transaction.importantFile.deleteMany({ where: { teamId: leader.ledTeam!.id } });
-        await transaction.uploadHistory.deleteMany({ where: { teamId: leader.ledTeam!.id } });
         await transaction.upload.deleteMany({ where: { teamId: leader.ledTeam!.id } });
         await transaction.team.delete({ where: { id: leader.ledTeam!.id } });
         await transaction.activityLog.deleteMany({ where: { actorId: leader.id } });
@@ -119,12 +112,7 @@ export async function POST(request: Request) {
     }
 
     await prisma.$transaction(async (transaction) => {
-      await transaction.message.deleteMany({
-        where: { OR: [{ senderId: leader.id }, { recipientId: leader.id }] },
-      });
-      await transaction.profileRequest.deleteMany({
-        where: { OR: [{ userId: leader.id }, { reviewerId: leader.id }] },
-      });
+      await removeProfileRequestsForDeletedUser(transaction, leader.id);
       await transaction.activityLog.deleteMany({ where: { actorId: leader.id } });
       await transaction.user.delete({ where: { id: leader.id } });
       await transaction.activityLog.create({

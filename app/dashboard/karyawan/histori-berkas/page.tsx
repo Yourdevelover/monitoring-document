@@ -65,6 +65,7 @@ export default async function HistoriBerkasPage({ searchParams }: { searchParams
                       <p className="mt-1 break-words text-sm text-[#346538]">
                         {file.fileName} • {file.category}
                       </p>
+                      {file.note && <p className="mt-1 whitespace-pre-wrap break-words text-xs text-[#4a7a4e]">Catatan: {file.note}</p>}
                       <p className="mt-1 text-xs text-emerald-600">
                         Dikirim {new Date(file.createdAt).toLocaleDateString("id-ID")} • Berlaku {expiresIn} jam lagi
                       </p>

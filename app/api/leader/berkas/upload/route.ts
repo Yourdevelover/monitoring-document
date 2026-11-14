@@ -67,9 +67,16 @@ export async function POST(request: Request) {
           // Ignore missing file on disk; the database record should still be deleted.
         }
 
+        if (upload.importantCopyPath) {
+          const importantPathOnDisk = path.join(process.cwd(), "public", upload.importantCopyPath.replace(/^\/+/, ""));
+          try {
+            await unlink(importantPathOnDisk);
+          } catch {
+            // Ignore missing permanent copy; the upload record should still be deleted.
+          }
+        }
+
         await prisma.$transaction([
-          prisma.uploadHistory.deleteMany({ where: { sourceUploadId: upload.id } }),
-          prisma.importantFile.deleteMany({ where: { sourceUploadId: upload.id } }),
           prisma.upload.delete({ where: { id: upload.id } }),
         ]);
 
@@ -92,6 +99,7 @@ export async function POST(request: Request) {
 
     const category = String(formData.get("category") ?? "");
     const title = String(formData.get("title") ?? "").trim();
+    const note = String(formData.get("note") ?? "").trim();
     const file = formData.get("file");
 
     if (!VALID_CATEGORIES.has(category) || !(file instanceof File) || file.size === 0) {
@@ -103,6 +111,10 @@ export async function POST(request: Request) {
 
     if (file.size > MAX_UPLOAD_SIZE_BYTES) {
       return NextResponse.json({ success: false, error: "Ukuran berkas maksimal 50 MiB." }, { status: 413 });
+    }
+
+    if (note.length > 1000) {
+      return NextResponse.json({ success: false, error: "Catatan maksimal 1.000 karakter." }, { status: 400 });
     }
 
     return await enqueueFileTask(async () => {
@@ -139,6 +151,7 @@ export async function POST(request: Request) {
           status: "COMPLETED",
           isSubmitted: true,
           submissionDate: new Date(),
+          note: note || null,
         },
       });
 

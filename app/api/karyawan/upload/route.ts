@@ -89,9 +89,16 @@ export async function POST(request: Request) {
           // Ignore missing file on disk; the database record should still be deleted.
         }
 
+        if (upload.importantCopyPath) {
+          const importantPathOnDisk = path.join(process.cwd(), "public", upload.importantCopyPath.replace(/^\/+/, ""));
+          try {
+            await unlink(importantPathOnDisk);
+          } catch {
+            // Ignore missing permanent copy; the upload record should still be deleted.
+          }
+        }
+
         await prisma.$transaction([
-          prisma.uploadHistory.deleteMany({ where: { sourceUploadId: uploadIdToDelete } }),
-          prisma.importantFile.deleteMany({ where: { sourceUploadId: uploadIdToDelete } }),
           prisma.upload.delete({ where: { id: uploadIdToDelete } }),
         ]);
 
@@ -105,28 +112,27 @@ export async function POST(request: Request) {
     if (action === "delete-important") {
       return await enqueueFileTask(async () => {
         const uploadId = Number(formData.get("uploadId") ?? 0);
-        const importantFile = await prisma.importantFile.findFirst({
-          where: { id: uploadId, userId: employee.id },
+        const upload = await prisma.upload.findFirst({
+          where: { id: uploadId, userId: employee.id, importantSaved: true },
         });
 
-        if (!importantFile) {
+        if (!upload) {
           return NextResponse.json({ success: false, error: "Data penting tidak ditemukan." }, { status: 404 });
         }
 
-        const importantPath = path.join(process.cwd(), "public", importantFile.filePath.replace(/^\/+/, ""));
-        try {
-          await unlink(importantPath);
-        } catch {
-          // The permanent copy may already be missing from disk.
+        if (upload.importantCopyPath) {
+          const importantPath = path.join(process.cwd(), "public", upload.importantCopyPath.replace(/^\/+/, ""));
+          try {
+            await unlink(importantPath);
+          } catch {
+            // The permanent copy may already be missing from disk.
+          }
         }
 
-        await prisma.$transaction([
-          prisma.importantFile.delete({ where: { id: importantFile.id } }),
-          prisma.upload.updateMany({
-            where: { id: importantFile.sourceUploadId, userId: employee.id },
-            data: { importantSaved: false },
-          }),
-        ]);
+        await prisma.upload.update({
+          where: { id: upload.id },
+          data: { importantSaved: false, importantCopyPath: null, importantSavedAt: null },
+        });
 
         return NextResponse.json({ success: true, message: "Data dihapus dari Data Prioritas." });
       });
@@ -185,28 +191,10 @@ export async function POST(request: Request) {
         const expiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000);
 
         const submittedAt = new Date();
-        await prisma.$transaction([
-          prisma.upload.update({
-            where: { id: uploadId },
-            data: { isSubmitted: true, submissionDate: submittedAt, expiresAt },
-          }),
-          prisma.uploadHistory.upsert({
-            where: { sourceUploadId: uploadId },
-            update: { submittedAt, filePath: upload.filePath },
-            create: {
-              sourceUploadId: upload.id,
-              userId: upload.userId,
-              teamId: upload.teamId,
-              title: upload.title,
-              fileName: upload.fileName,
-              filePath: upload.filePath,
-              fileType: upload.fileType,
-              category: upload.category,
-              status: upload.status,
-              submittedAt,
-            },
-          }),
-        ]);
+        await prisma.upload.update({
+          where: { id: uploadId },
+          data: { isSubmitted: true, submissionDate: submittedAt, expiresAt },
+        });
 
         await prisma.activityLog.create({
           data: {
@@ -256,11 +244,7 @@ export async function POST(request: Request) {
           );
         }
 
-        const existingImportant = await prisma.importantFile.findUnique({
-          where: { sourceUploadId: upload.id },
-        });
-
-        if (existingImportant) {
+        if (upload.importantSaved && upload.importantCopyPath) {
           return NextResponse.json({
             success: true,
             message: "Berkas sudah tersimpan di Data Prioritas",
@@ -290,23 +274,10 @@ export async function POST(request: Request) {
 
         await copyFile(sourcePath, importantPath);
 
-        await prisma.$transaction([
-          prisma.importantFile.create({
-            data: {
-              sourceUploadId: upload.id,
-              userId: employee.id,
-              teamId: upload.teamId,
-              title: upload.title,
-              fileName: upload.fileName,
-              filePath: importantPublicPath,
-              fileType: upload.fileType,
-              category: upload.category,
-              status: upload.status,
-              savedAt: new Date(),
-            },
-          }),
-          prisma.upload.update({ where: { id: upload.id }, data: { importantSaved: true } }),
-        ]);
+        await prisma.upload.update({
+          where: { id: upload.id },
+          data: { importantSaved: true, importantCopyPath: importantPublicPath, importantSavedAt: new Date() },
+        });
 
         return NextResponse.json({
           success: true,
@@ -358,6 +329,15 @@ export async function POST(request: Request) {
           // Ignore missing file on disk
         }
 
+        if (upload.importantCopyPath) {
+          const importantPathOnDisk = path.join(process.cwd(), "public", upload.importantCopyPath.replace(/^\/+/, ""));
+          try {
+            await unlink(importantPathOnDisk);
+          } catch {
+            // Ignore missing permanent copy.
+          }
+        }
+
         await prisma.upload.delete({
           where: { id: uploadId },
         });
@@ -372,6 +352,7 @@ export async function POST(request: Request) {
     const category = String(formData.get("category") ?? "");
     const title = String(formData.get("title") ?? "").trim();
     const isImportant = formData.get("isImportant") === "true";
+    const note = String(formData.get("note") ?? "").trim();
     const file = formData.get("file");
 
     if (!VALID_CATEGORIES.has(category) || !(file instanceof File) || file.size === 0) {
@@ -386,6 +367,10 @@ export async function POST(request: Request) {
 
     if (file.size > MAX_UPLOAD_SIZE_BYTES) {
       return NextResponse.json({ success: false, error: "Ukuran berkas maksimal 50 MiB." }, { status: 413 });
+    }
+
+    if (note.length > 1000) {
+      return NextResponse.json({ success: false, error: "Catatan maksimal 1.000 karakter." }, { status: 400 });
     }
 
     return await enqueueFileTask(async () => {
@@ -440,6 +425,7 @@ export async function POST(request: Request) {
           category: category as "DAILY" | "CHAT" | "PAYMENT",
           status: "COMPLETED",
           isImportant,
+          note: note || null,
         },
       });
 

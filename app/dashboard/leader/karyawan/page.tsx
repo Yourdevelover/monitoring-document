@@ -41,13 +41,28 @@ export default async function LeaderEmployeesPage({
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * pageSize,
         take: pageSize,
-        include: {
-          department: true,
-          uploads: { orderBy: { submissionDate: "desc" } },
-          activityLogs: {
-            where: { action: "LOGIN" },
-            orderBy: { createdAt: "desc" },
-            take: 1,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phoneNumber: true,
+          isActive: true,
+          profilePicture: true,
+          position: true,
+          createdAt: true,
+          department: { select: { name: true } },
+          uploads: {
+            orderBy: { submissionDate: "desc" },
+            select: {
+              id: true,
+              fileName: true,
+              filePath: true,
+              category: true,
+              status: true,
+              isSubmitted: true,
+              submissionDate: true,
+              expiresAt: true,
+            },
           },
         },
       })
@@ -84,10 +99,7 @@ export default async function LeaderEmployeesPage({
               <div key={member.id} className="relative flex cursor-pointer items-center justify-between gap-3 border-t border-[#e5e7eb] px-2 py-2.5 transition-colors hover:bg-[#f8f9fa] first:border-t-0 last:border-b">
                 <div className="flex min-w-0 flex-1 items-center gap-2.5 pl-11">
                   <EmployeeProfileCard
-                    employee={{
-                      ...member,
-                      latestLoginAt: member.activityLogs[0]?.createdAt ?? null,
-                    }}
+                    employee={member}
                     mode="row"
                     files={member.uploads.map((file) => ({
                       id: file.id,

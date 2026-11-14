@@ -38,7 +38,6 @@ export default async function LeaderCategoryPage({ params, searchParams }: Categ
         where: {
           category: categoryInfo.key,
           isSubmitted: true,
-          isImportant: false,
           submissionDate: { gte: startOfToday },
           ...(searchTerm
             ? {
@@ -60,7 +59,6 @@ export default async function LeaderCategoryPage({ params, searchParams }: Categ
         where: {
           teamId: team.id,
           isSubmitted: true,
-          isImportant: false,
           submissionDate: { gte: startOfToday },
         },
         orderBy: { submissionDate: "desc" },
@@ -139,8 +137,12 @@ export default async function LeaderCategoryPage({ params, searchParams }: Categ
                   }))}
                 />
                 <div className="min-w-0">
-                  <p className="truncate text-[13px] font-semibold text-slate-900" title={upload.fileName}>{upload.fileName}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="truncate text-[13px] font-semibold text-slate-900" title={upload.fileName}>{upload.fileName}</p>
+                    {upload.isImportant && <span className="shrink-0 rounded bg-[#fbf3db] px-1.5 py-0.5 text-[10px] font-semibold text-[#956400]">Prioritas</span>}
+                  </div>
                   <p className="mt-0.5 truncate text-xs text-slate-600">Dikirim oleh <span className="font-medium text-slate-800">{upload.user.name}</span></p>
+                  {upload.note && <p className="mt-1 whitespace-pre-wrap break-words text-xs text-slate-600">Catatan: {upload.note}</p>}
                 </div>
                 <p className="whitespace-nowrap text-xs text-slate-500">{formatDateTime(upload.submissionDate)}</p>
                 <div className="flex items-center gap-2">

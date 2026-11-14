@@ -45,14 +45,14 @@ export async function GET(request: Request) {
   }
 
   const uploadRecords: DownloadRecord[] = historyOnly
-    ? (await prisma.uploadHistory.findMany({
-        where: { teamId: team.id, category: category as "DAILY" | "CHAT" | "PAYMENT" | "OTHER" },
+    ? (await prisma.upload.findMany({
+        where: { teamId: team.id, category: category as "DAILY" | "CHAT" | "PAYMENT" | "OTHER", isSubmitted: true },
         include: { user: true },
-        orderBy: { submittedAt: "asc" },
+        orderBy: { submissionDate: "asc" },
       })).map((upload) => ({
         filePath: upload.filePath,
         fileName: upload.fileName,
-        archiveDate: upload.submittedAt,
+        archiveDate: upload.submissionDate,
         user: upload.user,
       }))
     : (await prisma.upload.findMany({

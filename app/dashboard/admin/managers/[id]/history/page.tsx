@@ -12,10 +12,10 @@ export default async function LeaderHistoryPage({ params }: { params: Promise<{ 
   if (!leader) return <p className="p-4 text-sm text-[#6b7280]">Leader tidak ditemukan.</p>;
 
   const files = leader.ledTeam
-    ? await prisma.uploadHistory.findMany({
-      where: { teamId: leader.ledTeam.id },
+    ? await prisma.upload.findMany({
+      where: { teamId: leader.ledTeam.id, isSubmitted: true },
         include: { user: true },
-      orderBy: { submittedAt: "desc" },
+      orderBy: { submissionDate: "desc" },
       })
     : [];
 
@@ -36,9 +36,12 @@ export default async function LeaderHistoryPage({ params }: { params: Promise<{ 
             rel="noopener noreferrer"
             className="grid gap-2 py-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] hover:bg-[#f8f9fa]"
           >
-            <span className="truncate font-medium" title={file.fileName}>{file.fileName}</span>
+            <span className="min-w-0">
+              <span className="block truncate font-medium" title={file.fileName}>{file.fileName}</span>
+              {file.note && <span className="mt-1 block whitespace-pre-wrap break-words text-xs text-[#374151]">Catatan: {file.note}</span>}
+            </span>
             <span className="truncate text-sm text-[#6b7280]">{file.user.name} • {file.category}</span>
-            <span className="text-xs text-[#6b7280]">{file.submittedAt.toLocaleString("id-ID")}</span>
+            <span className="text-xs text-[#6b7280]">{file.submissionDate.toLocaleString("id-ID")}</span>
           </a>
         )) : <p className="py-8 text-center text-sm text-[#6b7280]">Belum ada histori berkas.</p>}
       </div>

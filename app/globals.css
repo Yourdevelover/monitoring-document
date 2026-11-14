@@ -117,23 +117,6 @@ h1, h2, h3 { letter-spacing: -0.02em; }
   animation: leader-announcement-slide 12s linear infinite;
   will-change: transform;
 }
-.employee-announcement-track {
-  display: flex;
-  width: max-content;
-  flex: 0 0 auto;
-  animation: employee-announcement-loop 6s linear infinite;
-  will-change: transform;
-}
-.employee-announcement-copy {
-  display: block;
-  flex: 0 0 auto;
-  width: max-content;
-  margin: 0;
-  padding: 0.65rem 4rem 0.65rem 0;
-  font-size: 0.8125rem;
-  line-height: 1.25rem;
-  white-space: nowrap;
-}
 .leader-announcement-important { color: var(--badge-pale-red-text); font-weight: 600; }
 .leader-announcement-empty {
   margin: 0; padding: 0.65rem 1rem;
@@ -144,11 +127,6 @@ h1, h2, h3 { letter-spacing: -0.02em; }
   from { transform: translateX(0); }
   to { transform: translateX(-100%); }
 }
-@keyframes employee-announcement-loop {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
 /* ── Content containers ── */
 .leader-content, .admin-content, .employee-content {
   background: var(--content-background);

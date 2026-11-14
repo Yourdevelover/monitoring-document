@@ -21,12 +21,6 @@ enum UserStatus {
   REJECTED
 }
 
-enum ApprovalStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
 enum FileCategory {
   DAILY
   CHAT
@@ -55,7 +49,8 @@ model User {
   position      String?
   isActive      UserStatus   @default(ACTIVE)
   profilePicture String?
-  lastLoginAt   DateTime?
+  personalNotes Json         @default("[]")
+  profileRequests Json       @default("[]")
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
@@ -63,15 +58,8 @@ model User {
   department      Department?      @relation(fields: [departmentId], references: [id], onDelete: SetNull)
   ledTeam         Team?            @relation("TeamLeader")
   uploads         Upload[]
-  uploadHistory   UploadHistory[]
-  importantFiles ImportantFile[]
   announcements   Announcement[]
-  profileRequests ProfileRequest[] @relation("ProfileRequestsUser")
-  reviewedRequests ProfileRequest[] @relation("ProfileRequestsReviewer")
   activityLogs    ActivityLog[]
-  sentMessages    Message[]        @relation("UserSentMessages")
-  receivedMessages Message[]      @relation("UserReceivedMessages")
-  notes         PersonalNote[]
   targets       Target[]
 
   @@map("users")
@@ -90,8 +78,6 @@ model Team {
   department Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
   members    User[]    @relation("TeamMembers")
   uploads    Upload[]
-  uploadHistory UploadHistory[]
-  importantFiles ImportantFile[]
   announcements Announcement[]
 
   @@map("teams")
@@ -121,9 +107,12 @@ model Upload {
   category      FileCategory
   status        UploadStatus @default(PROCESSING)
   submissionDate DateTime    @default(now())
+  note          String?
   isSubmitted   Boolean      @default(false)
   isImportant   Boolean      @default(false)
   importantSaved Boolean      @default(false)
+  importantCopyPath String?
+  importantSavedAt DateTime?
   expiresAt     DateTime?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
@@ -131,55 +120,15 @@ model Upload {
   user          User         @relation(fields: [userId], references: [id])
   team          Team         @relation(fields: [teamId], references: [id])
 
+  @@index([teamId, category, submissionDate])
+  @@index([userId, importantSavedAt])
   @@map("uploads")
-}
-
-model UploadHistory {
-  id             Int          @id @default(autoincrement())
-  sourceUploadId Int          @unique
-  userId         Int
-  teamId         Int
-  title          String
-  fileName       String
-  filePath       String
-  fileType       String
-  category       FileCategory
-  status         UploadStatus
-  submittedAt    DateTime
-  createdAt      DateTime     @default(now())
-
-  user           User         @relation(fields: [userId], references: [id])
-  team           Team         @relation(fields: [teamId], references: [id])
-
-  @@index([teamId, category, submittedAt])
-  @@map("upload_history")
-}
-
-model ImportantFile {
-  id             Int          @id @default(autoincrement())
-  sourceUploadId Int          @unique
-  userId         Int
-  teamId         Int
-  title          String
-  fileName       String
-  filePath       String
-  fileType       String
-  category       FileCategory
-  status         UploadStatus
-  savedAt        DateTime     @default(now())
-
-  user           User         @relation(fields: [userId], references: [id])
-  team           Team         @relation(fields: [teamId], references: [id])
-
-  @@index([userId, category])
-  @@map("important_files")
 }
 
 model Announcement {
   id            Int       @id @default(autoincrement())
   leaderId      Int
   teamId        Int
-  targetUserId  Int?
   title         String
   content       String
   isPinned      Boolean   @default(false)
@@ -192,24 +141,6 @@ model Announcement {
   @@map("announcements")
 }
 
-model ProfileRequest {
-  id            Int             @id @default(autoincrement())
-  userId        Int
-  fieldName     String
-  oldValue      String?
-  newValue      String?
-  status        ApprovalStatus  @default(PENDING)
-  reviewerId    Int?
-  reviewNote    String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-
-  user          User            @relation("ProfileRequestsUser", fields: [userId], references: [id])
-  reviewer      User?           @relation("ProfileRequestsReviewer", fields: [reviewerId], references: [id])
-
-  @@map("profile_requests")
-}
-
 model ActivityLog {
   id            Int       @id @default(autoincrement())
   actorId       Int?
@@ -217,39 +148,11 @@ model ActivityLog {
   targetType    String?
   targetId      Int?
   description   String
-  ipAddress     String?
-  userAgent     String?
   createdAt     DateTime  @default(now())
 
   actor         User?     @relation(fields: [actorId], references: [id])
 
   @@map("activity_logs")
-}
-
-model Message {
-  id            Int       @id @default(autoincrement())
-  senderId      Int
-  recipientId   Int
-  content       String
-  createdAt     DateTime  @default(now())
-
-  sender        User      @relation("UserSentMessages", fields: [senderId], references: [id])
-  recipient     User      @relation("UserReceivedMessages", fields: [recipientId], references: [id])
-
-  @@map("messages")
-}
-
-model PersonalNote {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, updatedAt])
-  @@map("personal_notes")
 }
 
 model Target {

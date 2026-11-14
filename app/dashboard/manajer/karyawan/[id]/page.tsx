@@ -11,8 +11,7 @@ export default async function ManagerEmployeeDetailPage({ params }: { params: Pr
     : null;
   if (!employee) return <p className="p-5 text-sm text-[#6b7280]">Karyawan tidak ditemukan.</p>;
 
-  const [activities, latestUpload, uploads] = await Promise.all([
-    prisma.activityLog.findMany({ where: { actorId: employee.id, action: { in: ["LOGIN", "LOGOUT", "UPLOAD_FILE", "SUBMIT_FILE"] } }, orderBy: { createdAt: "desc" }, take: 20 }),
+  const [latestUpload, uploads] = await Promise.all([
     prisma.upload.findFirst({ where: { userId: employee.id }, orderBy: { createdAt: "desc" }, select: { createdAt: true, fileName: true } }),
     prisma.upload.findMany({ where: { userId: employee.id }, orderBy: { createdAt: "desc" }, take: 20 }),
   ]);
@@ -21,7 +20,7 @@ export default async function ManagerEmployeeDetailPage({ params }: { params: Pr
     <main className="min-h-screen px-4 py-5 text-[#111111]">
       <div className="mx-auto max-w-4xl space-y-4">
         <header className="border-b border-[#e5e7eb] pb-3">
-          <Link href="/dashboard/manajer/karyawan" className="text-xs font-semibold text-blue-700">← Semua karyawan</Link>
+          <Link href="/dashboard/manajer/pengguna?role=KARYAWAN" className="text-xs font-semibold text-blue-700">← Data Pengguna</Link>
           <h1 className="mt-2 text-[15px] font-semibold">Informasi Karyawan</h1>
         </header>
         <section className="grid gap-3 border-y border-[#e5e7eb] bg-white p-4 sm:grid-cols-2">
@@ -38,11 +37,6 @@ export default async function ManagerEmployeeDetailPage({ params }: { params: Pr
           <h2 className="border-b border-[#e5e7eb] px-4 py-3 text-xs font-semibold uppercase">Berkas</h2>
           {uploads.map((upload) => <a key={upload.id} href={upload.filePath} target="_blank" rel="noreferrer" className="flex justify-between gap-3 border-b border-[#f1f3f5] px-4 py-2.5 text-xs last:border-0"><span className="truncate">{upload.fileName}</span><span className="shrink-0 text-[#6b7280]">{upload.category} · {upload.createdAt.toLocaleDateString("id-ID")}</span></a>)}
           {uploads.length === 0 && <p className="px-4 py-5 text-xs text-[#6b7280]">Belum ada berkas.</p>}
-        </section>
-        <section className="border-y border-[#e5e7eb] bg-white">
-          <h2 className="border-b border-[#e5e7eb] px-4 py-3 text-xs font-semibold uppercase">Aktivitas</h2>
-          {activities.map((activity) => <div key={activity.id} className="flex justify-between gap-3 border-b border-[#f1f3f5] px-4 py-2.5 text-xs last:border-0"><span>{activity.description}</span><time className="shrink-0 text-[#6b7280]">{activity.createdAt.toLocaleString("id-ID")}</time></div>)}
-          {activities.length === 0 && <p className="px-4 py-5 text-xs text-[#6b7280]">Belum ada aktivitas.</p>}
         </section>
       </div>
     </main>

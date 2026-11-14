@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/prisma";
-import { requireManajer } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { PaginationControls } from "@/app/components/pagination-controls";
 
 export default async function ManagerActivityPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
-  await requireManajer();
+  await requireAdmin();
   const params = await searchParams;
   const pageSize = 25;
   const requestedPage = Math.max(1, Number(params.page) || 1);

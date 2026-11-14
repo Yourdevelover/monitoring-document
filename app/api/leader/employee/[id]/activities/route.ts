@@ -9,7 +9,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const leader = await getSessionUser();
-  if (!leader || leader.role !== "LEADER") {
+  if (!leader || leader.role !== "ADMIN") {
     return NextResponse.json({ error: "Akses ditolak." }, { status: 403 });
   }
 
@@ -19,16 +19,10 @@ export async function GET(
     return NextResponse.json({ error: "Karyawan tidak ditemukan." }, { status: 404 });
   }
 
-  const team = await prisma.team.findUnique({
-    where: { leaderId: leader.id },
+  const employee = await prisma.user.findFirst({
+    where: { id: employeeId, role: "KARYAWAN" },
     select: { id: true },
   });
-  const employee = team
-    ? await prisma.user.findFirst({
-        where: { id: employeeId, teamId: team.id, role: "KARYAWAN" },
-        select: { id: true },
-      })
-    : null;
 
   if (!employee) {
     return NextResponse.json({ error: "Karyawan tidak ditemukan." }, { status: 404 });

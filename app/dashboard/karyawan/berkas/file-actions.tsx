@@ -9,7 +9,6 @@ type FileActionsProps = {
   isSubmitted: boolean;
   isImportant: boolean;
   importantSaved: boolean;
-  importantFileId?: number;
 };
 
 export function FileActions({
@@ -17,7 +16,6 @@ export function FileActions({
   isSubmitted,
   isImportant,
   importantSaved,
-  importantFileId,
 }: FileActionsProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,8 +60,8 @@ export function FileActions({
             </button>
           ) : importantSaved ? (
             <button
-              onClick={() => importantFileId && handleAction("delete-important", importantFileId)}
-              disabled={isSubmitting || !importantFileId}
+              onClick={() => handleAction("delete-important")}
+              disabled={isSubmitting}
               className="inline-flex items-center rounded-lg border border-red-300 bg-[#fdebec] px-3 py-1.5 text-xs font-medium text-[#9f2f2d] hover:bg-[#fdebec] disabled:cursor-not-allowed disabled:opacity-60"
             >
               Hapus dari Data Prioritas

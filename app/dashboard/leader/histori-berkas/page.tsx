@@ -42,18 +42,19 @@ export default async function LeaderHistoryPage({
   const selectedDate = /^\d{4}-\d{2}-\d{2}$/.test(params.date ?? "") ? params.date ?? null : null;
   const team = await prisma.team.findUnique({ where: { leaderId: leader.id } });
   const submittedFiles = team
-    ? await prisma.uploadHistory.findMany({
+    ? await prisma.upload.findMany({
         where: {
           teamId: team.id,
+          isSubmitted: true,
           ...(selectedCategory ? { category: selectedCategory } : {}),
         },
         include: { user: true },
-        orderBy: { submittedAt: "desc" },
+        orderBy: { submissionDate: "desc" },
       })
     : [];
 
   const selectedFiles = selectedDate
-    ? submittedFiles.filter((file) => getDateKey(file.submittedAt) === selectedDate)
+    ? submittedFiles.filter((file) => getDateKey(file.submissionDate) === selectedDate)
     : [];
   const selectedCategoryLabel = categories.find((category) => category.key === selectedCategory)?.label;
 
@@ -96,7 +97,8 @@ export default async function LeaderHistoryPage({
                     <a href={file.filePath} target="_blank" rel="noopener noreferrer" className="min-w-0 hover:bg-slate-50">
                       <p className="truncate font-medium text-slate-900" title={file.fileName}>{file.fileName}</p>
                       <p className="truncate text-xs text-slate-600">Pengirim: <span className="font-medium text-slate-800">{file.user.name}</span></p>
-                      <p className="text-xs text-slate-500">Dikirim {file.submittedAt.toLocaleString("id-ID")}</p>
+                      {file.note && <p className="mt-1 whitespace-pre-wrap break-words text-xs text-slate-600">Catatan: {file.note}</p>}
+                      <p className="text-xs text-slate-500">Dikirim {file.submissionDate.toLocaleString("id-ID")}</p>
                     </a>
                     <a href={file.filePath} download={file.fileName} className="whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700">
                       Unduh
@@ -114,7 +116,7 @@ export default async function LeaderHistoryPage({
               const categoryDates = submittedFiles.filter((file) => file.category === category.key);
               const groupedDates = new Map<string, number>();
               for (const file of categoryDates) {
-                const dateKey = getDateKey(file.submittedAt);
+                const dateKey = getDateKey(file.submissionDate);
                 groupedDates.set(dateKey, (groupedDates.get(dateKey) ?? 0) + 1);
               }
               const categoryDateEntries = [...groupedDates.entries()].sort(([first], [second]) => second.localeCompare(first));

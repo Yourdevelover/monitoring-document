@@ -32,7 +32,7 @@ export default async function EmployeeFilesPage() {
   const employee = await requireEmployee();
   const startOfToday = getStartOfCurrentJakartaDay(new Date());
 
-  const [leaderSharedFiles, employeeUploads, importantFiles] = await Promise.all([
+  const [leaderSharedFiles, employeeUploads] = await Promise.all([
     prisma.upload.findMany({
       where: {
         teamId: employee.teamId ?? 0,
@@ -59,9 +59,6 @@ export default async function EmployeeFilesPage() {
         createdAt: "desc",
       },
     }),
-    prisma.importantFile.findMany({
-      where: { userId: employee.id },
-    }),
   ]);
 
   // group all uploads per category (multi-file for CHAT/PAYMENT, single for DAILY)
@@ -71,9 +68,6 @@ export default async function EmployeeFilesPage() {
     list.push(upload);
     uploadsByCategory.set(upload.category, list);
   }
-  const importantBySourceUpload = new Map(
-    importantFiles.map((file) => [file.sourceUploadId, file.id])
-  );
   return (
     <main className="min-h-screen bg-[#f8f9fa] px-4 py-5 text-[#111111]">
       <div className="mx-auto max-w-7xl space-y-4">
@@ -193,6 +187,7 @@ export default async function EmployeeFilesPage() {
                     <p className="mt-1 truncate text-xs" style={{ color: uploadedFile.isSubmitted ? '#4a7a4e' : '#a06a00' }}>
                       {uploadedFile.fileName}
                     </p>
+                    {uploadedFile.note && <p className="mt-1 whitespace-pre-wrap break-words text-xs text-[#374151]">Catatan: {uploadedFile.note}</p>}
                     <p className="mt-1 text-[11px] text-[#6b7280]">
                       Diunggah: {new Date(uploadedFile.createdAt).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}
                     </p>
@@ -221,10 +216,6 @@ export default async function EmployeeFilesPage() {
                         isSubmitted={uploadedFile.isSubmitted}
                         isImportant={uploadedFile.isImportant}
                         importantSaved={uploadedFile.importantSaved}
-                        importantFileId={
-                          importantBySourceUpload.get(uploadedFile.id) ??
-                          importantFiles.find((file) => file.category === uploadedFile.category)?.id
-                        }
                       />
                     )}
                     {!uploadedFile.isSubmitted && (

@@ -22,7 +22,7 @@ export default async function EmployeeDashboardPage() {
   const activeSince = new Date();
   activeSince.setHours(activeSince.getHours() - 12);
 
-  const [team, myUploads, importantFiles, announcementCount, myTargets] = await Promise.all([
+  const [team, myUploads, importantFileCount, announcementCount, myTargets] = await Promise.all([
     prisma.team.findUnique({
       where: { id: employee.teamId },
       include: {
@@ -38,7 +38,7 @@ export default async function EmployeeDashboardPage() {
       where: { userId: employee.id },
       orderBy: { createdAt: "desc" },
     }),
-    prisma.importantFile.findMany({ where: { userId: employee.id } }),
+    prisma.upload.count({ where: { userId: employee.id, importantSaved: true } }),
     prisma.announcement.count({ where: { teamId: employee.teamId, OR: [{ isPinned: true }, { createdAt: { gte: activeSince } }] } }),
     prisma.target.findMany({ where: { userId: employee.id, period: currentPeriod }, orderBy: { updatedAt: "desc" } }),
   ]);
@@ -94,7 +94,7 @@ export default async function EmployeeDashboardPage() {
           })}
           <div className="rounded-lg border border-[#e5e7eb] bg-white px-3.5 py-3">
             <p className="text-[11px] font-medium uppercase tracking-wide text-[#6b7280]">Data Prioritas</p>
-            <p className="mt-1.5 text-[13px] font-semibold">{importantFiles.length} file</p>
+            <p className="mt-1.5 text-[13px] font-semibold">{importantFileCount} file</p>
             <p className="mt-0.5 text-xs text-[#6b7280]">Tersimpan permanen</p>
           </div>
         </section>

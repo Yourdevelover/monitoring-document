@@ -1,18 +1,23 @@
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { readProfileRequests } from "@/lib/profile-requests";
 
 export default async function AdminDashboardPage() {
   await requireAdmin();
 
-  const [users, teams, allTargets, recentUploads, uploadCount, pendingApprovals, recentActivities] = await Promise.all([
-    prisma.user.findMany({ orderBy: { createdAt: "desc" }, select: { id: true, name: true, email: true, role: true, isActive: true, teamId: true, createdAt: true } }),
+  const [users, teams, allTargets, recentUploads, uploadCount, recentActivities] = await Promise.all([
+    prisma.user.findMany({ orderBy: { createdAt: "desc" }, select: { id: true, name: true, email: true, role: true, isActive: true, teamId: true, createdAt: true, profileRequests: true } }),
     prisma.team.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.target.findMany({ select: { userId: true, currentValue: true, targetValue: true, name: true, period: true, user: { select: { name: true } } } }),
     prisma.upload.findMany({ orderBy: { createdAt: "desc" }, take: 8, include: { user: { select: { name: true } }, team: { select: { name: true } } } }),
     prisma.upload.count(),
-    prisma.profileRequest.count({ where: { status: "PENDING" } }),
     prisma.activityLog.findMany({ orderBy: { createdAt: "desc" }, take: 8, include: { actor: true } }),
   ]);
+  const pendingApprovals = users.reduce(
+    (total, user) => total + (user.isActive === "PENDING" ? 1 : 0)
+      + readProfileRequests(user.profileRequests).filter((request) => request.status === "PENDING").length,
+    0,
+  );
 
   const summary = {
     totalUsers: users.length,

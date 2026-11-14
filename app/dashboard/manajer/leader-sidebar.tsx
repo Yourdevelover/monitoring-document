@@ -6,11 +6,11 @@ import { useState } from "react";
 import { Logo } from "@/app/components/logo";
 import { getNavIcon, IconLogout } from "@/app/components/sidebar-icons";
 
-type LeaderSidebarProps = {
+type ManagerSidebarProps = {
   navItems: Array<{ href: string; label: string }>;
 };
 
-export function LeaderSidebar({ navItems }: LeaderSidebarProps) {
+export function ManagerSidebar({ navItems }: ManagerSidebarProps) {
   const [isOpen, setIsOpen] = useState(true);
   const pathname = usePathname();
 
@@ -34,7 +34,7 @@ export function LeaderSidebar({ navItems }: LeaderSidebarProps) {
         </div>
         {isOpen && (
           <p className="mt-3 text-xs font-semibold uppercase tracking-[0.08em] text-white">
-            Panel Leader
+            Panel Manajer
           </p>
         )}
       </div>

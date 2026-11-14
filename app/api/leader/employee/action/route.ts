@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getBaseUrl } from "@/lib/redirect";
+import { removeProfileRequestsForDeletedUser } from "@/lib/profile-requests";
 
 export async function POST(request: Request) {
   const leader = await getSessionUser();
@@ -26,11 +27,9 @@ export async function POST(request: Request) {
     await prisma.user.update({ where: { id: employee.id }, data: { isActive: "INACTIVE" } });
   } else if (action === "delete") {
     await prisma.$transaction(async (tx) => {
-      await tx.message.deleteMany({ where: { OR: [{ senderId: employee.id }, { recipientId: employee.id }] } });
-      await tx.profileRequest.deleteMany({ where: { OR: [{ userId: employee.id }, { reviewerId: employee.id }] } });
+      await removeProfileRequestsForDeletedUser(tx, employee.id);
       await tx.upload.deleteMany({ where: { userId: employee.id } });
       await tx.activityLog.deleteMany({ where: { actorId: employee.id } });
-      await tx.announcement.deleteMany({ where: { targetUserId: employee.id } });
       await tx.user.delete({ where: { id: employee.id } });
     });
   } else {

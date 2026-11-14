@@ -1,0 +1,1 @@
+UPDATE "targets" SET "isPublic" = true;

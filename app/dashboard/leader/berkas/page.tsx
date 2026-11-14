@@ -23,7 +23,6 @@ export default async function LeaderFilesPage() {
       uploads: {
         where: {
           isSubmitted: true,
-          isImportant: false,
           submissionDate: { gte: startOfToday },
         },
         orderBy: { createdAt: "desc" },
@@ -105,8 +104,12 @@ export default async function LeaderFilesPage() {
                   {uploads.slice(0, 8).map((upload) => (
                     <div key={upload.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
                       <div className="min-w-0">
-                        <p className="truncate text-[13px] font-medium">{upload.fileName}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="truncate text-[13px] font-medium">{upload.fileName}</p>
+                          {upload.isImportant && <span className="shrink-0 rounded bg-[#fbf3db] px-1.5 py-0.5 text-[10px] font-semibold text-[#956400]">Prioritas</span>}
+                        </div>
                         <p className="mt-0.5 text-xs text-[#6b7280]">{upload.user.name} • {upload.category.toLowerCase()}</p>
+                        {upload.note && <p className="mt-1 whitespace-pre-wrap break-words text-xs text-[#374151]">Catatan: {upload.note}</p>}
                       </div>
                       <span className="shrink-0 text-[11px] text-[#9ca3af]">{new Date(upload.submissionDate).toLocaleDateString("id-ID", { dateStyle: "short" })}</span>
                     </div>
@@ -132,6 +135,7 @@ export default async function LeaderFilesPage() {
                       <div className="min-w-0">
                         <p className="truncate text-[13px] font-medium">{upload.fileName}</p>
                         <p className="mt-0.5 text-xs text-[#6b7280]">{upload.category.toLowerCase()} • {formatDateTime(upload.submissionDate)}</p>
+                        {upload.note && <p className="mt-1 whitespace-pre-wrap break-words text-xs text-[#374151]">Catatan: {upload.note}</p>}
                       </div>
                       <div className="flex items-center gap-2">
                         <a href={upload.filePath} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-[#e5e7eb] px-2.5 py-1.5 text-[11px] font-medium text-[#111111] hover:bg-[#f8f9fa]">Lihat</a>

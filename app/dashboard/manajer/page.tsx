@@ -4,28 +4,56 @@ import { requireManajer } from "@/lib/auth";
 
 export default async function ManagerDashboardPage() {
   const manager = await requireManajer();
-  const activeSince = new Date();
-  activeSince.setHours(activeSince.getHours() - 12);
   const period = new Date().toISOString().slice(0, 7);
-  const [employees, activeEmployees, uploads, targets, pendingRequests, announcements, departments] = await Promise.all([
-    prisma.user.count({ where: { role: "KARYAWAN" } }),
+  const [roleCounts, activeEmployees, totalTeams, uploads, teamsWithTargets, departments] = await Promise.all([
+    prisma.user.groupBy({ by: ["role"], _count: { _all: true } }),
     prisma.user.count({ where: { role: "KARYAWAN", isActive: "ACTIVE" } }),
-    prisma.upload.findMany({ orderBy: { createdAt: "desc" }, take: 8, include: { user: true, team: { include: { department: true } } } }),
-    prisma.target.findMany({ where: { period }, include: { user: true }, orderBy: { updatedAt: "desc" } }),
-    prisma.profileRequest.count({ where: { status: "PENDING" } }),
-    prisma.announcement.findMany({ where: { OR: [{ isPinned: true }, { createdAt: { gte: activeSince } }] }, include: { leader: true, team: true }, orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }], take: 8 }),
+    prisma.team.count(),
+    prisma.upload.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 8,
+      select: {
+        id: true,
+        fileName: true,
+        createdAt: true,
+        user: { select: { name: true } },
+        team: { select: { department: { select: { name: true } } } },
+      },
+    }),
+    prisma.team.findMany({
+      select: {
+        leader: { select: { targets: { where: { period }, select: { targetValue: true, currentValue: true } } } },
+        members: { select: { targets: { where: { period }, select: { targetValue: true, currentValue: true } } } },
+      },
+    }),
     prisma.department.findMany({ include: { _count: { select: { users: true, teams: true } } }, orderBy: { name: "asc" } }),
   ]);
-  const averageProgress = targets.length
-    ? Math.round(targets.reduce((sum, target) => sum + (target.targetValue > 0 ? target.currentValue / target.targetValue * 100 : 0), 0) / targets.length)
+  const countsByRole = new Map(roleCounts.map((item) => [item.role, item._count._all]));
+  const totalUsers = roleCounts.reduce((sum, item) => sum + item._count._all, 0);
+  const teamProgress = teamsWithTargets.map((team) => {
+    const targets = [
+      ...team.leader.targets,
+      ...team.members.flatMap((member) => member.targets),
+    ];
+    const targetValue = targets.reduce((sum, target) => sum + target.targetValue, 0);
+    const currentValue = targets.reduce((sum, target) => sum + target.currentValue, 0);
+    return { hasTargets: targets.length > 0, targetValue, currentValue };
+  });
+  const teamsWithCurrentTargets = teamProgress.filter((team) => team.hasTargets);
+  const averageProgress = teamsWithCurrentTargets.length
+    ? Math.round(teamsWithCurrentTargets.reduce((sum, team) => sum + (team.targetValue > 0 ? team.currentValue / team.targetValue * 100 : 0), 0) / teamsWithCurrentTargets.length)
     : 0;
   const cards = [
-    { label: "Seluruh karyawan", value: employees, href: "/dashboard/manajer/karyawan" },
-    { label: "Karyawan aktif", value: activeEmployees, href: "/dashboard/manajer/karyawan" },
+    { label: "Seluruh pengguna", value: totalUsers, href: "/dashboard/manajer/pengguna" },
+    { label: "Admin", value: countsByRole.get("ADMIN") ?? 0, href: "/dashboard/manajer/pengguna?role=ADMIN" },
+    { label: "Leader", value: countsByRole.get("LEADER") ?? 0, href: "/dashboard/manajer/pengguna?role=LEADER" },
+    { label: "Manajer", value: countsByRole.get("MANAJER") ?? 0, href: "/dashboard/manajer/pengguna?role=MANAJER" },
+    { label: "Karyawan", value: countsByRole.get("KARYAWAN") ?? 0, href: "/dashboard/manajer/pengguna?role=KARYAWAN" },
+    { label: "Karyawan aktif", value: activeEmployees, href: "/dashboard/manajer/pengguna?role=KARYAWAN" },
+    { label: "Tim", value: totalTeams, href: "/dashboard/manajer/tim" },
     { label: "Berkas tersimpan", value: await prisma.upload.count(), href: "/dashboard/manajer/berkas" },
-    { label: "Target bulan ini", value: targets.length, href: "/dashboard/manajer/target" },
-    { label: "Pengajuan profil", value: pendingRequests, href: "/dashboard/manajer/pengajuan-profil" },
-    { label: "Rata-rata target", value: `${averageProgress}%`, href: "/dashboard/manajer/target" },
+    { label: "Tim dengan target bulan ini", value: teamsWithCurrentTargets.length, href: "/dashboard/manajer/pengguna?role=TEAM" },
+    { label: "Rata-rata target tim", value: `${averageProgress}%`, href: "/dashboard/manajer/pengguna?role=TEAM_TARGETS" },
   ];
 
   return (
@@ -34,13 +62,13 @@ export default async function ManagerDashboardPage() {
         <header className="border-b border-[#e5e7eb] pb-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">Panel pemantauan</p>
           <h1 className="mt-1 text-[15px] font-semibold">Dashboard Manajer</h1>
-          <p className="mt-1 text-xs text-[#6b7280]">{manager.name} · Data seluruh departemen</p>
+          <p className="mt-1 text-xs text-[#6b7280]">{manager.name} · Data seluruh departemen · Akses baca</p>
         </header>
-        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
           {cards.map((card) => (
-            <Link key={card.label} href={card.href} className="flex items-center justify-between border-b border-[#d1d5db] bg-white px-4 py-3 hover:bg-[#f8f9fa]">
+            <Link key={card.label} href={card.href} className="flex min-h-[68px] items-center justify-between gap-3 rounded-md border border-[#e5e7eb] bg-white px-3.5 py-3 hover:bg-[#f8f9fa]">
               <span className="text-xs text-[#6b7280]">{card.label}</span>
-              <strong className="text-lg">{card.value}</strong>
+              <strong className="text-lg tabular-nums">{card.value}</strong>
             </Link>
           ))}
         </section>
@@ -64,16 +92,6 @@ export default async function ManagerDashboardPage() {
             ))}
             {uploads.length === 0 && <p className="px-4 py-5 text-xs text-[#6b7280]">Belum ada berkas.</p>}
           </div>
-        </section>
-        <section className="border-y border-[#d1d5db] bg-white">
-          <h2 className="border-b border-[#e5e7eb] px-4 py-3 text-xs font-semibold uppercase">Pengumuman terbaru</h2>
-          {announcements.map((announcement) => (
-            <article key={announcement.id} className="border-b border-[#f1f3f5] px-4 py-3 last:border-0">
-              <p className="text-xs font-semibold">{announcement.title} <span className="font-normal text-[#6b7280]">· {announcement.team.name} · {announcement.leader.name}</span></p>
-              <p className="mt-1 text-xs text-[#374151]">{announcement.content}</p>
-            </article>
-          ))}
-          {announcements.length === 0 && <p className="px-4 py-5 text-xs text-[#6b7280]">Belum ada pengumuman.</p>}
         </section>
       </div>
     </main>

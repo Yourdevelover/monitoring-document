@@ -72,7 +72,7 @@ export default async function AdminActivitiesPage({
     <main className="space-y-4">
       <header className="rounded-lg border border-[#e5e7eb] bg-white px-4 py-3">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">Audit Log</p>
-        <h1 className="mt-1 text-[13px] font-semibold tracking-tight">Log Aktivitas</h1>
+        <h1 className="mt-1 text-[13px] font-semibold tracking-tight">Logs</h1>
         <p className="mt-1 text-xs text-[#6b7280]">Catat aktivitas sistem.</p>
         <div className="flex items-center gap-2">
           <div className="flex min-w-0 flex-1">

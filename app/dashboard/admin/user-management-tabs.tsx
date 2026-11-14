@@ -13,12 +13,16 @@ export async function UserManagementTabs({
 }: {
   activeRole: (typeof tabs)[number]["role"];
 }) {
-  const [adminCount, leaderCount, employeeCount, managerCount] = await Promise.all([
+  const [adminCount, leaderCount, employeeCount, managerCount, pendingLeaderCount, pendingEmployeeCount, pendingManagerCount] = await Promise.all([
     prisma.user.count({ where: { role: "ADMIN" } }),
-    prisma.user.count({ where: { role: "LEADER" } }),
+    prisma.user.count({ where: { role: "LEADER", isActive: { not: "REJECTED" } } }),
     prisma.user.count({ where: { role: "KARYAWAN" } }),
     prisma.user.count({ where: { role: "MANAJER" } }),
+    prisma.user.count({ where: { role: "LEADER", isActive: "PENDING" } }),
+    prisma.user.count({ where: { role: "KARYAWAN", isActive: "PENDING" } }),
+    prisma.user.count({ where: { role: "MANAJER", isActive: "PENDING" } }),
   ]);
+  const pendingCount = pendingLeaderCount + pendingEmployeeCount + pendingManagerCount;
   const accountCounts = [
     { role: "admin", label: "Admin", count: adminCount },
     { role: "leaders", label: "Leader", count: leaderCount },
@@ -34,13 +38,22 @@ export async function UserManagementTabs({
           <h1 className="mt-1 text-[13px] font-semibold tracking-tight">Kelola Pengguna</h1>
           <p className="mt-1 text-xs text-[#6b7280]">Kelola akun admin, leader, karyawan, dan manajer.</p>
         </div>
-        <div aria-label="Jumlah seluruh akun berdasarkan peran" className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:w-[min(100%,36rem)]">
-          {accountCounts.map((item) => (
-            <div key={item.role} className={`min-w-0 rounded-md border px-3 py-2 ${activeRole === item.role ? "border-[#111111] bg-[#f8f9fa]" : "border-[#e5e7eb] bg-white"}`}>
-              <p className="truncate text-[10px] font-medium text-[#6b7280]">{item.label}</p>
-              <p className="mt-0.5 text-sm font-semibold tabular-nums text-[#111111]">{item.count}</p>
-            </div>
-          ))}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div aria-label="Jumlah seluruh akun berdasarkan peran" className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {accountCounts.map((item) => (
+              <div key={item.role} className={`min-w-0 rounded-md border px-3 py-2 ${activeRole === item.role ? "border-[#111111] bg-[#f8f9fa]" : "border-[#e5e7eb] bg-white"}`}>
+                <p className="truncate text-[10px] font-medium text-[#6b7280]">{item.label}</p>
+                <p className="mt-0.5 text-sm font-semibold tabular-nums text-[#111111]">{item.count}</p>
+              </div>
+            ))}
+          </div>
+          <Link
+            href="/dashboard/admin/approvals"
+            className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-[#18181b] px-3 text-xs font-medium text-white hover:bg-[#27272a]"
+          >
+            Persetujuan akun
+            <span className="rounded bg-white/15 px-1.5 py-0.5 tabular-nums">{pendingCount}</span>
+          </Link>
         </div>
       </header>
 

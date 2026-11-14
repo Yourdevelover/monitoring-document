@@ -67,9 +67,16 @@ export async function POST(request: Request) {
           // Ignore missing file on disk; the database record should still be deleted.
         }
 
+        if (upload.importantCopyPath) {
+          const importantPathOnDisk = path.join(process.cwd(), "public", upload.importantCopyPath.replace(/^\/+/, ""));
+          try {
+            await unlink(importantPathOnDisk);
+          } catch {
+            // Ignore missing permanent copy; the upload record should still be deleted.
+          }
+        }
+
         await prisma.$transaction([
-          prisma.uploadHistory.deleteMany({ where: { sourceUploadId: upload.id } }),
-          prisma.importantFile.deleteMany({ where: { sourceUploadId: upload.id } }),
           prisma.upload.delete({ where: { id: upload.id } }),
         ]);
 

@@ -28,6 +28,7 @@ export function FileConfirmationDialog({
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(isNewUpload); // Auto-open for new uploads
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [note, setNote] = useState("");
 
   async function handleSubmit(action: string) {
     setIsSubmitting(true);
@@ -39,6 +40,7 @@ export function FileConfirmationDialog({
           uploadFormData.append("category", categoryKey);
           uploadFormData.append("title", fileName);
           uploadFormData.append("isImportant", String(isImportant));
+          uploadFormData.append("note", note);
           uploadFormData.append("file", newFile);
 
           const uploadResponse = await fetch("/api/karyawan/upload", {
@@ -185,6 +187,17 @@ export function FileConfirmationDialog({
             <p className="mb-6 text-sm text-[#6b7280]">
               Apakah data file ini sudah benar dan siap untuk dikirim?
             </p>
+            <label className="mb-4 block text-xs font-medium text-[#374151]">
+              Catatan (opsional)
+              <textarea
+                value={note}
+                onChange={(event) => setNote(event.target.value)}
+                maxLength={1000}
+                rows={2}
+                placeholder="Tambahkan keterangan untuk berkas ini"
+                className="mt-1 w-full resize-none rounded-md border border-[#d1d5db] px-3 py-2 text-sm font-normal text-[#111111] outline-none focus:border-[#2563eb]"
+              />
+            </label>
 
             <div className="space-y-3">
               <button

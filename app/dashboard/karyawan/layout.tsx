@@ -37,24 +37,20 @@ export default async function EmployeeLayout({
         <div className="employee-content min-w-0 flex-1">
           <div className="leader-announcement-bar" role="status" aria-live="polite">
             <NotificationButton href="/dashboard/karyawan/announcement" count={announcements.length} />
-            <div className="leader-announcement-viewport employee-announcement-viewport">
+            <div className="leader-announcement-viewport">
               {announcements.length > 0 ? (
-                <div className="employee-announcement-track">
-                  {[0, 1].map((copy) => (
-                    <p key={copy} className="employee-announcement-copy" aria-hidden={copy === 1}>
-                      {announcements.map((announcement, index) => (
-                        <span key={announcement.id}>
-                          {index > 0 && "  •  "}
-                          <span className={announcement.isPinned ? "leader-announcement-important" : undefined}>
-                            {announcement.title
-                              ? `${announcement.title} - ${announcement.content}`
-                              : announcement.content}
-                          </span>
-                        </span>
-                      ))}
-                    </p>
+                <p className="leader-announcement-single">
+                  {announcements.map((announcement, index) => (
+                    <span key={announcement.id}>
+                      {index > 0 && "  •  "}
+                      <span className={announcement.isPinned ? "leader-announcement-important" : undefined}>
+                        {announcement.title
+                          ? `${announcement.title} - ${announcement.content}`
+                          : announcement.content}
+                      </span>
+                    </span>
                   ))}
-                </div>
+                </p>
               ) : (
                 <p className="leader-announcement-empty">Belum ada announcement terbaru dari leader.</p>
               )}

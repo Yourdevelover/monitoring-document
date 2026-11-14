@@ -47,6 +47,7 @@ export default async function LeaderFileDetailPage({ params }: FileDetailPagePro
           <p className="text-sm font-medium">{upload.fileName}</p>
           <p className="text-sm text-[#6b7280]">Kategori: {upload.category.toLowerCase()}</p>
           <p className="text-sm text-[#6b7280]">Karyawan: {upload.user.name}</p>
+          {upload.note && <p className="whitespace-pre-wrap break-words text-sm text-[#374151]">Catatan: {upload.note}</p>}
           <p className="text-xs text-[#6b7280]">
             Dikirim: {new Date(upload.submissionDate).toLocaleString("id-ID")}
           </p>

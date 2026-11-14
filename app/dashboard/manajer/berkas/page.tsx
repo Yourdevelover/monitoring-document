@@ -44,14 +44,17 @@ export default async function ManagerFilesPage() {
           <h2 className="px-4 py-3 text-xs font-semibold uppercase">Berkas Terbaru</h2>
           {recentUploads.map((upload) => (
             <div key={upload.id} className="grid gap-1 px-4 py-3 sm:grid-cols-[1.4fr_1fr_1fr_auto] sm:items-center">
-              <a
-                href={upload.filePath}
-                target="_blank"
-                rel="noreferrer"
-                className="truncate text-xs font-medium hover:underline"
-              >
-                {upload.fileName}
-              </a>
+              <div className="min-w-0">
+                <a
+                  href={upload.filePath}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block truncate text-xs font-medium hover:underline"
+                >
+                  {upload.fileName}
+                </a>
+                {upload.note && <p className="mt-1 whitespace-pre-wrap break-words text-xs text-[#374151]">Catatan: {upload.note}</p>}
+              </div>
               <span className="truncate text-xs">{upload.user.name}</span>
               <span className="text-xs text-[#6b7280]">
                 {upload.team.department.name} · {upload.category}

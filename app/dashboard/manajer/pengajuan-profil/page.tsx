@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireManajer } from "@/lib/auth";
 import { PaginationControls } from "@/app/components/pagination-controls";
+import { readProfileRequests } from "@/lib/profile-requests";
 
 export default async function ManagerProfileRequestsPage({
   searchParams,
@@ -11,18 +12,22 @@ export default async function ManagerProfileRequestsPage({
   const params = await searchParams;
   const pageSize = 12;
   const requestedPage = Math.max(1, Number(params.page) || 1);
-  const totalItems = await prisma.profileRequest.count();
+  const users = await prisma.user.findMany({
+    include: { department: true, team: true },
+  });
+  const usersById = new Map(users.map((user) => [user.id, user]));
+  const allRequests = users
+    .flatMap((user) => readProfileRequests(user.profileRequests)
+      .map((profileRequest) => ({
+        ...profileRequest,
+        user,
+        reviewer: profileRequest.reviewerId ? usersById.get(profileRequest.reviewerId) ?? null : null,
+      })))
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+  const totalItems = allRequests.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const page = Math.min(requestedPage, totalPages);
-  const requests = await prisma.profileRequest.findMany({
-    include: {
-      user: { include: { department: true, team: true } },
-      reviewer: true,
-    },
-    orderBy: { createdAt: "desc" },
-    skip: (page - 1) * pageSize,
-    take: pageSize,
-  });
+  const requests = allRequests.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <main className="min-h-screen bg-[#f8f9fa] px-4 py-5 text-[#111111]">
@@ -57,7 +62,7 @@ export default async function ManagerProfileRequestsPage({
               <div className="text-xs">
                 <span className="font-medium">{request.status}</span>
                 <time className="mt-1 block text-[11px] text-[#6b7280]">
-                  {request.createdAt.toLocaleString("id-ID")}
+                  {new Date(request.createdAt).toLocaleString("id-ID")}
                 </time>
                 {request.reviewer && (
                   <span className="mt-1 block text-[11px] text-[#6b7280]">

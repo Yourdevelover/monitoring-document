@@ -11,7 +11,6 @@ type EmployeeProfile = {
   isActive: string;
   profilePicture: string | null;
   createdAt: Date;
-  latestLoginAt?: Date | null;
 };
 
 type EmployeeProfileCardProps = {
@@ -102,12 +101,6 @@ export function EmployeeProfileCard({ employee, files = [], mode = "avatar" }: E
                     month: "long",
                     year: "numeric",
                   })}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-4 py-3">
-                <dt className="text-[#6b7280]">Login terakhir</dt>
-                <dd className="text-right font-medium text-[#111111]">
-                  {employee.latestLoginAt ? new Date(employee.latestLoginAt).toLocaleString("id-ID") : "Belum ada data"}
                 </dd>
               </div>
               <div className="flex justify-between gap-4 py-3">

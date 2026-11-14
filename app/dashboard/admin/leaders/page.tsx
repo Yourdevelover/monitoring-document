@@ -6,7 +6,7 @@ import { LeaderSearchList } from "./leader-search-list";
 export default async function AdminLeadersPage() {
   await requireAdmin();
   const leaders = await prisma.user.findMany({
-    where: { role: "LEADER" },
+    where: { role: "LEADER", isActive: { not: "REJECTED" } },
     include: {
       ledTeam: {
         include: { members: true, department: true },

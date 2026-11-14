@@ -8,46 +8,28 @@ export default async function DataPentingPage({ searchParams }: { searchParams: 
   const params = await searchParams;
   const pageSize = 20;
   const requestedPage = Math.max(1, Number(params.page) || 1);
-  const [importantUploadCount, archivedFileCount] = await Promise.all([
-    prisma.upload.count({ where: { userId: employee.id, isImportant: true, isSubmitted: true } }),
-    prisma.importantFile.count({ where: { userId: employee.id } }),
-  ]);
-  const totalFiles = importantUploadCount + archivedFileCount;
+  const priorityWhere = {
+    userId: employee.id,
+    OR: [{ importantSaved: true }, { isImportant: true, isSubmitted: true }],
+  };
+  const totalFiles = await prisma.upload.count({ where: priorityWhere });
   const totalPages = Math.max(1, Math.ceil(totalFiles / pageSize));
   const page = Math.min(requestedPage, totalPages);
-  const [importantUploads, archivedFiles] = await Promise.all([
-    prisma.upload.findMany({
-      where: { userId: employee.id, isImportant: true, isSubmitted: true },
-      orderBy: { submissionDate: "desc" },
-      take: page * pageSize,
-      select: {
-        id: true,
-        title: true,
-        fileName: true,
-        filePath: true,
-        category: true,
-        submissionDate: true,
-      },
-    }),
-    prisma.importantFile.findMany({
-      where: { userId: employee.id },
-      orderBy: { savedAt: "desc" },
-      take: page * pageSize,
-      select: {
-        id: true,
-        title: true,
-        fileName: true,
-        filePath: true,
-        category: true,
-        savedAt: true,
-      },
-    }),
-  ]);
-  const importantFiles = [
-    ...importantUploads.map((file) => ({ ...file, source: "upload" as const, savedAt: file.submissionDate })),
-    ...archivedFiles.map((file) => ({ ...file, source: "archive" as const })),
-  ]
-    .sort((first, second) => second.savedAt.getTime() - first.savedAt.getTime())
+  const importantFiles = (await prisma.upload.findMany({
+    where: priorityWhere,
+    select: {
+      id: true,
+      title: true,
+      fileName: true,
+      filePath: true,
+      importantCopyPath: true,
+      importantSaved: true,
+      importantSavedAt: true,
+      category: true,
+      submissionDate: true,
+    },
+  }))
+    .sort((first, second) => (second.importantSavedAt ?? second.submissionDate).getTime() - (first.importantSavedAt ?? first.submissionDate).getTime())
     .slice((page - 1) * pageSize, page * pageSize);
 
   return (
@@ -72,19 +54,19 @@ export default async function DataPentingPage({ searchParams }: { searchParams: 
                   {file.fileName} • {file.category}
                 </p>
                 <p className="mt-1 text-xs text-[#956400]">
-                  {new Date(file.savedAt).toLocaleDateString("id-ID")}
+                  {new Date(file.importantSavedAt ?? file.submissionDate).toLocaleDateString("id-ID")}
                 </p>
 
                 <div className="mt-4 flex flex-wrap gap-2">
                   <a
-                    href={file.filePath}
+                    href={file.importantCopyPath ?? file.filePath}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center rounded-lg bg-[#956400] px-4 py-2 text-sm font-medium text-white hover:bg-[#956400]"
                   >
                     Lihat file
                   </a>
-                  <DeleteImportantButton fileId={file.id} source={file.source} />
+                  <DeleteImportantButton fileId={file.id} source={file.importantSaved ? "archive" : "upload"} />
                 </div>
               </article>
             ))}

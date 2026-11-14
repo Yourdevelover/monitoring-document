@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { requireEmployee } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getBaseUrl } from "@/lib/redirect";
+import { profileRequestsJson, readProfileRequests, type ProfileRequestRecord } from "@/lib/profile-requests";
 
 export async function POST(request: Request) {
   try {
@@ -99,20 +100,34 @@ export async function POST(request: Request) {
       );
     }
 
-    await prisma.profileRequest.deleteMany({
-      where: {
-        userId: employee.id,
-        status: "PENDING",
-      },
-    });
+    await prisma.$transaction(async (transaction) => {
+      await transaction.$queryRaw`SELECT "id" FROM "users" WHERE "id" = ${employee.id} FOR UPDATE`;
+      const currentUser = await transaction.user.findUnique({
+        where: { id: employee.id },
+        select: { profileRequests: true },
+      });
+      if (!currentUser) throw new Error("Profil karyawan tidak ditemukan.");
 
-    await prisma.profileRequest.create({
-      data: {
+      const now = new Date().toISOString();
+      const profileRequest: ProfileRequestRecord = {
+        id: crypto.randomUUID(),
         userId: employee.id,
         fieldName: "profile",
         oldValue: JSON.stringify(oldValuePayload),
         newValue: JSON.stringify(newValuePayload),
-      },
+        status: "PENDING",
+        reviewerId: null,
+        reviewNote: null,
+        createdAt: now,
+        updatedAt: now,
+      };
+      const requests = readProfileRequests(currentUser.profileRequests)
+        .filter((item) => item.status !== "PENDING");
+
+      await transaction.user.update({
+        where: { id: employee.id },
+        data: { profileRequests: profileRequestsJson([...requests, profileRequest]) },
+      });
     });
 
     return NextResponse.redirect(new URL("/dashboard/karyawan/profil?toast=" + encodeURIComponent("Pengajuan perubahan profil berhasil dikirim ke leader."), getBaseUrl(request)));

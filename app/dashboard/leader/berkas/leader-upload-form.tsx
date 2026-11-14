@@ -16,6 +16,8 @@ export function LeaderUploadForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [category, setCategory] = useState<string>("DAILY");
+  const [note, setNote] = useState("");
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -28,12 +30,22 @@ export function LeaderUploadForm() {
 
     setError(null);
     setSuccess(null);
+    setIsConfirmOpen(true);
+  }
+
+  async function confirmUpload() {
+    if (!selectedFile) {
+      setError("Silakan pilih file terlebih dahulu.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const formData = new FormData();
       formData.append("category", category);
       formData.append("title", CATEGORY_OPTIONS.find((c) => c.key === category)?.label ?? category);
+      formData.append("note", note);
       formData.append("file", selectedFile);
 
       const response = await fetch("/api/leader/berkas/upload", {
@@ -50,6 +62,8 @@ export function LeaderUploadForm() {
       toast("Berkas berhasil dibagikan ke tim.", "success");
       setSelectedFile(null);
       setCategory("DAILY");
+      setNote("");
+      setIsConfirmOpen(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -114,8 +128,53 @@ export function LeaderUploadForm() {
         disabled={isSubmitting || !selectedFile}
         className="inline-flex w-full items-center justify-center rounded-lg bg-[#111111] px-4 py-2 text-[13px] font-medium text-white transition hover:bg-[#333333] disabled:cursor-not-allowed disabled:bg-[#9ca3af]"
       >
-        {isSubmitting ? "Mengunggah..." : "Bagikan ke Tim"}
+        Bagikan ke Tim
       </button>
+      {isConfirmOpen && selectedFile && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-y-auto bg-[#111111]/50 p-4" onClick={() => !isSubmitting && setIsConfirmOpen(false)}>
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="leader-upload-confirm-title"
+            className="my-auto w-full max-w-md rounded-lg border border-[#e5e7eb] bg-white p-4 shadow-xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 id="leader-upload-confirm-title" className="text-sm font-semibold text-[#111111]">Konfirmasi Berkas</h2>
+            <p className="mt-2 break-words text-xs text-[#6b7280]">{selectedFile.name} · {CATEGORY_OPTIONS.find((item) => item.key === category)?.label}</p>
+            <p className="mt-2 text-xs text-[#6b7280]">Tambahkan catatan jika diperlukan, lalu lanjutkan untuk membagikan berkas ke tim.</p>
+            <label className="mt-4 block text-xs font-medium text-[#374151]">
+              Catatan (opsional)
+              <textarea
+                value={note}
+                onChange={(event) => setNote(event.target.value)}
+                maxLength={1000}
+                rows={2}
+                placeholder="Tambahkan keterangan untuk berkas ini"
+                className="mt-1 w-full resize-none rounded-md border border-[#d1d5db] px-3 py-2 text-sm font-normal text-[#111111] outline-none focus:border-[#2563eb]"
+              />
+            </label>
+            {error && <p className="mt-2 rounded-md bg-[#fdebec] px-3 py-2 text-xs font-medium text-[#9f2f2d]">{error}</p>}
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                disabled={isSubmitting}
+                onClick={() => setIsConfirmOpen(false)}
+                className="rounded-md border border-[#e5e7eb] px-3 py-2 text-xs font-medium text-[#374151] hover:bg-[#f8f9fa] disabled:opacity-60"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={isSubmitting}
+                onClick={confirmUpload}
+                className="rounded-md bg-[#111111] px-3 py-2 text-xs font-medium text-white hover:bg-[#333333] disabled:opacity-60"
+              >
+                {isSubmitting ? "Mengirim..." : "Ya, Kirim"}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </form>
   );
 }

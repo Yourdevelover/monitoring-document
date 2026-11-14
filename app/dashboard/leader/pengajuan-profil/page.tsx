@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireLeader } from "@/lib/auth";
 import { PaginationControls } from "@/app/components/pagination-controls";
+import { readProfileRequests } from "@/lib/profile-requests";
 
 function parseProfilePayload(value: string | null | undefined) {
   if (!value) {
@@ -28,22 +29,21 @@ export default async function LeaderProfileRequestsPage({
     where: { leaderId: leader.id },
   });
 
-  const requestWhere = {
-    status: "PENDING" as const,
-    user: { teamId: team?.id },
-  };
-  const totalRequests = await prisma.profileRequest.count({ where: requestWhere });
+  const requestUsers = team
+    ? await prisma.user.findMany({
+        where: { teamId: team.id },
+        select: { id: true, name: true, profileRequests: true },
+      })
+    : [];
+  const allRequests = requestUsers
+    .flatMap((user) => readProfileRequests(user.profileRequests)
+      .filter((profileRequest) => profileRequest.status === "PENDING")
+      .map((profileRequest) => ({ ...profileRequest, user })))
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+  const totalRequests = allRequests.length;
   const totalPages = Math.max(1, Math.ceil(totalRequests / pageSize));
   const page = Math.min(requestedPage, totalPages);
-  const requests = await prisma.profileRequest.findMany({
-    where: requestWhere,
-    orderBy: { createdAt: "desc" },
-    skip: (page - 1) * pageSize,
-    take: pageSize,
-    include: {
-      user: true,
-    },
-  });
+  const requests = allRequests.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <main className="min-h-screen bg-[#f8f9fa] px-4 py-5 text-[#111111]">

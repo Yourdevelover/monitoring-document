@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { requireLeader } from "@/lib/auth";
 import { PaginationControls } from "@/app/components/pagination-controls";
 import Link from "next/link";
+import { readProfileRequests } from "@/lib/profile-requests";
 
 export default async function LeaderDashboardPage({
   searchParams,
@@ -51,13 +52,17 @@ export default async function LeaderDashboardPage({
 
   const period = new Date().toISOString().slice(0, 7);
 
-  const [members, teamTargets, pendingRequests, announcementCount, uploadCount] = await Promise.all([
+  const [members, teamTargets, requestUsers, announcementCount, uploadCount] = await Promise.all([
     prisma.user.findMany({ where: { teamId: team.id, role: "KARYAWAN" }, orderBy: { createdAt: "desc" } }),
     prisma.target.findMany({ where: { period, user: { teamId: team.id } }, include: { user: { select: { name: true } } }, orderBy: { createdAt: "desc" } }),
-    prisma.profileRequest.count({ where: { user: { teamId: team.id }, status: "PENDING" } }),
+    prisma.user.findMany({ where: { teamId: team.id }, select: { profileRequests: true } }),
     prisma.announcement.count({ where: { teamId: team.id, OR: [{ isPinned: true }, { createdAt: { gte: activeSince } }] } }),
     prisma.upload.count({ where: { teamId: team.id } }),
   ]);
+  const pendingRequests = requestUsers.reduce(
+    (total, user) => total + readProfileRequests(user.profileRequests).filter((request) => request.status === "PENDING").length,
+    0,
+  );
 
   const totalEmployees = members.length;
   const activeEmployees = members.filter((m) => m.isActive === "ACTIVE").length;
