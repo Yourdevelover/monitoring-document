@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { readProfileRequests } from "@/lib/profile-requests";
+import { getUploadFileName } from "@/lib/upload-file";
 
 export default async function AdminDashboardPage() {
   await requireAdmin();
@@ -9,7 +10,7 @@ export default async function AdminDashboardPage() {
     prisma.user.findMany({ orderBy: { createdAt: "desc" }, select: { id: true, name: true, email: true, role: true, isActive: true, teamId: true, createdAt: true, profileRequests: true } }),
     prisma.team.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.target.findMany({ select: { userId: true, currentValue: true, targetValue: true, name: true, period: true, user: { select: { name: true } } } }),
-    prisma.upload.findMany({ orderBy: { createdAt: "desc" }, take: 8, include: { user: { select: { name: true } }, team: { select: { name: true } } } }),
+    prisma.upload.findMany({ orderBy: { id: "desc" }, take: 8, include: { user: { select: { name: true } }, team: { select: { name: true } } } }),
     prisma.upload.count(),
     prisma.activityLog.findMany({ orderBy: { createdAt: "desc" }, take: 8, include: { actor: true } }),
   ]);
@@ -206,10 +207,10 @@ export default async function AdminDashboardPage() {
             {recentUploads.length ? recentUploads.map((u) => (
               <div key={u.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
                 <div className="min-w-0">
-                  <p className="truncate text-[13px] font-medium">{u.title}</p>
+                  <p className="truncate text-[13px] font-medium">{getUploadFileName(u.filePath)}</p>
                   <p className="truncate text-xs text-[#6b7280]">{u.user.name} • {u.team.name} • {u.category}</p>
                 </div>
-                <span className="shrink-0 text-[11px] text-[#9ca3af]">{new Date(u.createdAt).toLocaleDateString("id-ID", { dateStyle: "short" })}</span>
+                <span className="shrink-0 text-[11px] text-[#9ca3af]">{u.submissionDate?.toLocaleDateString("id-ID", { dateStyle: "short" }) ?? "Belum dikirim"}</span>
               </div>
             )) : <p className="px-4 py-6 text-center text-xs text-[#6b7280]">Belum ada file.</p>}
           </div>

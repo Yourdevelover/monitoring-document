@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireManajer } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getUploadFileName } from "@/lib/upload-file";
 
 export default async function ManagerLeaderDetailPage({
   params,
@@ -41,15 +42,12 @@ export default async function ManagerLeaderDetailPage({
           uploads: {
             select: {
               id: true,
-              fileName: true,
               filePath: true,
               category: true,
-              isSubmitted: true,
               submissionDate: true,
-              createdAt: true,
               user: { select: { name: true } },
             },
-            orderBy: { createdAt: "desc" },
+            orderBy: { id: "desc" },
             take: 20,
           },
         },
@@ -67,7 +65,7 @@ export default async function ManagerLeaderDetailPage({
   const currentTarget = leader.targets.reduce((sum, target) => sum + target.targetValue, 0);
   const currentProgress = leader.targets.reduce((sum, target) => sum + target.currentValue, 0);
   const targetPercent = currentTarget > 0 ? Math.round((currentProgress / currentTarget) * 100) : 0;
-  const submittedUploads = leader.ledTeam?.uploads.filter((upload) => upload.isSubmitted) ?? [];
+  const submittedUploads = leader.ledTeam?.uploads.filter((upload) => upload.submissionDate !== null) ?? [];
 
   return (
     <main className="space-y-4">
@@ -146,10 +144,10 @@ export default async function ManagerLeaderDetailPage({
         <div className="divide-y divide-[#f1f3f5]">
           {leader.ledTeam?.uploads.map((upload) => (
             <article key={upload.id} className="grid gap-1 px-4 py-3 sm:grid-cols-[1.4fr_1fr_0.8fr_auto] sm:items-center">
-              <a href={upload.filePath} target="_blank" rel="noreferrer" className="truncate text-xs font-medium text-[#1f6c9f] hover:underline">{upload.fileName}</a>
+              <a href={upload.filePath} target="_blank" rel="noreferrer" className="truncate text-xs font-medium text-[#1f6c9f] hover:underline">{getUploadFileName(upload.filePath)}</a>
               <span className="truncate text-xs">{upload.user.name}</span>
-              <span className="text-xs text-[#6b7280]">{upload.category} · {upload.isSubmitted ? "Terkirim" : "Belum dikirim"}</span>
-              <time className="text-[11px] text-[#6b7280]">{upload.createdAt.toLocaleString("id-ID")}</time>
+              <span className="text-xs text-[#6b7280]">{upload.category} · {upload.submissionDate ? "Terkirim" : "Belum dikirim"}</span>
+              <time className="text-[11px] text-[#6b7280]">{upload.submissionDate?.toLocaleString("id-ID") ?? "-"}</time>
             </article>
           ))}
           {!leader.ledTeam?.uploads.length && <p className="px-4 py-7 text-center text-xs text-[#6b7280]">Belum ada berkas tim.</p>}

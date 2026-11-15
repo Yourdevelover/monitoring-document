@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireManajer } from "@/lib/auth";
+import { getUploadFileName } from "@/lib/upload-file";
 
 export default async function ManagerEmployeeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   await requireManajer();
@@ -12,8 +13,8 @@ export default async function ManagerEmployeeDetailPage({ params }: { params: Pr
   if (!employee) return <p className="p-5 text-sm text-[#6b7280]">Karyawan tidak ditemukan.</p>;
 
   const [latestUpload, uploads] = await Promise.all([
-    prisma.upload.findFirst({ where: { userId: employee.id }, orderBy: { createdAt: "desc" }, select: { createdAt: true, fileName: true } }),
-    prisma.upload.findMany({ where: { userId: employee.id }, orderBy: { createdAt: "desc" }, take: 20 }),
+    prisma.upload.findFirst({ where: { userId: employee.id }, orderBy: { id: "desc" }, select: { submissionDate: true, filePath: true } }),
+    prisma.upload.findMany({ where: { userId: employee.id }, orderBy: { id: "desc" }, take: 20 }),
   ]);
 
   return (
@@ -31,11 +32,11 @@ export default async function ManagerEmployeeDetailPage({ params }: { params: Pr
           <Info label="Tim" value={employee.team?.name ?? "Tanpa tim"} />
           <Info label="Status" value={employee.isActive} />
           <Info label="Bergabung" value={employee.createdAt.toLocaleDateString("id-ID")} />
-          <Info label="Berkas terakhir" value={latestUpload ? `${latestUpload.fileName} · ${latestUpload.createdAt.toLocaleString("id-ID")}` : "Belum ada"} />
+          <Info label="Berkas terakhir" value={latestUpload ? `${getUploadFileName(latestUpload.filePath)} · ${latestUpload.submissionDate?.toLocaleString("id-ID") ?? "Belum dikirim"}` : "Belum ada"} />
         </section>
         <section className="border-y border-[#e5e7eb] bg-white">
           <h2 className="border-b border-[#e5e7eb] px-4 py-3 text-xs font-semibold uppercase">Berkas</h2>
-          {uploads.map((upload) => <a key={upload.id} href={upload.filePath} target="_blank" rel="noreferrer" className="flex justify-between gap-3 border-b border-[#f1f3f5] px-4 py-2.5 text-xs last:border-0"><span className="truncate">{upload.fileName}</span><span className="shrink-0 text-[#6b7280]">{upload.category} · {upload.createdAt.toLocaleDateString("id-ID")}</span></a>)}
+          {uploads.map((upload) => <a key={upload.id} href={upload.filePath} target="_blank" rel="noreferrer" className="flex justify-between gap-3 border-b border-[#f1f3f5] px-4 py-2.5 text-xs last:border-0"><span className="truncate">{getUploadFileName(upload.filePath)}</span><span className="shrink-0 text-[#6b7280]">{upload.category} · {upload.submissionDate?.toLocaleDateString("id-ID") ?? "Belum dikirim"}</span></a>)}
           {uploads.length === 0 && <p className="px-4 py-5 text-xs text-[#6b7280]">Belum ada berkas.</p>}
         </section>
       </div>

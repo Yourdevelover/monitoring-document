@@ -57,8 +57,6 @@ export async function POST(request: Request) {
       period,
       targetValue,
       currentValue,
-      formula: "bagi",
-      threshold: 20,
     },
     update: { targetValue, currentValue },
   });

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireManajer } from "@/lib/auth";
+import { getUploadFileName } from "@/lib/upload-file";
 
 const categories = [
   { key: "DAILY", slug: "daily", label: "Daily" },
@@ -14,7 +15,7 @@ export default async function ManagerFilesPage() {
   const [counts, recentUploads] = await Promise.all([
     prisma.upload.groupBy({ by: ["category"], _count: { _all: true } }),
     prisma.upload.findMany({
-      orderBy: { createdAt: "desc" },
+      orderBy: { id: "desc" },
       take: 20,
       include: { user: true, team: { include: { department: true } } },
     }),
@@ -51,7 +52,7 @@ export default async function ManagerFilesPage() {
                   rel="noreferrer"
                   className="block truncate text-xs font-medium hover:underline"
                 >
-                  {upload.fileName}
+                  {getUploadFileName(upload.filePath)}
                 </a>
                 {upload.note && <p className="mt-1 whitespace-pre-wrap break-words text-xs text-[#374151]">Catatan: {upload.note}</p>}
               </div>
@@ -59,7 +60,7 @@ export default async function ManagerFilesPage() {
               <span className="text-xs text-[#6b7280]">
                 {upload.team.department.name} · {upload.category}
               </span>
-              <time className="text-[11px] text-[#6b7280]">{upload.createdAt.toLocaleString("id-ID")}</time>
+              <time className="text-[11px] text-[#6b7280]">{upload.submissionDate?.toLocaleString("id-ID") ?? "Belum dikirim"}</time>
             </div>
           ))}
           {recentUploads.length === 0 && <p className="px-4 py-6 text-xs text-[#6b7280]">Belum ada berkas.</p>}

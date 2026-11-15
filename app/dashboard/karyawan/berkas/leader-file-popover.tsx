@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { getUploadFileName } from "@/lib/upload-file";
 
 type SharedFile = {
   id: number;
-  title: string;
-  fileName: string;
   category: string;
   filePath: string;
   uploaderName: string;
@@ -38,8 +37,7 @@ export function LeaderFilePopover({ file }: { file: SharedFile }) {
 
       {open && (
         <div className="absolute right-0 top-full z-20 mt-2 w-72 rounded-lg border border-[#e5e7eb] bg-white p-4">
-          <p className="text-sm font-semibold text-[#111111]">{file.title}</p>
-          <p className="mt-1 break-all text-xs text-[#6b7280]">{file.fileName}</p>
+          <p className="text-sm font-semibold text-[#111111]">{getUploadFileName(file.filePath)}</p>
           <p className="mt-2 text-xs text-[#6b7280]">
             Kategori: {file.category === "OTHER" ? "Berkas Lainnya" : file.category.toLowerCase()} • oleh {file.uploaderName}
           </p>

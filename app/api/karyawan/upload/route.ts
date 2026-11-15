@@ -1,8 +1,9 @@
-import { copyFile, mkdir, unlink, writeFile } from "fs/promises";
+import { mkdir, unlink, writeFile } from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getUploadFileName } from "@/lib/upload-file";
 import { enqueueFileTask } from "@/lib/upload-queue";
 import { exceedsUploadRequestLimit, MAX_UPLOAD_SIZE_BYTES } from "@/lib/upload-limits";
 
@@ -89,15 +90,6 @@ export async function POST(request: Request) {
           // Ignore missing file on disk; the database record should still be deleted.
         }
 
-        if (upload.importantCopyPath) {
-          const importantPathOnDisk = path.join(process.cwd(), "public", upload.importantCopyPath.replace(/^\/+/, ""));
-          try {
-            await unlink(importantPathOnDisk);
-          } catch {
-            // Ignore missing permanent copy; the upload record should still be deleted.
-          }
-        }
-
         await prisma.$transaction([
           prisma.upload.delete({ where: { id: uploadIdToDelete } }),
         ]);
@@ -106,35 +98,6 @@ export async function POST(request: Request) {
           success: true,
           message: "Berkas berhasil dihapus",
         });
-      });
-    }
-
-    if (action === "delete-important") {
-      return await enqueueFileTask(async () => {
-        const uploadId = Number(formData.get("uploadId") ?? 0);
-        const upload = await prisma.upload.findFirst({
-          where: { id: uploadId, userId: employee.id, importantSaved: true },
-        });
-
-        if (!upload) {
-          return NextResponse.json({ success: false, error: "Data penting tidak ditemukan." }, { status: 404 });
-        }
-
-        if (upload.importantCopyPath) {
-          const importantPath = path.join(process.cwd(), "public", upload.importantCopyPath.replace(/^\/+/, ""));
-          try {
-            await unlink(importantPath);
-          } catch {
-            // The permanent copy may already be missing from disk.
-          }
-        }
-
-        await prisma.upload.update({
-          where: { id: upload.id },
-          data: { importantSaved: false, importantCopyPath: null, importantSavedAt: null },
-        });
-
-        return NextResponse.json({ success: true, message: "Data dihapus dari Data Prioritas." });
       });
     }
 
@@ -187,13 +150,10 @@ export async function POST(request: Request) {
           );
         }
 
-        // Set expiration time to 12 hours from now
-        const expiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000);
-
         const submittedAt = new Date();
         await prisma.upload.update({
           where: { id: uploadId },
-          data: { isSubmitted: true, submissionDate: submittedAt, expiresAt },
+          data: { submissionDate: submittedAt },
         });
 
         await prisma.activityLog.create({
@@ -202,7 +162,7 @@ export async function POST(request: Request) {
             action: "SUBMIT_FILE",
             targetType: "UPLOAD",
             targetId: upload.id,
-            description: `${employee.name} mengirim berkas ${upload.fileName} (${upload.category}).`,
+            description: `${employee.name} mengirim berkas ${getUploadFileName(upload.filePath)} (${upload.category}).`,
           },
         });
 
@@ -244,39 +204,15 @@ export async function POST(request: Request) {
           );
         }
 
-        if (upload.importantSaved && upload.importantCopyPath) {
+        if (upload.isImportant) {
           return NextResponse.json({
             success: true,
             message: "Berkas sudah tersimpan di Data Prioritas",
           });
         }
-
-        const sourcePath = path.join(
-          process.cwd(),
-          "public",
-          upload.filePath.replace(/^\/+/, "")
-        );
-        const importantFolder = path.join(
-          process.cwd(),
-          "public",
-          "uploads",
-          "teams",
-          String(upload.teamId),
-          "employees",
-          String(employee.id),
-          "important"
-        );
-        await mkdir(importantFolder, { recursive: true });
-
-        const importantFileName = `${Date.now()}-${upload.fileName}`;
-        const importantPath = path.join(importantFolder, importantFileName);
-        const importantPublicPath = `/uploads/teams/${upload.teamId}/employees/${employee.id}/important/${importantFileName}`;
-
-        await copyFile(sourcePath, importantPath);
-
         await prisma.upload.update({
           where: { id: upload.id },
-          data: { importantSaved: true, importantCopyPath: importantPublicPath, importantSavedAt: new Date() },
+          data: { isImportant: true },
         });
 
         return NextResponse.json({
@@ -329,15 +265,6 @@ export async function POST(request: Request) {
           // Ignore missing file on disk
         }
 
-        if (upload.importantCopyPath) {
-          const importantPathOnDisk = path.join(process.cwd(), "public", upload.importantCopyPath.replace(/^\/+/, ""));
-          try {
-            await unlink(importantPathOnDisk);
-          } catch {
-            // Ignore missing permanent copy.
-          }
-        }
-
         await prisma.upload.delete({
           where: { id: uploadId },
         });
@@ -350,7 +277,6 @@ export async function POST(request: Request) {
     }
 
     const category = String(formData.get("category") ?? "");
-    const title = String(formData.get("title") ?? "").trim();
     const isImportant = formData.get("isImportant") === "true";
     const note = String(formData.get("note") ?? "").trim();
     const file = formData.get("file");
@@ -378,7 +304,7 @@ export async function POST(request: Request) {
         where: {
           userId: employee.id,
           category: category as "DAILY" | "CHAT" | "PAYMENT",
-          isSubmitted: false,
+          submissionDate: null,
         },
       });
 
@@ -418,10 +344,8 @@ export async function POST(request: Request) {
         data: {
           userId: employee.id,
           teamId,
-          title: title || safeFileName,
-          fileName: safeFileName,
           filePath: publicFilePath,
-          fileType: file.type || "application/octet-stream",
+          submissionDate: null,
           category: category as "DAILY" | "CHAT" | "PAYMENT",
           status: "COMPLETED",
           isImportant,
@@ -435,7 +359,7 @@ export async function POST(request: Request) {
           action: "UPLOAD_FILE",
           targetType: "UPLOAD",
           targetId: upload.id,
-          description: `${employee.name} mengunggah berkas ${upload.fileName} (${upload.category}).`,
+          description: `${employee.name} mengunggah berkas ${safeFileName} (${upload.category}).`,
         },
       });
 

@@ -1,8 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { requireEmployee } from "@/lib/auth";
 
-const OPS = ["bagi", "kali", "tambah", "kurang"] as const;
-
 function getBaseUrl(req: Request) {
   const host = req.headers.get("host") ?? "localhost:3000";
   const safeHost = host.replace(/^0\.0\.0\.0/, "localhost");
@@ -32,12 +30,10 @@ export async function POST(req: Request) {
     const name = String(form.get("name") ?? "").trim();
     const targetValue = Number(form.get("targetValue"));
     const currentValue = Number(form.get("currentValue") ?? 0);
-    const formula = String(form.get("formula") ?? "bagi");
-    const threshold = Number(form.get("threshold") ?? 20);
-    if (!isFinite(id) || !name || !isFinite(targetValue) || targetValue <= 0 || !OPS.includes(formula as (typeof OPS)[number])) {
+    if (!isFinite(id) || !name || !isFinite(targetValue) || targetValue <= 0) {
       return Response.json({ error: "Data tidak valid" }, { status: 400 });
     }
-    await prisma.target.updateMany({ where: { id, userId: employee.id }, data: { name, targetValue, currentValue, formula, threshold, isPublic: true } });
+    await prisma.target.updateMany({ where: { id, userId: employee.id }, data: { name, targetValue, currentValue } });
     return Response.redirect(new URL("/dashboard/karyawan/target?toast=" + encodeURIComponent("Progres tersimpan."), base), 303);
   }
 
@@ -45,17 +41,15 @@ export async function POST(req: Request) {
   const period = String(form.get("period") ?? "").trim();
   const targetValue = Number(form.get("targetValue"));
   const currentValue = Number(form.get("currentValue") ?? 0);
-  const formula = String(form.get("formula") ?? "bagi");
-  const threshold = Number(form.get("threshold") ?? 20);
 
-  if (!name || !period || !isFinite(targetValue) || targetValue <= 0 || !OPS.includes(formula as (typeof OPS)[number])) {
+  if (!name || !period || !isFinite(targetValue) || targetValue <= 0) {
     return Response.json({ error: "Data tidak valid" }, { status: 400 });
   }
 
   await prisma.target.upsert({
     where: { userId_period_name: { userId: employee.id, period, name } },
-    create: { userId: employee.id, name, period, targetValue, currentValue, formula, threshold, isPublic: true },
-    update: { targetValue, currentValue, formula, threshold, isPublic: true },
+    create: { userId: employee.id, name, period, targetValue, currentValue },
+    update: { targetValue, currentValue },
   });
 
   return Response.redirect(new URL("/dashboard/karyawan/target?toast=" + encodeURIComponent("Target tersimpan."), base), 303);

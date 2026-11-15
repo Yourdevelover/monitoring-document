@@ -3,6 +3,7 @@ import path from "path";
 import { NextResponse } from "next/server";
 import { requireLeader } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getUploadFileName } from "@/lib/upload-file";
 import { enqueueFileTask } from "@/lib/upload-queue";
 import { exceedsUploadRequestLimit, MAX_UPLOAD_SIZE_BYTES } from "@/lib/upload-limits";
 
@@ -67,15 +68,6 @@ export async function POST(request: Request) {
           // Ignore missing file on disk; the database record should still be deleted.
         }
 
-        if (upload.importantCopyPath) {
-          const importantPathOnDisk = path.join(process.cwd(), "public", upload.importantCopyPath.replace(/^\/+/, ""));
-          try {
-            await unlink(importantPathOnDisk);
-          } catch {
-            // Ignore missing permanent copy; the upload record should still be deleted.
-          }
-        }
-
         await prisma.$transaction([
           prisma.upload.delete({ where: { id: upload.id } }),
         ]);
@@ -86,7 +78,7 @@ export async function POST(request: Request) {
             action: "DELETE_FILE",
             targetType: "UPLOAD",
             targetId: upload.id,
-            description: `${leader.name} menghapus berkas ${upload.fileName} (${upload.category}).`,
+            description: `${leader.name} menghapus berkas ${getUploadFileName(upload.filePath)} (${upload.category}).`,
           },
         });
 
@@ -98,7 +90,6 @@ export async function POST(request: Request) {
     }
 
     const category = String(formData.get("category") ?? "");
-    const title = String(formData.get("title") ?? "").trim();
     const file = formData.get("file");
 
     if (!VALID_CATEGORIES.has(category) || !(file instanceof File) || file.size === 0) {
@@ -138,13 +129,9 @@ export async function POST(request: Request) {
         data: {
           userId: leader.id,
           teamId: team.id,
-          title: title || safeFileName,
-          fileName: safeFileName,
           filePath: publicFilePath,
-          fileType: file.type || "application/octet-stream",
           category: category as "DAILY" | "CHAT" | "PAYMENT" | "OTHER",
           status: "COMPLETED",
-          isSubmitted: true,
           submissionDate: new Date(),
         },
       });
@@ -155,7 +142,7 @@ export async function POST(request: Request) {
           action: "UPLOAD_FILE",
           targetType: "UPLOAD",
           targetId: upload.id,
-          description: `${leader.name} membagikan berkas ${upload.fileName} (${upload.category}) ke tim.`,
+          description: `${leader.name} membagikan berkas ${getUploadFileName(upload.filePath)} (${upload.category}) ke tim.`,
         },
       });
 

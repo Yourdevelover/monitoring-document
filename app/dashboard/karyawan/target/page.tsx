@@ -57,8 +57,6 @@ export default async function EmployeeTargetPage() {
           <form action="/api/karyawan/target" method="POST" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <input type="hidden" name="period" value={period} />
             <input type="hidden" name="action" value="upsert" />
-            <input type="hidden" name="formula" value="bagi" />
-            <input type="hidden" name="threshold" value="20" />
             <label className="text-xs">Nama<input name="name" required placeholder="Target Bulanan" className="mt-1 w-full rounded-md border border-[#e5e7eb] px-3 py-2 text-sm" /></label>
             <label className="text-xs">Target (100%)<input name="targetValue" required type="number" step="any" placeholder="30000000" className="mt-1 w-full rounded-md border border-[#e5e7eb] px-3 py-2 text-sm" /></label>
             <label className="text-xs">Progres sekarang<input name="currentValue" type="number" step="any" defaultValue={0} placeholder="10000000" className="mt-1 w-full rounded-md border border-[#e5e7eb] px-3 py-2 text-sm" /></label>
@@ -124,8 +122,6 @@ export default async function EmployeeTargetPage() {
                                 <input type="hidden" name="id" value={String(target.id)} />
                                 <input type="hidden" name="name" value={target.name} />
                                 <input type="hidden" name="targetValue" value={String(target.targetValue)} />
-                                <input type="hidden" name="formula" value="bagi" />
-                                <input type="hidden" name="threshold" value={String(target.threshold)} />
                                 <label className="block text-xs">Progres baru<input name="currentValue" type="number" min="0" step="any" defaultValue={String(target.currentValue)} required className="mt-1 w-36 rounded-md border border-[#e5e7eb] px-2 py-1.5 text-xs" /></label>
                                 <button type="submit" className="w-full rounded-md bg-[#111111] px-3 py-1.5 text-xs font-medium text-white">Simpan Progres</button>
                               </form>

@@ -6,17 +6,10 @@ import { toast } from "@/app/components/toast";
 
 type FileActionsProps = {
   uploadId: number;
-  isSubmitted: boolean;
   isImportant: boolean;
-  importantSaved: boolean;
 };
 
-export function FileActions({
-  uploadId,
-  isSubmitted,
-  isImportant,
-  importantSaved,
-}: FileActionsProps) {
+export function FileActions({ uploadId, isImportant }: FileActionsProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   async function handleAction(action: string, actionUploadId = uploadId) {
@@ -48,42 +41,30 @@ export function FileActions({
 
   return (
     <div className="flex flex-nowrap items-center gap-2">
-      {isSubmitted && (
+      {isImportant ? (
+        <button
+          onClick={() => handleAction("unmark-important")}
+          disabled={isSubmitting}
+          className="inline-flex items-center rounded-lg border border-[#e8d9a8] bg-[#fbf3db] px-3 py-1.5 text-xs font-medium text-[#956400] hover:bg-[#fbf3db] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Hapus dari Data Prioritas
+        </button>
+      ) : (
         <>
-          {isImportant ? (
-            <button
-              onClick={() => handleAction("unmark-important")}
-              disabled={isSubmitting}
-              className="inline-flex items-center rounded-lg border border-[#e8d9a8] bg-[#fbf3db] px-3 py-1.5 text-xs font-medium text-[#956400] hover:bg-[#fbf3db] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              ✓ Data Prioritas
-            </button>
-          ) : importantSaved ? (
-            <button
-              onClick={() => handleAction("delete-important")}
-              disabled={isSubmitting}
-              className="inline-flex items-center rounded-lg border border-red-300 bg-[#fdebec] px-3 py-1.5 text-xs font-medium text-[#9f2f2d] hover:bg-[#fdebec] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              Hapus dari Data Prioritas
-            </button>
-          ) : (
-            <button
-              onClick={() => handleAction("add-important")}
-              disabled={isSubmitting}
-              className="inline-flex items-center rounded-lg border border-[#e8d9a8] bg-[#fbf3db] px-3 py-1.5 text-xs font-medium text-[#956400] hover:bg-[#fbf3db] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              Simpan
-            </button>
-          )}
-          {!isImportant && !importantSaved && (
-            <button
-              onClick={() => handleAction("delete")}
-              disabled={isSubmitting}
-              className="inline-flex items-center rounded-lg border border-red-300 bg-[#fdebec] px-3 py-1.5 text-xs font-medium text-[#9f2f2d] hover:bg-[#fdebec] disabled:cursor-not-allowed"
-            >
-              Hapus
-            </button>
-          )}
+          <button
+            onClick={() => handleAction("add-important")}
+            disabled={isSubmitting}
+            className="inline-flex items-center rounded-lg border border-[#e8d9a8] bg-[#fbf3db] px-3 py-1.5 text-xs font-medium text-[#956400] hover:bg-[#fbf3db] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Simpan ke Data Prioritas
+          </button>
+          <button
+            onClick={() => handleAction("delete")}
+            disabled={isSubmitting}
+            className="inline-flex items-center rounded-lg border border-red-300 bg-[#fdebec] px-3 py-1.5 text-xs font-medium text-[#9f2f2d] hover:bg-[#fdebec] disabled:cursor-not-allowed"
+          >
+            Hapus
+          </button>
         </>
       )}
     </div>

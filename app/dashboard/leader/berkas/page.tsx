@@ -4,6 +4,7 @@ import Link from "next/link";
 import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
 import { LeaderUploadForm } from "./leader-upload-form";
 import { LeaderFileDeleteButton } from "./leader-file-delete-button";
+import { getUploadFileName } from "@/lib/upload-file";
 
 const CATEGORIES = [
   { key: "DAILY", label: "daily" },
@@ -22,10 +23,9 @@ export default async function LeaderFilesPage() {
     include: {
       uploads: {
         where: {
-          isSubmitted: true,
           submissionDate: { gte: startOfToday },
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: { submissionDate: "desc" },
         include: { user: true },
       },
     },
@@ -105,13 +105,13 @@ export default async function LeaderFilesPage() {
                     <div key={upload.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="truncate text-[13px] font-medium">{upload.fileName}</p>
+                          <p className="truncate text-[13px] font-medium">{getUploadFileName(upload.filePath)}</p>
                           {upload.isImportant && <span className="shrink-0 rounded bg-[#fbf3db] px-1.5 py-0.5 text-[10px] font-semibold text-[#956400]">Prioritas</span>}
                         </div>
                         <p className="mt-0.5 text-xs text-[#6b7280]">{upload.user.name} • {upload.category.toLowerCase()}</p>
                         {upload.note && <p className="mt-1 whitespace-pre-wrap break-words text-xs text-[#374151]">Catatan: {upload.note}</p>}
                       </div>
-                      <span className="shrink-0 text-[11px] text-[#9ca3af]">{new Date(upload.submissionDate).toLocaleDateString("id-ID", { dateStyle: "short" })}</span>
+                      <span className="shrink-0 text-[11px] text-[#9ca3af]">{upload.submissionDate?.toLocaleDateString("id-ID", { dateStyle: "short" }) ?? "-"}</span>
                     </div>
                   ))}
                 </div>
@@ -133,8 +133,8 @@ export default async function LeaderFilesPage() {
                   {leaderUploads.map((upload) => (
                     <div key={upload.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
                       <div className="min-w-0">
-                        <p className="truncate text-[13px] font-medium">{upload.fileName}</p>
-                        <p className="mt-0.5 text-xs text-[#6b7280]">{upload.category.toLowerCase()} • {formatDateTime(upload.submissionDate)}</p>
+                        <p className="truncate text-[13px] font-medium">{getUploadFileName(upload.filePath)}</p>
+                        <p className="mt-0.5 text-xs text-[#6b7280]">{upload.category.toLowerCase()} • {upload.submissionDate ? formatDateTime(upload.submissionDate) : "Belum dikirim"}</p>
                         {upload.note && <p className="mt-1 whitespace-pre-wrap break-words text-xs text-[#374151]">Catatan: {upload.note}</p>}
                       </div>
                       <div className="flex items-center gap-2">

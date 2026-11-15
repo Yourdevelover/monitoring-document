@@ -48,7 +48,6 @@ model User {
   departmentId  Int?
   position      String?
   isActive      UserStatus   @default(ACTIVE)
-  profilePicture String?
   personalNotes Json         @default("[]")
   profileRequests Json       @default("[]")
   createdAt     DateTime     @default(now())
@@ -100,28 +99,17 @@ model Upload {
   id            Int          @id @default(autoincrement())
   userId        Int
   teamId        Int
-  title         String
-  fileName      String
   filePath      String
-  fileType      String
   category      FileCategory
   status        UploadStatus @default(PROCESSING)
-  submissionDate DateTime    @default(now())
+  submissionDate DateTime?
   note          String?
-  isSubmitted   Boolean      @default(false)
   isImportant   Boolean      @default(false)
-  importantSaved Boolean      @default(false)
-  importantCopyPath String?
-  importantSavedAt DateTime?
-  expiresAt     DateTime?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
 
   user          User         @relation(fields: [userId], references: [id])
   team          Team         @relation(fields: [teamId], references: [id])
 
   @@index([teamId, category, submissionDate])
-  @@index([userId, importantSavedAt])
   @@map("uploads")
 }
 
@@ -161,16 +149,10 @@ model Target {
   name         String
   targetValue  Float
   currentValue Float    @default(0)
-  formula      String
-  threshold    Float    @default(20)
   period       String
-  isPublic     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
 
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, period, name])
-  @@index([period, isPublic])
   @@map("targets")
 }

@@ -15,11 +15,11 @@ export default async function LeaderTargetPage() {
     prisma.target.findMany({
       where: { period, user: { teamId: team?.id, role: "KARYAWAN" } },
       include: { user: { select: { name: true } } },
-      orderBy: { createdAt: "desc" },
+      orderBy: { id: "desc" },
     }),
     prisma.target.findMany({
       where: { userId: leader.id, period },
-      orderBy: { createdAt: "desc" },
+      orderBy: { id: "desc" },
     }),
   ]);
   const teamProgress = (team?.members ?? [])

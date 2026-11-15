@@ -3,6 +3,7 @@ import { requireLeader } from "@/lib/auth";
 import { PaginationControls } from "@/app/components/pagination-controls";
 import Link from "next/link";
 import { readProfileRequests } from "@/lib/profile-requests";
+import { getUploadFileName } from "@/lib/upload-file";
 
 export default async function LeaderDashboardPage({
   searchParams,
@@ -21,7 +22,7 @@ export default async function LeaderDashboardPage({
     include: {
       leader: true,
       uploads: {
-        orderBy: { createdAt: "desc" },
+        orderBy: { id: "desc" },
         take: 6,
         include: {
           user: true,
@@ -54,7 +55,7 @@ export default async function LeaderDashboardPage({
 
   const [members, teamTargets, requestUsers, announcementCount, uploadCount] = await Promise.all([
     prisma.user.findMany({ where: { teamId: team.id, role: "KARYAWAN" }, orderBy: { createdAt: "desc" } }),
-    prisma.target.findMany({ where: { period, user: { teamId: team.id } }, include: { user: { select: { name: true } } }, orderBy: { createdAt: "desc" } }),
+    prisma.target.findMany({ where: { period, user: { teamId: team.id } }, include: { user: { select: { name: true } } }, orderBy: { id: "desc" } }),
     prisma.user.findMany({ where: { teamId: team.id }, select: { profileRequests: true } }),
     prisma.announcement.count({ where: { teamId: team.id, OR: [{ isPinned: true }, { createdAt: { gte: activeSince } }] } }),
     prisma.upload.count({ where: { teamId: team.id } }),
@@ -220,7 +221,7 @@ export default async function LeaderDashboardPage({
               </div>
               <div className="divide-y divide-[#f1f3f5]">
                 {team.uploads.length ? team.uploads.map((upload) => (
-                  <div key={upload.id} className="px-4 py-2.5"><p className="truncate text-[13px] font-medium">{upload.title}</p><p className="mt-0.5 text-xs text-[#6b7280]">{upload.category} • {upload.user.name}</p></div>
+                  <div key={upload.id} className="px-4 py-2.5"><p className="truncate text-[13px] font-medium">{getUploadFileName(upload.filePath)}</p><p className="mt-0.5 text-xs text-[#6b7280]">{upload.category} • {upload.user.name}</p></div>
                 )) : <p className="px-4 py-6 text-center text-xs text-[#6b7280]">Belum ada file.</p>}
               </div>
             </div>

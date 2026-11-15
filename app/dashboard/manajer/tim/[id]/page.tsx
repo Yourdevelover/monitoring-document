@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireManajer } from "@/lib/auth";
 import { PaginationControls } from "@/app/components/pagination-controls";
 import { prisma } from "@/lib/prisma";
+import { getUploadFileName } from "@/lib/upload-file";
 
 export default async function ManagerTeamDetailPage({
   params,
@@ -57,16 +58,13 @@ export default async function ManagerTeamDetailPage({
       uploads: {
         select: {
           id: true,
-          fileName: true,
           filePath: true,
           category: true,
           status: true,
-          isSubmitted: true,
           submissionDate: true,
-          createdAt: true,
           user: { select: { id: true, name: true } },
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: { id: "desc" },
       },
     },
   });
@@ -77,7 +75,7 @@ export default async function ManagerTeamDetailPage({
   const historyPageSize = 10;
   const requestedPage = Math.max(1, Number(query.page) || 1);
   const requestedHistoryPage = Math.max(1, Number(query.historyPage) || 1);
-  const submittedUploads = team.uploads.filter((upload) => upload.isSubmitted);
+  const submittedUploads = team.uploads.filter((upload) => upload.submissionDate !== null);
   const totalPages = Math.max(1, Math.ceil(team.uploads.length / pageSize));
   const totalHistoryPages = Math.max(1, Math.ceil(submittedUploads.length / historyPageSize));
   const page = Math.min(requestedPage, totalPages);
@@ -207,10 +205,10 @@ export default async function ManagerTeamDetailPage({
         <div className="divide-y divide-[#f1f3f5]">
           {latestUploads.map((upload) => (
             <article key={upload.id} className="grid gap-1 px-4 py-3 sm:grid-cols-[1.4fr_1fr_0.8fr_auto] sm:items-center">
-              <a href={upload.filePath} target="_blank" rel="noreferrer" className="truncate text-xs font-medium text-[#1f6c9f] hover:underline">{upload.fileName}</a>
+              <a href={upload.filePath} target="_blank" rel="noreferrer" className="truncate text-xs font-medium text-[#1f6c9f] hover:underline">{getUploadFileName(upload.filePath)}</a>
               <span className="truncate text-xs">{upload.user.name}</span>
               <span className="text-xs text-[#6b7280]">{upload.category} · {upload.status}</span>
-              <time className="text-[11px] text-[#6b7280]">{upload.createdAt.toLocaleString("id-ID")}</time>
+              <time className="text-[11px] text-[#6b7280]">{upload.submissionDate?.toLocaleString("id-ID") ?? "Belum dikirim"}</time>
             </article>
           ))}
           {latestUploads.length === 0 && <p className="px-4 py-7 text-center text-xs text-[#6b7280]">Belum ada berkas pada tim ini.</p>}
@@ -228,10 +226,10 @@ export default async function ManagerTeamDetailPage({
         <div className="divide-y divide-[#f1f3f5]">
           {historyUploads.map((upload) => (
             <article key={upload.id} className="grid gap-1 px-4 py-3 sm:grid-cols-[1.4fr_1fr_0.8fr_auto] sm:items-center">
-              <a href={upload.filePath} target="_blank" rel="noreferrer" className="truncate text-xs font-medium text-[#1f6c9f] hover:underline">{upload.fileName}</a>
+              <a href={upload.filePath} target="_blank" rel="noreferrer" className="truncate text-xs font-medium text-[#1f6c9f] hover:underline">{getUploadFileName(upload.filePath)}</a>
               <span className="truncate text-xs">{upload.user.name}</span>
               <span className="text-xs text-[#6b7280]">{upload.category} · {upload.status}</span>
-              <time className="text-[11px] text-[#6b7280]">{upload.submissionDate.toLocaleString("id-ID")}</time>
+              <time className="text-[11px] text-[#6b7280]">{upload.submissionDate?.toLocaleString("id-ID") ?? "-"}</time>
             </article>
           ))}
           {historyUploads.length === 0 && <p className="px-4 py-7 text-center text-xs text-[#6b7280]">Belum ada berkas terkirim.</p>}

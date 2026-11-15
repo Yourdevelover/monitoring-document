@@ -4,6 +4,7 @@ import { EmployeeProfileCard } from "../../employee-profile-card";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
 import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
 import { PaginationControls } from "@/app/components/pagination-controls";
+import { getUploadFileName } from "@/lib/upload-file";
 
 const CATEGORY_LABELS = {
   "daily": { key: "DAILY", label: "daily" },
@@ -37,12 +38,11 @@ export default async function LeaderCategoryPage({ params, searchParams }: Categ
       uploads: {
         where: {
           category: categoryInfo.key,
-          isSubmitted: true,
           submissionDate: { gte: startOfToday },
           ...(searchTerm
             ? {
                 OR: [
-                  { fileName: { contains: searchTerm, mode: "insensitive" as const } },
+                  { filePath: { contains: searchTerm, mode: "insensitive" as const } },
                   { user: { name: { contains: searchTerm, mode: "insensitive" as const } } },
                 ],
               }
@@ -58,7 +58,6 @@ export default async function LeaderCategoryPage({ params, searchParams }: Categ
     ? await prisma.upload.findMany({
         where: {
           teamId: team.id,
-          isSubmitted: true,
           submissionDate: { gte: startOfToday },
         },
         orderBy: { submissionDate: "desc" },
@@ -127,24 +126,19 @@ export default async function LeaderCategoryPage({ params, searchParams }: Categ
                   employee={upload.user}
                   files={uploadsByEmployee.get(upload.userId)?.map((file) => ({
                     id: file.id,
-                    fileName: file.fileName,
-                    filePath: file.filePath,
                     category: file.category,
-                    status: file.status,
-                    isSubmitted: file.isSubmitted,
                     submissionDate: file.submissionDate,
-                    expiresAt: file.expiresAt,
                   }))}
                 />
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="truncate text-[13px] font-semibold text-slate-900" title={upload.fileName}>{upload.fileName}</p>
+                    <p className="truncate text-[13px] font-semibold text-slate-900" title={getUploadFileName(upload.filePath)}>{getUploadFileName(upload.filePath)}</p>
                     {upload.isImportant && <span className="shrink-0 rounded bg-[#fbf3db] px-1.5 py-0.5 text-[10px] font-semibold text-[#956400]">Prioritas</span>}
                   </div>
                   <p className="mt-0.5 truncate text-xs text-slate-600">Dikirim oleh <span className="font-medium text-slate-800">{upload.user.name}</span></p>
                   {upload.note && <p className="mt-1 whitespace-pre-wrap break-words text-xs text-slate-600">Catatan: {upload.note}</p>}
                 </div>
-                <p className="whitespace-nowrap text-xs text-slate-500">{formatDateTime(upload.submissionDate)}</p>
+                <p className="whitespace-nowrap text-xs text-slate-500">{upload.submissionDate ? formatDateTime(upload.submissionDate) : "-"}</p>
                 <div className="flex items-center gap-2">
                   <a
                     href={upload.filePath}
@@ -156,7 +150,7 @@ export default async function LeaderCategoryPage({ params, searchParams }: Categ
                   </a>
                   <a
                     href={upload.filePath}
-                    download={upload.fileName}
+                    download={getUploadFileName(upload.filePath)}
                     className="whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700"
                   >
                     Unduh

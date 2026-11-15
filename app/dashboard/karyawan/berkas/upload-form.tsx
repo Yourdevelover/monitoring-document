@@ -54,10 +54,9 @@ export function UploadForm({ categoryKey, categoryLabel, isDisabled = false }: U
     <>
       <form onSubmit={handleSubmit} className="mt-3 space-y-2">
         <input type="hidden" name="category" value={categoryKey} />
-        <input type="hidden" name="title" value={categoryLabel} />
 
         <label className="block text-[11px] font-medium uppercase tracking-wide text-[#6b7280]">
-          Pilih file
+          Pilih file {categoryLabel}
           <input
             type="file"
             name="file"

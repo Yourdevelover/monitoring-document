@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { requireLeader } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
+import { getUploadFileName } from "@/lib/upload-file";
 
 export const runtime = "nodejs";
 
@@ -46,29 +47,28 @@ export async function GET(request: Request) {
 
   const uploadRecords: DownloadRecord[] = historyOnly
     ? (await prisma.upload.findMany({
-        where: { teamId: team.id, category: category as "DAILY" | "CHAT" | "PAYMENT" | "OTHER", isSubmitted: true },
+        where: { teamId: team.id, category: category as "DAILY" | "CHAT" | "PAYMENT" | "OTHER", submissionDate: { not: null } },
         include: { user: true },
         orderBy: { submissionDate: "asc" },
       })).map((upload) => ({
         filePath: upload.filePath,
-        fileName: upload.fileName,
-        archiveDate: upload.submissionDate,
+        fileName: getUploadFileName(upload.filePath),
+        archiveDate: upload.submissionDate!,
         user: upload.user,
       }))
     : (await prisma.upload.findMany({
         where: {
           teamId: team.id,
           category: category as "DAILY" | "CHAT" | "PAYMENT" | "OTHER",
-          isSubmitted: true,
           isImportant: false,
           submissionDate: { gte: getStartOfCurrentJakartaDay() },
         },
         include: { user: true },
-        orderBy: { createdAt: "asc" },
+        orderBy: { submissionDate: "asc" },
       })).map((upload) => ({
         filePath: upload.filePath,
-        fileName: upload.fileName,
-        archiveDate: upload.submissionDate,
+        fileName: getUploadFileName(upload.filePath),
+        archiveDate: upload.submissionDate!,
         user: upload.user,
       }))
   const dateFilteredUploads = date && /^\d{4}-\d{2}-\d{2}$/.test(date)
@@ -92,7 +92,7 @@ export async function GET(request: Request) {
       const filePath = path.join(process.cwd(), "public", upload.filePath.replace(/^\/+/, ""));
       const fileBuffer = await readFile(filePath);
       archive.append(fileBuffer, {
-        name: `${upload.user.name}-${upload.fileName}`.replace(/[^a-zA-Z0-9._-]/g, "_"),
+        name: `${upload.user.name}-${getUploadFileName(upload.filePath)}`.replace(/[^a-zA-Z0-9._-]/g, "_"),
       });
     } catch {
       // Skip files that are no longer present on disk.

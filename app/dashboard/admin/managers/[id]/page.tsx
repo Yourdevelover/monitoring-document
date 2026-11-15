@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
+import { getUploadFileName } from "@/lib/upload-file";
 
 type ManagerDetailProps = {
   params: Promise<{ id: string }>;
@@ -31,7 +32,7 @@ export default async function AdminManagerDetailPage({ params }: ManagerDetailPr
     ? await prisma.upload.findMany({
         where: { team: { departmentId: leader.departmentId } },
         include: { user: true, team: true },
-        orderBy: { createdAt: "desc" },
+        orderBy: { id: "desc" },
         take: 10,
       })
     : [];
@@ -93,9 +94,9 @@ export default async function AdminManagerDetailPage({ params }: ManagerDetailPr
         <div className="divide-y divide-[#f1f3f5] px-4">
           {recentFiles.map((upload) => (
             <a key={upload.id} href={upload.filePath} target="_blank" rel="noreferrer" className="grid gap-1 py-3 hover:bg-[#f8f9fa] sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center">
-              <span className="truncate text-xs font-medium" title={upload.fileName}>{upload.fileName}</span>
+              <span className="truncate text-xs font-medium" title={getUploadFileName(upload.filePath)}>{getUploadFileName(upload.filePath)}</span>
               <span className="text-[11px] text-[#6b7280]">{upload.user.name} · {upload.category}</span>
-              <time className="text-[11px] text-[#6b7280]">{upload.createdAt.toLocaleString("id-ID")}</time>
+              <time className="text-[11px] text-[#6b7280]">{upload.submissionDate?.toLocaleString("id-ID") ?? "Belum dikirim"}</time>
             </a>
           ))}
           {recentFiles.length === 0 && <p className="py-4 text-xs text-[#6b7280]">Belum ada berkas di departemen ini.</p>}

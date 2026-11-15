@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { requireManajer } from "@/lib/auth";
+import { getUploadFileName } from "@/lib/upload-file";
 
 const categories = ["DAILY", "CHAT", "PAYMENT", "OTHER"] as const;
 function dateKey(date: Date) {
@@ -23,7 +24,7 @@ export default async function ManagerFileHistoryPage({
     ? params.date
     : null;
   const files = await prisma.upload.findMany({
-    where: { isSubmitted: true, ...(category ? { category } : {}) },
+    where: { submissionDate: { not: null }, ...(category ? { category } : {}) },
     include: {
       user: true,
       team: { include: { department: true } },
@@ -31,9 +32,9 @@ export default async function ManagerFileHistoryPage({
     orderBy: { submissionDate: "desc" },
   });
   const filtered = selectedDate
-    ? files.filter((file) => dateKey(file.submissionDate) === selectedDate)
+    ? files.filter((file) => file.submissionDate && dateKey(file.submissionDate) === selectedDate)
     : files;
-  const dates = [...new Set(files.map((file) => dateKey(file.submissionDate)))];
+  const dates = [...new Set(files.flatMap((file) => file.submissionDate ? [dateKey(file.submissionDate)] : []))];
 
   return (
     <main className="min-h-screen bg-[#f8f9fa] px-4 py-5 text-[#111111]">
@@ -83,7 +84,7 @@ export default async function ManagerFileHistoryPage({
               className="grid gap-1 px-4 py-3 hover:bg-[#f8f9fa] sm:grid-cols-[1.5fr_1fr_1fr_auto] sm:items-center"
             >
               <span className="min-w-0">
-                <span className="block truncate text-xs font-semibold">{file.fileName}</span>
+                <span className="block truncate text-xs font-semibold">{getUploadFileName(file.filePath)}</span>
                 {file.note && <span className="mt-1 block whitespace-pre-wrap break-words text-xs font-normal text-[#374151]">Catatan: {file.note}</span>}
               </span>
               <span className="truncate text-xs">{file.user.name}</span>
@@ -91,7 +92,7 @@ export default async function ManagerFileHistoryPage({
                 {file.team.department.name} · {file.category}
               </span>
               <time className="text-[11px] text-[#6b7280]">
-                {file.submissionDate.toLocaleString("id-ID")}
+                {file.submissionDate?.toLocaleString("id-ID") ?? "Belum dikirim"}
               </time>
             </a>
           ))}

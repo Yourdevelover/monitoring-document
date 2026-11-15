@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireEmployee } from "@/lib/auth";
 import Link from "next/link";
+import { getUploadFileName } from "@/lib/upload-file";
 import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
 
 export default async function EmployeeDashboardPage() {
@@ -36,11 +37,11 @@ export default async function EmployeeDashboardPage() {
     }),
     prisma.upload.findMany({
       where: { userId: employee.id },
-      orderBy: { createdAt: "desc" },
+      orderBy: { id: "desc" },
     }),
-    prisma.upload.count({ where: { userId: employee.id, importantSaved: true } }),
+    prisma.upload.count({ where: { userId: employee.id, isImportant: true, submissionDate: { not: null } } }),
     prisma.announcement.count({ where: { teamId: employee.teamId, OR: [{ isPinned: true }, { createdAt: { gte: activeSince } }] } }),
-    prisma.target.findMany({ where: { userId: employee.id, period: currentPeriod }, orderBy: { updatedAt: "desc" } }),
+    prisma.target.findMany({ where: { userId: employee.id, period: currentPeriod }, orderBy: { id: "desc" } }),
   ]);
 
   if (!team) {
@@ -54,12 +55,12 @@ export default async function EmployeeDashboardPage() {
     );
   }
 
-  const todayUploads = myUploads.filter((u) => u.submissionDate >= startOfToday);
+  const todayUploads = myUploads.filter((u) => !u.submissionDate || u.submissionDate >= startOfToday);
   const byCategory = new Map(todayUploads.map((u) => [u.category, u]));
   const categories = ["DAILY", "CHAT", "PAYMENT"] as const;
   const submittedCount = categories.filter((c) => {
     const u = byCategory.get(c);
-    return u?.isSubmitted;
+    return Boolean(u?.submissionDate);
   }).length;
 
   return (
@@ -82,13 +83,13 @@ export default async function EmployeeDashboardPage() {
                 <p className="text-[11px] font-medium uppercase tracking-wide text-[#6b7280]">{label}</p>
                 {u ? (
                   <div className="mt-1.5 flex items-center gap-2">
-                    <span className={`inline-block h-2 w-2 rounded-full ${u.isSubmitted ? "bg-[#346538]" : "bg-[#956400]"}`} />
-                    <p className="text-[13px] font-semibold">{u.isSubmitted ? "Terkirim" : "Menunggu"}</p>
+                    <span className={`inline-block h-2 w-2 rounded-full ${u.submissionDate ? "bg-[#346538]" : "bg-[#956400]"}`} />
+                    <p className="text-[13px] font-semibold">{u.submissionDate ? "Terkirim" : "Menunggu"}</p>
                   </div>
                 ) : (
                   <p className="mt-1.5 text-[13px] font-semibold text-[#9ca3af]">Belum upload</p>
                 )}
-                {u && <p className="mt-0.5 truncate text-xs text-[#6b7280]">{u.fileName}</p>}
+                {u && <p className="mt-0.5 truncate text-xs text-[#6b7280]">{getUploadFileName(u.filePath)}</p>}
               </div>
             );
           })}
@@ -190,7 +191,7 @@ export default async function EmployeeDashboardPage() {
                 return (
                   <div key={cat} className="flex items-center justify-between px-4 py-2.5">
                     <p className="text-[13px] font-medium">{cat.toLowerCase()}</p>
-                    {u?.isSubmitted ? (
+                    {u?.submissionDate ? (
                       <span className="rounded bg-[#edf3ec] px-1.5 py-0.5 text-[11px] font-medium text-[#346538]">✓ Terkirim</span>
                     ) : (
                       <span className="rounded bg-[#fbf3db] px-1.5 py-0.5 text-[11px] font-medium text-[#956400]">⏳ Belum</span>

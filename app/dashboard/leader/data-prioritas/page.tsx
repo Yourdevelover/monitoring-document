@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireLeader } from "@/lib/auth";
 import { PaginationControls } from "@/app/components/pagination-controls";
+import { getUploadFileName } from "@/lib/upload-file";
 
 export default async function LeaderImportantFilesPage({
   searchParams,
@@ -18,7 +19,7 @@ export default async function LeaderImportantFilesPage({
   const where = {
     teamId: team?.id ?? 0,
     isImportant: true,
-    isSubmitted: true,
+    submissionDate: { not: null },
   };
   const totalFiles = await prisma.upload.count({ where });
   const totalPages = Math.max(1, Math.ceil(totalFiles / pageSize));
@@ -46,19 +47,18 @@ export default async function LeaderImportantFilesPage({
               <article key={file.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="truncate text-[13px] font-semibold">{file.title || file.fileName}</p>
+                    <p className="truncate text-[13px] font-semibold">{getUploadFileName(file.filePath)}</p>
                     <span className="rounded bg-[#fbf3db] px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[#956400]">{file.category.toLowerCase()}</span>
                   </div>
-                  <p className="mt-1 truncate text-xs text-[#6b7280]">{file.fileName}</p>
                   <p className="mt-1 text-xs text-[#6b7280]">
-                    Dari {file.user.name} · {new Date(file.submissionDate).toLocaleString("id-ID")}
+                    Dari {file.user.name} · {file.submissionDate?.toLocaleString("id-ID") ?? "-"}
                   </p>
                 </div>
                 <div className="flex shrink-0 gap-2">
                   <a href={file.filePath} target="_blank" rel="noopener noreferrer" className="inline-flex h-8 items-center rounded-md border border-[#e5e7eb] px-3 text-xs font-medium hover:bg-[#f8f9fa]">
                     Lihat
                   </a>
-                  <a href={file.filePath} download={file.fileName} className="inline-flex h-8 items-center rounded-md bg-[#111111] px-3 text-xs font-medium text-white hover:bg-[#333333]">
+                  <a href={file.filePath} download={getUploadFileName(file.filePath)} className="inline-flex h-8 items-center rounded-md bg-[#111111] px-3 text-xs font-medium text-white hover:bg-[#333333]">
                     Unduh
                   </a>
                 </div>

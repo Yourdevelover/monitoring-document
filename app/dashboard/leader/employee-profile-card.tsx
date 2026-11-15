@@ -9,7 +9,6 @@ type EmployeeProfile = {
   email: string;
   phoneNumber: string | null;
   isActive: string;
-  profilePicture: string | null;
   createdAt: Date;
 };
 
@@ -17,13 +16,8 @@ type EmployeeProfileCardProps = {
   employee: EmployeeProfile;
   files?: Array<{
     id: number;
-    fileName: string;
-    filePath: string;
     category: string;
-    status: string;
-    isSubmitted: boolean;
-    submissionDate: Date;
-    expiresAt: Date | null;
+    submissionDate: Date | null;
   }>;
   mode?: "avatar" | "name" | "row";
 };
@@ -52,15 +46,9 @@ export function EmployeeProfileCard({ employee, files = [], mode = "avatar" }: E
         aria-label={`Lihat profil ${employee.name}`}
         className={triggerClassName}
       >
-        {mode === "avatar" ? (
-          employee.profilePicture ? (
-            <img src={employee.profilePicture} alt={employee.name} className="h-full w-full object-cover" />
-          ) : initials
-        ) : mode === "name" ? employee.name : (
+        {mode === "avatar" ? initials : mode === "name" ? employee.name : (
           <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e5e7eb] text-xs font-semibold text-[#6b7280]">
-            {employee.profilePicture ? (
-              <img src={employee.profilePicture} alt={employee.name} className="h-full w-full object-cover" />
-            ) : initials}
+            {initials}
           </span>
         )}
       </button>
@@ -75,9 +63,7 @@ export function EmployeeProfileCard({ employee, files = [], mode = "avatar" }: E
           >
             <div className="flex items-center gap-3 border-b border-[#e5e7eb] pb-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e5e7eb] font-semibold text-[#6b7280]">
-                {employee.profilePicture ? (
-                  <img src={employee.profilePicture} alt={employee.name} className="h-full w-full object-cover" />
-                ) : initials}
+                {initials}
               </div>
               <div className="min-w-0">
                 <h2 className="truncate text-base font-semibold text-[#111111]">{employee.name}</h2>
@@ -110,7 +96,7 @@ export function EmployeeProfileCard({ employee, files = [], mode = "avatar" }: E
                     const file = files.find((item) => item.category === category);
                     return (
                       <span key={category}>
-                        {file?.isSubmitted ? (
+                        {file?.submissionDate ? (
                           <Link
                             href={`/dashboard/leader/berkas/${category.toLowerCase()}/${file.id}`}
                             className="text-[#1f6c9f] hover:text-[#1d4ed8] hover:underline"

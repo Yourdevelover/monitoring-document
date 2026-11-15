@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireManajer } from "@/lib/auth";
+import { getUploadFileName } from "@/lib/upload-file";
 
 const categories = { daily: "DAILY", chat: "CHAT", payment: "PAYMENT", other: "OTHER" } as const;
 
@@ -18,7 +19,7 @@ export default async function ManagerFileDetailPage({ params }: { params: Promis
       <div className="mx-auto max-w-3xl space-y-4">
         <header className="border-b border-[#e5e7eb] pb-3">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]">Informasi berkas</p>
-          <h1 className="mt-1 break-words text-[15px] font-semibold">{upload.fileName}</h1>
+          <h1 className="mt-1 break-words text-[15px] font-semibold">{getUploadFileName(upload.filePath)}</h1>
         </header>
         <section className="grid gap-3 border-y border-[#d1d5db] bg-white p-4 sm:grid-cols-2">
           <Info label="Karyawan" value={upload.user.name} />
@@ -27,7 +28,7 @@ export default async function ManagerFileDetailPage({ params }: { params: Promis
           <Info label="Tim" value={upload.team.name} />
           <Info label="Kategori" value={upload.category} />
           <Info label="Status" value={upload.status} />
-          <Info label="Dikirim" value={upload.submissionDate.toLocaleString("id-ID")} />
+          <Info label="Dikirim" value={upload.submissionDate?.toLocaleString("id-ID") ?? "Belum dikirim"} />
         </section>
         <a
           href={upload.filePath}

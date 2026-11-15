@@ -6,6 +6,7 @@ import { FileConfirmationDialog } from "./file-confirmation-dialog";
 import { FileActions } from "./file-actions";
 import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
 import { LeaderFilePopover } from "./leader-file-popover";
+import { getUploadFileName } from "@/lib/upload-file";
 
 const CATEGORY_DETAILS = [
   {
@@ -39,25 +40,20 @@ export default async function EmployeeFilesPage() {
         user: {
           role: "LEADER",
         },
-        isSubmitted: true,
         isImportant: false,
         submissionDate: { gte: startOfToday },
       },
       include: {
         user: true,
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { submissionDate: "desc" },
     }),
     prisma.upload.findMany({
       where: {
         teamId: employee.teamId ?? 0,
         userId: employee.id,
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { id: "desc" },
     }),
   ]);
 
@@ -84,14 +80,11 @@ export default async function EmployeeFilesPage() {
               {leaderSharedFiles.map((upload) => (
                 <div key={upload.id} className="flex items-center justify-between gap-2 rounded-md bg-[#f8f9fa] px-2.5 py-1.5">
                   <div className="min-w-0">
-                    <p className="truncate text-[13px] font-medium text-[#111111]">{upload.title}</p>
-                    <p className="truncate text-xs text-[#6b7280]">{upload.fileName}</p>
+                    <p className="truncate text-[13px] font-medium text-[#111111]">{getUploadFileName(upload.filePath)}</p>
                   </div>
                   <LeaderFilePopover
                     file={{
                       id: upload.id,
-                      title: upload.title,
-                      fileName: upload.fileName,
                       category: upload.category,
                       filePath: upload.filePath,
                       uploaderName: upload.user.name ?? "Leader",
@@ -108,7 +101,7 @@ export default async function EmployeeFilesPage() {
             {CATEGORY_DETAILS.map((category) => {
               const allCategoryUploads = uploadsByCategory.get(category.key) ?? [];
               const isMulti = category.key !== "DAILY";
-              const pendingDailyUpload = allCategoryUploads.find((upload) => !upload.isSubmitted);
+              const pendingDailyUpload = allCategoryUploads.find((upload) => !upload.submissionDate);
 
               return (
                 <div key={category.key} className="rounded-md border border-[#e5e7eb] bg-[#f8f9fa] p-3">
@@ -168,7 +161,7 @@ export default async function EmployeeFilesPage() {
             <div className="mt-3 space-y-2.5">
               {employeeUploads.map((uploadedFile) => (
                 <div key={uploadedFile.id} className="flex flex-col gap-2.5 rounded-md p-3 sm:flex-row sm:items-center sm:justify-between" style={{
-                  backgroundColor: uploadedFile.isSubmitted ? '#edf3ec' : '#fbf3db'
+                  backgroundColor: uploadedFile.submissionDate ? '#edf3ec' : '#fbf3db'
                 }}>
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -180,17 +173,15 @@ export default async function EmployeeFilesPage() {
                           Data Prioritas untuk Leader
                         </span>
                       )}
-                      <p className="text-[13px] font-semibold" style={{ color: uploadedFile.isSubmitted ? '#346538' : '#956400' }}>
-                        {uploadedFile.isSubmitted ? '✓ Sudah Dikirim' : '⏳ Belum Dikirim'}
+                      <p className="text-[13px] font-semibold" style={{ color: uploadedFile.submissionDate ? '#346538' : '#956400' }}>
+                        {uploadedFile.submissionDate ? '✓ Sudah Dikirim' : '⏳ Belum Dikirim'}
                       </p>
                     </div>
-                    <p className="mt-1 truncate text-xs" style={{ color: uploadedFile.isSubmitted ? '#4a7a4e' : '#a06a00' }}>
-                      {uploadedFile.fileName}
+                    <p className="mt-1 truncate text-xs" style={{ color: uploadedFile.submissionDate ? '#4a7a4e' : '#a06a00' }}>
+                      {getUploadFileName(uploadedFile.filePath)}
                     </p>
                     {uploadedFile.note && <p className="mt-1 whitespace-pre-wrap break-words text-xs text-[#374151]">Catatan: {uploadedFile.note}</p>}
-                    <p className="mt-1 text-[11px] text-[#6b7280]">
-                      Diunggah: {new Date(uploadedFile.createdAt).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}
-                    </p>
+                    {uploadedFile.submissionDate && <p className="mt-1 text-[11px] text-[#6b7280]">Dikirim: {uploadedFile.submissionDate.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}</p>}
                   </div>
 
                   <div className="flex flex-nowrap items-center gap-1.5 overflow-x-auto">
@@ -202,23 +193,21 @@ export default async function EmployeeFilesPage() {
                     >
                       Lihat file
                     </a>
-                    {!uploadedFile.isSubmitted && (
+                    {!uploadedFile.submissionDate && (
                       <FileConfirmationDialog
                         uploadId={uploadedFile.id}
-                        fileName={uploadedFile.fileName}
+                        fileName={getUploadFileName(uploadedFile.filePath)}
                         categoryKey={uploadedFile.category as "DAILY" | "CHAT" | "PAYMENT"}
                         isNewUpload={false}
                       />
                     )}
-                    {uploadedFile.isSubmitted && (
+                    {uploadedFile.submissionDate && (
                       <FileActions
                         uploadId={uploadedFile.id}
-                        isSubmitted={uploadedFile.isSubmitted}
                         isImportant={uploadedFile.isImportant}
-                        importantSaved={uploadedFile.importantSaved}
                       />
                     )}
-                    {!uploadedFile.isSubmitted && (
+                    {!uploadedFile.submissionDate && (
                       <span className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-[11px] font-medium text-[#111111]">
                         {uploadedFile.status}
                       </span>

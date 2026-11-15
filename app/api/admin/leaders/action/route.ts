@@ -68,9 +68,9 @@ export async function POST(request: Request) {
 
       const uploads = await prisma.upload.findMany({
         where: { teamId: leader.ledTeam.id },
-        select: { filePath: true, importantCopyPath: true },
+        select: { filePath: true },
       });
-      const filePaths = [...new Set(uploads.flatMap((file) => [file.filePath, file.importantCopyPath].filter((filePath): filePath is string => Boolean(filePath))))];
+      const filePaths = [...new Set(uploads.map((file) => file.filePath))];
 
       await prisma.$transaction(async (transaction) => {
         await removeProfileRequestsForDeletedUser(transaction, leader.id);

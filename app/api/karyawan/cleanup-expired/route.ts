@@ -22,15 +22,14 @@ export async function GET(request: Request) {
       );
     }
 
-    const now = new Date();
+    const expiresBefore = new Date(Date.now() - 12 * 60 * 60 * 1000);
 
     // Find all expired files
     const expiredFiles = await prisma.upload.findMany({
       where: {
-        expiresAt: {
-          lte: now,
-        },
+        submissionDate: { lte: expiresBefore },
         isImportant: false,
+        user: { role: "KARYAWAN" },
       },
     });
 

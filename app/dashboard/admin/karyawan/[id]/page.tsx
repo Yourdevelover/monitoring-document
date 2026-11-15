@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { ConfirmActionForm } from "@/app/components/confirm-action-form";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
+import { getUploadFileName } from "@/lib/upload-file";
 
 type AdminEmployeeDetailProps = {
   params: Promise<{ id: string }>;
@@ -22,7 +23,7 @@ export default async function AdminEmployeeDetailPage({ params }: AdminEmployeeD
           leader: true,
           department: true,
           members: { orderBy: { createdAt: "desc" } },
-          uploads: { orderBy: { createdAt: "desc" }, take: 10 },
+          uploads: { orderBy: { id: "desc" }, take: 10 },
         },
       },
     },
@@ -45,9 +46,9 @@ export default async function AdminEmployeeDetailPage({ params }: AdminEmployeeD
   );
   const recentFiles = await prisma.upload.findMany({
     where: { userId: employee.id },
-    orderBy: { createdAt: "desc" },
+    orderBy: { id: "desc" },
     take: 10,
-    select: { id: true, fileName: true, filePath: true, category: true, createdAt: true, status: true },
+    select: { id: true, filePath: true, category: true, submissionDate: true, status: true },
   });
 
   return (
@@ -120,9 +121,9 @@ export default async function AdminEmployeeDetailPage({ params }: AdminEmployeeD
         <div className="divide-y divide-[#f1f3f5] px-4">
           {recentFiles.map((file) => (
             <a key={file.id} href={file.filePath} target="_blank" rel="noreferrer" className="grid gap-1 py-3 hover:bg-[#f8f9fa] sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center">
-              <span className="truncate text-xs font-medium">{file.fileName}</span>
+              <span className="truncate text-xs font-medium">{getUploadFileName(file.filePath)}</span>
               <span className="text-[11px] text-[#6b7280]">{file.category} · {file.status}</span>
-              <time className="text-[11px] text-[#6b7280]">{file.createdAt.toLocaleString("id-ID")}</time>
+              <time className="text-[11px] text-[#6b7280]">{file.submissionDate?.toLocaleString("id-ID") ?? "Belum dikirim"}</time>
             </a>
           ))}
           {recentFiles.length === 0 && <p className="py-4 text-xs text-[#6b7280]">Belum ada berkas.</p>}

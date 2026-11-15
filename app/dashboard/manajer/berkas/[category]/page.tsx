@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireManajer } from "@/lib/auth";
 import { PaginationControls } from "@/app/components/pagination-controls";
+import { getUploadFileName } from "@/lib/upload-file";
 
 const categories = { daily: "DAILY", chat: "CHAT", payment: "PAYMENT", other: "OTHER" } as const;
 
@@ -14,11 +15,11 @@ export default async function ManagerCategoryPage({ params, searchParams }: { pa
   const search = q?.trim() ?? "";
   const pageSize = 15;
   const requestedPage = Math.max(1, Number(pageParam) || 1);
-  const where = { category: selected, ...(search ? { OR: [{ fileName: { contains: search, mode: "insensitive" as const } }, { user: { name: { contains: search, mode: "insensitive" as const } } }] } : {}) };
+  const where = { category: selected, ...(search ? { OR: [{ filePath: { contains: search, mode: "insensitive" as const } }, { user: { name: { contains: search, mode: "insensitive" as const } } }] } : {}) };
   const totalItems = await prisma.upload.count({ where });
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const page = Math.min(requestedPage, totalPages);
-  const uploads = await prisma.upload.findMany({ where, include: { user: true, team: { include: { department: true } } }, orderBy: { createdAt: "desc" }, skip: (page - 1) * pageSize, take: pageSize });
+  const uploads = await prisma.upload.findMany({ where, include: { user: true, team: { include: { department: true } } }, orderBy: { id: "desc" }, skip: (page - 1) * pageSize, take: pageSize });
 
   return (
     <main className="min-h-screen bg-[#f8f9fa] px-4 py-5 text-[#111111]">
@@ -37,13 +38,13 @@ export default async function ManagerCategoryPage({ params, searchParams }: { pa
           {uploads.map((upload) => (
             <article key={upload.id} className="grid gap-2 px-4 py-3 sm:grid-cols-[1.5fr_1fr_1fr_auto] sm:items-center">
               <a href={`/dashboard/manajer/berkas/${category}/${upload.id}`} className="truncate text-xs font-semibold hover:underline">
-                {upload.fileName}
+                {getUploadFileName(upload.filePath)}
               </a>
               <span className="truncate text-xs">{upload.user.name}</span>
               <span className="truncate text-xs text-[#6b7280]">
                 {upload.team.department.name} · {upload.team.name}
               </span>
-              <time className="text-[11px] text-[#6b7280]">{upload.submissionDate.toLocaleString("id-ID")}</time>
+              <time className="text-[11px] text-[#6b7280]">{upload.submissionDate?.toLocaleString("id-ID") ?? "Belum dikirim"}</time>
             </article>
           ))}
           {uploads.length === 0 && (

@@ -5,10 +5,8 @@ import { toast } from "@/app/components/toast";
 
 export function DeleteImportantButton({
   fileId,
-  source,
 }: {
   fileId: number;
-  source: "upload" | "archive";
 }) {
   const router = useRouter();
 
@@ -16,7 +14,7 @@ export function DeleteImportantButton({
     if (!confirm("Hapus data prioritas ini?")) return;
     try {
       const formData = new FormData();
-      formData.append("action", source === "upload" ? "unmark-important" : "delete-important");
+      formData.append("action", "unmark-important");
       formData.append("uploadId", String(fileId));
       const res = await fetch("/api/karyawan/upload", { method: "POST", body: formData });
       const data = await res.json();

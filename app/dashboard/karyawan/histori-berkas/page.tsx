@@ -3,6 +3,7 @@ import { requireEmployee } from "@/lib/auth";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
 import { getStartOfCurrentJakartaDay } from "@/lib/upload-time";
 import { PaginationControls } from "@/app/components/pagination-controls";
+import { getUploadFileName } from "@/lib/upload-file";
 
 export default async function HistoriBerkasPage({ searchParams }: { searchParams: Promise<{ page?: string; expiredPage?: string }> }) {
   const employee = await requireEmployee();
@@ -11,25 +12,23 @@ export default async function HistoriBerkasPage({ searchParams }: { searchParams
   const requestedPage = Math.max(1, Number(params.page) || 1);
   const requestedExpiredPage = Math.max(1, Number(params.expiredPage) || 1);
 
-  const submittedFiles = await prisma.upload.findMany({
+  const submittedFiles = (await prisma.upload.findMany({
     where: {
       userId: employee.id,
-      isSubmitted: true,
+      submissionDate: { not: null },
       isImportant: false,
     },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+    orderBy: { submissionDate: "desc" },
+  })).filter((file) => file.submissionDate !== null);
 
   // Filter expired files (not important)
   const now = new Date();
   const startOfToday = getStartOfCurrentJakartaDay(now);
   const validSubmittedFiles = submittedFiles.filter(
-    (file) => file.submissionDate >= startOfToday && (!file.expiresAt || file.expiresAt > now)
+    (file) => file.submissionDate !== null && file.submissionDate >= startOfToday && file.submissionDate.getTime() + 12 * 60 * 60 * 1000 > now.getTime()
   );
   const expiredFiles = submittedFiles.filter(
-    (file) => file.submissionDate < startOfToday || Boolean(file.expiresAt && file.expiresAt <= now)
+    (file) => file.submissionDate !== null && (file.submissionDate < startOfToday || file.submissionDate.getTime() + 12 * 60 * 60 * 1000 <= now.getTime())
   );
   const totalPages = Math.max(1, Math.ceil(validSubmittedFiles.length / pageSize));
   const page = Math.min(requestedPage, totalPages);
@@ -54,20 +53,18 @@ export default async function HistoriBerkasPage({ searchParams }: { searchParams
           {validSubmittedFiles.length > 0 ? (
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {visibleValidFiles.map((file) => {
-                const expiresIn = file.expiresAt
-                  ? Math.ceil((file.expiresAt.getTime() - now.getTime()) / (60 * 60 * 1000))
-                  : 0;
+                const expiresIn = Math.ceil((file.submissionDate!.getTime() + 12 * 60 * 60 * 1000 - now.getTime()) / (60 * 60 * 1000));
 
                 return (
                   <article key={file.id} className="flex min-h-48 flex-col border-t-2 border-emerald-300 py-4">
                     <div>
-                      <p className="font-medium text-emerald-900">{file.title}</p>
+                      <p className="font-medium text-emerald-900">{getUploadFileName(file.filePath)}</p>
                       <p className="mt-1 break-words text-sm text-[#346538]">
-                        {file.fileName} • {file.category}
+                        {file.category}
                       </p>
                       {file.note && <p className="mt-1 whitespace-pre-wrap break-words text-xs text-[#4a7a4e]">Catatan: {file.note}</p>}
                       <p className="mt-1 text-xs text-emerald-600">
-                        Dikirim {new Date(file.createdAt).toLocaleDateString("id-ID")} • Berlaku {expiresIn} jam lagi
+                        Dikirim {file.submissionDate!.toLocaleDateString("id-ID")} • Berlaku {expiresIn} jam lagi
                       </p>
                     </div>
 
@@ -123,9 +120,9 @@ export default async function HistoriBerkasPage({ searchParams }: { searchParams
                 <div key={file.id} className="border-t border-[#e5e7eb] py-4 opacity-60">
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
-                      <p className="font-medium text-[#6b7280]">{file.title}</p>
+                      <p className="font-medium text-[#6b7280]">{getUploadFileName(file.filePath)}</p>
                       <p className="text-sm text-[#6b7280]">
-                        {file.fileName} • {file.category} • Kadaluarsa pada {file.expiresAt?.toLocaleDateString('id-ID')}
+                        {file.category} • Kadaluarsa pada {new Date(file.submissionDate!.getTime() + 12 * 60 * 60 * 1000).toLocaleDateString('id-ID')}
                       </p>
                     </div>
 

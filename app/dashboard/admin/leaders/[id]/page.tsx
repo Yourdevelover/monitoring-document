@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { ConfirmActionForm } from "@/app/components/confirm-action-form";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
+import { getUploadFileName } from "@/lib/upload-file";
 
 type LeaderDetailProps = {
   params: Promise<{ id: string }>;
@@ -17,7 +18,7 @@ export default async function AdminLeaderDetailPage({ params }: LeaderDetailProp
       ledTeam: {
         include: {
           department: true,
-          uploads: { orderBy: { createdAt: "desc" }, take: 10 },
+          uploads: { orderBy: { id: "desc" }, take: 10 },
         },
       },
     },
@@ -116,7 +117,7 @@ export default async function AdminLeaderDetailPage({ params }: LeaderDetailProp
         <div className="divide-y divide-[#f1f3f5] px-4">
           {leader.ledTeam && leader.ledTeam.uploads.length > 0 ? leader.ledTeam.uploads.map((upload) => (
             <div key={upload.id} className="grid gap-1 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-3">
-              <span className="truncate text-xs" title={upload.fileName}>{upload.fileName}</span>
+              <span className="truncate text-xs" title={getUploadFileName(upload.filePath)}>{getUploadFileName(upload.filePath)}</span>
               <span className="text-[11px] text-[#6b7280]">{upload.category}</span>
             </div>
           )) : <p className="py-4 text-xs text-[#6b7280]">Belum ada berkas tim.</p>}

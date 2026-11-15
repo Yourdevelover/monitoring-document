@@ -47,7 +47,6 @@ export default async function LeaderEmployeesPage({
           email: true,
           phoneNumber: true,
           isActive: true,
-          profilePicture: true,
           position: true,
           createdAt: true,
           department: { select: { name: true } },
@@ -55,13 +54,8 @@ export default async function LeaderEmployeesPage({
             orderBy: { submissionDate: "desc" },
             select: {
               id: true,
-              fileName: true,
-              filePath: true,
               category: true,
-              status: true,
-              isSubmitted: true,
               submissionDate: true,
-              expiresAt: true,
             },
           },
         },
@@ -103,13 +97,8 @@ export default async function LeaderEmployeesPage({
                     mode="row"
                     files={member.uploads.map((file) => ({
                       id: file.id,
-                      fileName: file.fileName,
-                      filePath: file.filePath,
                       category: file.category,
-                      status: file.status,
-                      isSubmitted: file.isSubmitted,
                       submissionDate: file.submissionDate,
-                      expiresAt: file.expiresAt,
                     }))}
                   />
                   <div className="min-w-0">

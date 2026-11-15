@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireLeader } from "@/lib/auth";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
+import { getUploadFileName } from "@/lib/upload-file";
 
 const categories = [
   { key: "DAILY", label: "daily" },
@@ -45,7 +46,7 @@ export default async function LeaderHistoryPage({
     ? await prisma.upload.findMany({
         where: {
           teamId: team.id,
-          isSubmitted: true,
+          submissionDate: { not: null },
           ...(selectedCategory ? { category: selectedCategory } : {}),
         },
         include: { user: true },
@@ -54,7 +55,7 @@ export default async function LeaderHistoryPage({
     : [];
 
   const selectedFiles = selectedDate
-    ? submittedFiles.filter((file) => getDateKey(file.submissionDate) === selectedDate)
+    ? submittedFiles.filter((file) => file.submissionDate && getDateKey(file.submissionDate) === selectedDate)
     : [];
   const selectedCategoryLabel = categories.find((category) => category.key === selectedCategory)?.label;
 
@@ -95,12 +96,12 @@ export default async function LeaderHistoryPage({
                 {selectedFiles.map((file) => (
                   <div key={file.id} className="grid gap-2 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                     <a href={file.filePath} target="_blank" rel="noopener noreferrer" className="min-w-0 hover:bg-slate-50">
-                      <p className="truncate font-medium text-slate-900" title={file.fileName}>{file.fileName}</p>
+                      <p className="truncate font-medium text-slate-900" title={getUploadFileName(file.filePath)}>{getUploadFileName(file.filePath)}</p>
                       <p className="truncate text-xs text-slate-600">Pengirim: <span className="font-medium text-slate-800">{file.user.name}</span></p>
                       {file.note && <p className="mt-1 whitespace-pre-wrap break-words text-xs text-slate-600">Catatan: {file.note}</p>}
-                      <p className="text-xs text-slate-500">Dikirim {file.submissionDate.toLocaleString("id-ID")}</p>
+                      <p className="text-xs text-slate-500">Dikirim {file.submissionDate?.toLocaleString("id-ID") ?? "-"}</p>
                     </a>
-                    <a href={file.filePath} download={file.fileName} className="whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700">
+                    <a href={file.filePath} download={getUploadFileName(file.filePath)} className="whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700">
                       Unduh
                     </a>
                   </div>
@@ -116,7 +117,7 @@ export default async function LeaderHistoryPage({
               const categoryDates = submittedFiles.filter((file) => file.category === category.key);
               const groupedDates = new Map<string, number>();
               for (const file of categoryDates) {
-                const dateKey = getDateKey(file.submissionDate);
+                const dateKey = file.submissionDate ? getDateKey(file.submissionDate) : "";
                 groupedDates.set(dateKey, (groupedDates.get(dateKey) ?? 0) + 1);
               }
               const categoryDateEntries = [...groupedDates.entries()].sort(([first], [second]) => second.localeCompare(first));

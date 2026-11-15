@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireManajer } from "@/lib/auth";
+import { getUploadFileName } from "@/lib/upload-file";
 
 export default async function ManagerDashboardPage() {
   const manager = await requireManajer();
@@ -10,12 +11,12 @@ export default async function ManagerDashboardPage() {
     prisma.user.count({ where: { role: "KARYAWAN", isActive: "ACTIVE" } }),
     prisma.team.count(),
     prisma.upload.findMany({
-      orderBy: { createdAt: "desc" },
+      orderBy: { id: "desc" },
       take: 8,
       select: {
         id: true,
-        fileName: true,
-        createdAt: true,
+        filePath: true,
+        submissionDate: true,
         user: { select: { name: true } },
         team: { select: { department: { select: { name: true } } } },
       },
@@ -86,8 +87,8 @@ export default async function ManagerDashboardPage() {
             <h2 className="border-b border-[#e5e7eb] px-4 py-3 text-xs font-semibold uppercase">Berkas terbaru</h2>
             {uploads.map((upload) => (
               <div key={upload.id} className="border-b border-[#f1f3f5] px-4 py-2.5 last:border-0">
-                <p className="truncate text-xs font-medium">{upload.fileName}</p>
-                <p className="mt-1 text-[11px] text-[#6b7280]">{upload.user.name} · {upload.team.department.name} · {new Date(upload.createdAt).toLocaleString("id-ID")}</p>
+                <p className="truncate text-xs font-medium">{getUploadFileName(upload.filePath)}</p>
+                <p className="mt-1 text-[11px] text-[#6b7280]">{upload.user.name} · {upload.team.department.name} · {upload.submissionDate?.toLocaleString("id-ID") ?? "Belum dikirim"}</p>
               </div>
             ))}
             {uploads.length === 0 && <p className="px-4 py-5 text-xs text-[#6b7280]">Belum ada berkas.</p>}

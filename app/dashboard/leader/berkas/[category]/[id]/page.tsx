@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireLeader } from "@/lib/auth";
 import { BackToPreviousButton } from "@/app/components/back-to-previous-button";
+import { getUploadFileName } from "@/lib/upload-file";
 
 const CATEGORY_KEYS = {
   "daily": "DAILY",
@@ -26,7 +27,7 @@ export default async function LeaderFileDetailPage({ params }: FileDetailPagePro
           id: uploadId,
           teamId: team.id,
           category: categoryKey,
-          isSubmitted: true,
+          submissionDate: { not: null },
         },
         include: { user: true },
       })
@@ -44,12 +45,12 @@ export default async function LeaderFileDetailPage({ params }: FileDetailPagePro
         </div>
 
         <section className="space-y-2">
-          <p className="text-sm font-medium">{upload.fileName}</p>
+          <p className="text-sm font-medium">{getUploadFileName(upload.filePath)}</p>
           <p className="text-sm text-[#6b7280]">Kategori: {upload.category.toLowerCase()}</p>
           <p className="text-sm text-[#6b7280]">Karyawan: {upload.user.name}</p>
           {upload.note && <p className="whitespace-pre-wrap break-words text-sm text-[#374151]">Catatan: {upload.note}</p>}
           <p className="text-xs text-[#6b7280]">
-            Dikirim: {new Date(upload.submissionDate).toLocaleString("id-ID")}
+            Dikirim: {upload.submissionDate?.toLocaleString("id-ID") ?? "-"}
           </p>
           <a
             href={upload.filePath}
