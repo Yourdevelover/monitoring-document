@@ -19,6 +19,52 @@ Aplikasi monitoring berkas tim berbasis web dengan 4 peran: **Admin**, **Leader*
 - PostgreSQL 15+ (database `Data_monitoring`)
 - Nginx (opsional, untuk akses LAN/produksi)
 
+## GitHub: Push dan Clone
+
+Repository GitHub proyek ini: <https://github.com/Yourdevelover/monitoring-document>
+
+### Push perubahan dari laptop ini
+
+Jalankan PowerShell dari folder proyek setelah mengubah kode:
+
+```powershell
+git add .
+git commit -m "Simpan perubahan proyek"
+git push origin main
+```
+
+Pastikan `.env`, `.env.local`, `node_modules/`, `.next/`, dan `public/uploads/` tidak ikut dikirim. File environment berisi rahasia, sedangkan database lokal dan file upload tidak disimpan di GitHub. Repository ini sudah menggunakan remote `origin`; jika menghubungkan folder lokal lain yang belum memiliki remote, jalankan sekali:
+
+```powershell
+git remote add origin https://github.com/Yourdevelover/monitoring-document.git
+git branch -M main
+```
+
+### Clone di laptop lain
+
+```powershell
+git clone https://github.com/Yourdevelover/monitoring-document.git
+cd monitoring-document
+npm install
+```
+
+Buat file `.env` sendiri di folder proyek. Jangan mengambil atau mengirimkannya melalui GitHub. Untuk database PostgreSQL lokal, isi dengan URL database di laptop tersebut dan secret baru:
+
+```env
+DATABASE_URL="postgresql://postgres:<PASSWORD>@localhost:5432/Data_monitoring?schema=public"
+JWT_SECRET="ganti-dengan-secret-acak-minimal-32-karakter"
+```
+
+Buat database PostgreSQL kosong bernama `Data_monitoring`, lalu siapkan tabel dan jalankan aplikasi:
+
+```powershell
+npx prisma db push
+npx prisma generate
+npm run dev
+```
+
+Database dan isinya tidak ikut ter-clone. Untuk membawa data lama, backup database dari komputer asal lalu restore ke PostgreSQL di laptop baru. Jika perlu membawa file upload, salin folder `public/uploads/` secara terpisah.
+
 ## Instalasi
 
 ```bash
